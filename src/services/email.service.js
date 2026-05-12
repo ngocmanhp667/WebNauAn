@@ -24,18 +24,18 @@ class EmailService {
     /**
      * Gửi OTP xác thực tài khoản
      */
-    async sendOtpEmail(toEmail, otp) {
+    async sendOtpEmail(toEmail, otp, expiresInMinutes = 10) {
         const mailOptions = {
-            from: `"BaiTap2 API" <${process.env.EMAIL_FROM}>`,
+            from: `"MamNgon API" <${process.env.EMAIL_FROM}>`,
             to: toEmail,
-            subject: 'Mã xác thực OTP - Xác nhận tài khoản',
+            subject: 'Ma OTP kich hoat tai khoan',
             html: `<div style="font-family:Arial;max-width:600px;margin:0 auto;padding:20px">
-                <h2 style="color:#667eea">Xác thực tài khoản</h2>
-                <p>Mã OTP của bạn là:</p>
-                <div style="background:#f0f0f0;padding:20px;text-align:center;border-radius:8px;margin:20px 0">
-                    <span style="font-size:36px;font-weight:bold;color:#667eea;letter-spacing:8px">${otp}</span>
+                <h2 style="color:#2d3748">Kich hoat tai khoan</h2>
+                <p>Ban vua dang ky tai khoan. Ma OTP cua ban la:</p>
+                <div style="background:#edf2f7;padding:16px;text-align:center;border-radius:8px;margin:20px 0">
+                    <span style="font-size:32px;font-weight:bold;color:#2b6cb0;letter-spacing:6px">${otp}</span>
                 </div>
-                <p>Mã có hiệu lực trong <strong>10 phút</strong>.</p>
+                <p>Ma co hieu luc trong <strong>${expiresInMinutes} phut</strong>.</p>
             </div>`
         };
 

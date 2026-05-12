@@ -59,8 +59,9 @@ const validateLogin = [
 /**
  * Validation rules cho API Register
  * - username: không rỗng, tối thiểu 3 ký tự, chỉ chứa chữ và số
- * - password: không rỗng, tối thiểu 6 ký tự
+ * - password: không rỗng, tối thiểu 8 ký tự, có chữ và số
  * - email: không rỗng, đúng định dạng email
+ * - full_name: optional, nếu có thì 2-100 ký tự
  */
 const validateRegister = [
     body('username')
@@ -75,8 +76,10 @@ const validateRegister = [
     body('password')
         .notEmpty()
         .withMessage('Password không được để trống')
-        .isLength({ min: 6 })
-        .withMessage('Password phải có ít nhất 6 ký tự'),
+        .isLength({ min: 8 })
+        .withMessage('Password phải có ít nhất 8 ký tự')
+        .matches(/^(?=.*[A-Za-z])(?=.*\d).+$/)
+        .withMessage('Password phải chứa ít nhất 1 chữ cái và 1 số'),
 
     body('email')
         .trim()
@@ -85,6 +88,12 @@ const validateRegister = [
         .isEmail()
         .withMessage('Email không đúng định dạng')
         .normalizeEmail(),
+
+    body('full_name')
+        .optional({ nullable: true })
+        .trim()
+        .isLength({ min: 2, max: 100 })
+        .withMessage('Họ tên phải từ 2 đến 100 ký tự'),
 
     // Middleware xử lý kết quả validation
     handleValidationErrors

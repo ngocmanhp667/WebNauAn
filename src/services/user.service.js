@@ -66,7 +66,18 @@ class UserService {
      * @returns {Object} Thông tin đăng ký
      */
     async registerUser(data) {
-        const { username, password, email, full_name } = data;
+        const normalizeString = (value) => {
+            if (typeof value !== 'string') return value;
+            const trimmed = value.trim();
+            return trimmed ? trimmed : null;
+        };
+
+        const username = normalizeString(data.username);
+        const email = typeof data.email === 'string' ? data.email.trim().toLowerCase() : data.email;
+        const full_name = normalizeString(data.full_name);
+        const password = data.password;
+
+        const otpTtlMinutes = Number(process.env.OTP_TTL_MINUTES) || 10;
 
         // Bước 1: Kiểm tra username đã tồn tại chưa
         const existingUser = await userRepository.findByUsername(username);
@@ -79,6 +90,20 @@ class UserService {
         // Bước 2: Kiểm tra email đã tồn tại chưa
         const existingEmail = await userRepository.findByEmail(email);
         if (existingEmail) {
+            if (!existingEmail.is_verified) {
+                const otp = generateOtp();
+                const otpExpiry = getOtpExpiry(otpTtlMinutes);
+
+                await userRepository.updateOtp(email, otp, otpExpiry);
+                await EmailService.sendOtpEmail(email, otp, otpTtlMinutes);
+
+                return {
+                    message: 'Email đã đăng ký nhưng chưa xác thực. OTP mới đã được gửi lại.',
+                    userId: existingEmail.id,
+                    email
+                };
+            }
+
             const error = new Error('Email đã được sử dụng');
             error.statusCode = 409;
             throw error;
@@ -90,23 +115,26 @@ class UserService {
 
         // Bước 4: Lưu user vào DB với is_verified = false
         const result = await userRepository.create({
-            username, password_hash, email, full_name
+            username,
+            password_hash,
+            email,
+            full_name
         });
 
         // Bước 5: Sinh mã OTP ngẫu nhiên
         const otp = generateOtp();
-        const otpExpiry = getOtpExpiry(10); // Hết hạn sau 10 phút
+        const otpExpiry = getOtpExpiry(otpTtlMinutes);
 
         // Bước 6: Lưu OTP vào DB
         await userRepository.updateOtp(email, otp, otpExpiry);
 
         // Bước 7: Gửi OTP qua email
-        await EmailService.sendOtpEmail(email, otp);
+        await EmailService.sendOtpEmail(email, otp, otpTtlMinutes);
 
         return {
             message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
             userId: result.insertId,
-            email: email
+            email
         };
     }
 
@@ -120,11 +148,16 @@ class UserService {
      */
     async verifyOtp(email, otp) {
         // Bước 1: Tìm user theo email
-        const user = await userRepository.findByEmail(email);
+        const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : email;
+        const user = await userRepository.findByEmail(normalizedEmail);
         if (!user) {
             const error = new Error('Email không tồn tại trong hệ thống');
             error.statusCode = 404;
             throw error;
+        }
+
+        if (user.is_verified) {
+            return { message: 'Tài khoản đã được xác thực trước đó.' };
         }
 
         // Bước 2: Kiểm tra OTP có khớp không
@@ -142,7 +175,7 @@ class UserService {
         }
 
         // Bước 4: Cập nhật trạng thái xác thực
-        await userRepository.updateVerificationStatus(email);
+        await userRepository.updateVerificationStatus(normalizedEmail);
 
         return { message: 'Xác thực email thành công! Bạn có thể đăng nhập.' };
     }
