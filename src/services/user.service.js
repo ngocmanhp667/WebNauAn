@@ -1,0 +1,269 @@
+/**
+ * =================================================================
+ * USER SERVICE
+ * =================================================================
+ * Tầng Service - Xử lý Business Logic cốt lõi.
+ * Gọi Repository để truy vấn DB, xử lý logic nghiệp vụ.
+ * =================================================================
+ */
+
+const bcrypt = require('bcryptjs');
+const userRepository = require('../repositories/user.repository');
+const JWTService = require('./jwt.service');
+const EmailService = require('./email.service');
+const { generateOtp, getOtpExpiry } = require('../utils/otp.util');
+const { toUserDTO } = require('../utils/dto.util');
+
+class UserService {
+    /**
+     * Xác thực thông tin đăng nhập
+     * Flow: Tìm user -> So sánh password -> Tạo JWT
+     * 
+     * @param {string} username
+     * @param {string} password
+     * @returns {Object} { token, user } nếu thành công
+     * @throws {Error} Nếu sai thông tin đăng nhập
+     */
+    async verifyCredentials(username, password) {
+        // Bước 1: Tìm user theo username từ Repository
+        const user = await userRepository.findByUsername(username);
+        if (!user) {
+            const error = new Error('Tên đăng nhập hoặc mật khẩu không đúng');
+            error.statusCode = 401;
+            throw error;
+        }
+
+        // Bước 2: Kiểm tra tài khoản đã xác thực chưa
+        if (!user.is_verified) {
+            const error = new Error('Tài khoản chưa được xác thực email. Vui lòng verify OTP.');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        // Bước 3: So sánh password bằng bcrypt
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+        if (!isPasswordValid) {
+            const error = new Error('Tên đăng nhập hoặc mật khẩu không đúng');
+            error.statusCode = 401;
+            throw error;
+        }
+
+        // Bước 4: Tạo JWT token qua JWTService
+        const token = JWTService.generateToken(user);
+
+        // Bước 5: Trả về token và user DTO
+        return {
+            token,
+            user: toUserDTO(user)
+        };
+    }
+
+    /**
+     * Đăng ký tài khoản mới
+     * Flow: Check trùng -> Hash password -> Lưu DB -> Gen OTP -> Gửi email
+     * 
+     * @param {Object} data - { username, password, email, full_name }
+     * @returns {Object} Thông tin đăng ký
+     */
+    async registerUser(data) {
+        const { username, password, email, full_name } = data;
+
+        // Bước 1: Kiểm tra username đã tồn tại chưa
+        const existingUser = await userRepository.findByUsername(username);
+        if (existingUser) {
+            const error = new Error('Username đã tồn tại');
+            error.statusCode = 409;
+            throw error;
+        }
+
+        // Bước 2: Kiểm tra email đã tồn tại chưa
+        const existingEmail = await userRepository.findByEmail(email);
+        if (existingEmail) {
+            const error = new Error('Email đã được sử dụng');
+            error.statusCode = 409;
+            throw error;
+        }
+
+        // Bước 3: Hash password bằng bcrypt (salt rounds = 10)
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
+
+        // Bước 4: Lưu user vào DB với is_verified = false
+        const result = await userRepository.create({
+            username, password_hash, email, full_name
+        });
+
+        // Bước 5: Sinh mã OTP ngẫu nhiên
+        const otp = generateOtp();
+        const otpExpiry = getOtpExpiry(10); // Hết hạn sau 10 phút
+
+        // Bước 6: Lưu OTP vào DB
+        await userRepository.updateOtp(email, otp, otpExpiry);
+
+        // Bước 7: Gửi OTP qua email
+        await EmailService.sendOtpEmail(email, otp);
+
+        return {
+            message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
+            userId: result.insertId,
+            email: email
+        };
+    }
+
+    /**
+     * Xác thực OTP
+     * Flow: Tìm user theo email -> Check OTP -> Check hết hạn -> Update verified
+     * 
+     * @param {string} email
+     * @param {string} otp
+     * @returns {Object} Kết quả xác thực
+     */
+    async verifyOtp(email, otp) {
+        // Bước 1: Tìm user theo email
+        const user = await userRepository.findByEmail(email);
+        if (!user) {
+            const error = new Error('Email không tồn tại trong hệ thống');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Bước 2: Kiểm tra OTP có khớp không
+        if (user.otp_code !== otp) {
+            const error = new Error('Mã OTP không đúng');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        // Bước 3: Kiểm tra OTP hết hạn chưa
+        if (new Date() > new Date(user.otp_expires_at)) {
+            const error = new Error('Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        // Bước 4: Cập nhật trạng thái xác thực
+        await userRepository.updateVerificationStatus(email);
+
+        return { message: 'Xác thực email thành công! Bạn có thể đăng nhập.' };
+    }
+
+    /**
+     * Quên mật khẩu - Gửi OTP qua email
+     * 
+     * @param {string} email
+     * @returns {Object} Thông báo
+     */
+    async forgotPassword(email) {
+        // Bước 1: Kiểm tra email tồn tại
+        const user = await userRepository.findByEmail(email);
+        if (!user) {
+            const error = new Error('Email không tồn tại trong hệ thống');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Bước 2: Sinh OTP mới
+        const otp = generateOtp();
+        const otpExpiry = getOtpExpiry(10);
+
+        // Bước 3: Lưu OTP vào DB
+        await userRepository.updateOtp(email, otp, otpExpiry);
+
+        // Bước 4: Gửi email OTP reset password
+        await EmailService.sendResetPasswordOtp(email, otp);
+
+        return { message: 'Mã OTP đặt lại mật khẩu đã được gửi tới email của bạn.' };
+    }
+
+    /**
+     * Đặt lại mật khẩu
+     * Flow: Check email -> Verify OTP -> Hash new password -> Update DB
+     * 
+     * @param {string} email
+     * @param {string} otp
+     * @param {string} newPassword
+     * @returns {Object} Kết quả
+     */
+    async resetPassword(email, otp, newPassword) {
+        // Bước 1: Tìm user
+        const user = await userRepository.findByEmail(email);
+        if (!user) {
+            const error = new Error('Email không tồn tại trong hệ thống');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Bước 2: Kiểm tra OTP
+        if (user.otp_code !== otp) {
+            const error = new Error('Mã OTP không đúng');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        // Bước 3: Kiểm tra hết hạn
+        if (new Date() > new Date(user.otp_expires_at)) {
+            const error = new Error('Mã OTP đã hết hạn');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        // Bước 4: Hash mật khẩu mới
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(newPassword, salt);
+
+        // Bước 5: Cập nhật mật khẩu trong DB
+        await userRepository.updatePassword(email, passwordHash);
+
+        return { message: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.' };
+    }
+
+    /**
+     * Lấy thông tin profile user
+     * Trả về User DTO (lược bỏ thông tin nhạy cảm)
+     * 
+     * @param {number} userId
+     * @returns {Object} User DTO
+     */
+    async getProfileData(userId) {
+        const user = await userRepository.findById(userId);
+        if (!user) {
+            const error = new Error('Không tìm thấy người dùng');
+            error.statusCode = 404;
+            throw error;
+        }
+        return toUserDTO(user);
+    }
+
+    /**
+     * Cập nhật thông tin profile
+     * 
+     * @param {number} userId
+     * @param {Object} data - { full_name, phone, address }
+     * @returns {Object} Updated User DTO
+     */
+    async updateProfile(userId, data) {
+        // Bước 1: Kiểm tra user tồn tại
+        const user = await userRepository.findById(userId);
+        if (!user) {
+            const error = new Error('Không tìm thấy người dùng');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Bước 2: Merge dữ liệu (giữ giá trị cũ nếu không gửi mới)
+        const updateData = {
+            full_name: data.full_name || user.full_name,
+            phone: data.phone || user.phone,
+            address: data.address || user.address
+        };
+
+        // Bước 3: Cập nhật DB
+        await userRepository.updateProfile(userId, updateData);
+
+        // Bước 4: Lấy lại user mới và trả về DTO
+        const updatedUser = await userRepository.findById(userId);
+        return toUserDTO(updatedUser);
+    }
+}
+
+module.exports = new UserService();
