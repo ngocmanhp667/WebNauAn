@@ -14,7 +14,7 @@ class JWTService {
      * Tạo JWT Token từ thông tin user
      * 
      * Payload chứa: id, role
-     * Token có thời hạn theo config JWT_EXPIRES_IN (mặc định 24h)
+    * Token có thời hạn theo config JWT_EXPIRES_IN (mặc định 15m)
      * 
      * @param {Object} user - User object { id, role }
      * @returns {string} JWT Token
@@ -28,7 +28,7 @@ class JWTService {
         const token = jwt.sign(
             payload,
             process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+            { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
         );
 
         return token;

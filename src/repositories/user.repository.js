@@ -114,15 +114,23 @@ class UserRepository {
     /**
      * Cập nhật thông tin profile
      * @param {number} id - User ID
-     * @param {Object} data - { full_name, phone, address }
+    * @param {Object} data - { full_name, phone, address, bio, cuisine_preferences, daily_budget }
      * @returns {Object} Kết quả UPDATE
      */
     async updateProfile(id, data) {
-        const { full_name, phone, address } = data;
+        const { full_name, phone, address, bio, cuisine_preferences, daily_budget } = data;
 
         const [result] = await pool.execute(
-            'UPDATE users SET full_name = ?, phone = ?, address = ? WHERE id = ?',
-            [full_name || null, phone || null, address || null, id]
+            'UPDATE users SET full_name = ?, phone = ?, address = ?, bio = ?, cuisine_preferences = ?, daily_budget = ? WHERE id = ?',
+            [
+                full_name ?? null,
+                phone ?? null,
+                address ?? null,
+                bio ?? null,
+                cuisine_preferences ?? null,
+                daily_budget ?? null,
+                id
+            ]
         );
 
         return result;

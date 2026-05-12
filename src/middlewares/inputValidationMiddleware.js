@@ -165,28 +165,83 @@ const validateResetPassword = [
     handleValidationErrors
 ];
 
+const fullNameRegex = /^[\p{L}\s.'-]+$/u;
+
 /**
  * Validation rules cho API Update Profile
- * - full_name: optional, nếu có thì không rỗng
+ * - fullName/full_name: optional, nếu có thì không rỗng và không chứa ký tự đặc biệt
  * - phone: optional, nếu có thì đúng format
- * - address: optional
+ * - address: optional (legacy)
+ * - bio: optional
+ * - cuisinePreferences/cuisine_preferences: optional (string hoặc array string)
+ * - dailyBudget/daily_budget: optional, phải là số dương
  */
 const validateUpdateProfile = [
-    body('full_name')
-        .optional()
-        .trim()
-        .notEmpty()
-        .withMessage('Họ tên không được để trống nếu được cung cấp'),
+    body('fullName')
+        .custom((value, { req }) => {
+            const target = value ?? req.body.full_name;
+            if (target === undefined || target === null) return true;
+            if (typeof target !== 'string') {
+                throw new Error('Họ tên phải là chuỗi');
+            }
+            const trimmed = target.trim();
+            if (!trimmed) {
+                throw new Error('Họ tên không được để trống nếu được cung cấp');
+            }
+            if (!fullNameRegex.test(trimmed)) {
+                throw new Error('Họ tên không được chứa ký tự đặc biệt');
+            }
+            return true;
+        }),
 
     body('phone')
-        .optional()
+        .optional({ nullable: true })
         .trim()
         .matches(/^[0-9]{10,11}$/)
         .withMessage('Số điện thoại phải có 10-11 chữ số'),
 
     body('address')
-        .optional()
+        .optional({ nullable: true })
         .trim(),
+
+    body('bio')
+        .optional({ nullable: true })
+        .custom((value) => {
+            if (value === undefined || value === null) return true;
+            if (typeof value !== 'string') {
+                throw new Error('Bio phải là chuỗi');
+            }
+            return true;
+        })
+        .trim(),
+
+    body('cuisinePreferences')
+        .custom((value, { req }) => {
+            const target = value ?? req.body.cuisine_preferences;
+            if (target === undefined || target === null) return true;
+            if (Array.isArray(target)) {
+                const invalid = target.some((item) => typeof item !== 'string' || !item.trim());
+                if (invalid) {
+                    throw new Error('Sở thích ẩm thực chỉ chứa chuỗi không rỗng');
+                }
+                return true;
+            }
+            if (typeof target === 'string') {
+                return true;
+            }
+            throw new Error('Sở thích ẩm thực phải là chuỗi hoặc mảng chuỗi');
+        }),
+
+    body('dailyBudget')
+        .custom((value, { req }) => {
+            const target = value ?? req.body.daily_budget;
+            if (target === undefined || target === null || target === '') return true;
+            const num = Number(target);
+            if (!Number.isFinite(num) || num <= 0) {
+                throw new Error('Ngân sách phải là số dương');
+            }
+            return true;
+        }),
 
     // Middleware xử lý kết quả validation
     handleValidationErrors

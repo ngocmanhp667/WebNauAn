@@ -25,6 +25,9 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(100) DEFAULT NULL,
     phone VARCHAR(20) DEFAULT NULL,
     address VARCHAR(255) DEFAULT NULL,
+    bio TEXT DEFAULT NULL,
+    cuisine_preferences TEXT DEFAULT NULL,
+    daily_budget DECIMAL(12,2) DEFAULT NULL,
     
     -- Phân quyền
     role ENUM('user', 'admin') DEFAULT 'user',

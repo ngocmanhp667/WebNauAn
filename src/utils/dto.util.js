@@ -7,6 +7,29 @@
  * =================================================================
  */
 
+const parseCuisinePreferences = (value) => {
+    if (value === null || value === undefined) return null;
+    if (Array.isArray(value)) return value;
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+            return parsed;
+        }
+    } catch (error) {
+        // Ignore JSON parse errors and fall back to raw string
+    }
+    return trimmed;
+};
+
+const parseDailyBudget = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : null;
+};
+
 /**
  * Chuyển đổi user object từ DB thành User DTO
  * Lược bỏ: password_hash, otp_code, otp_expires_at
@@ -17,18 +40,31 @@
 const toUserDTO = (user) => {
     if (!user) return null;
 
-    return {
+    const cuisinePreferences = parseCuisinePreferences(user.cuisine_preferences);
+    const dailyBudget = parseDailyBudget(user.daily_budget);
+
+    const dto = {
         id: user.id,
         username: user.username,
         email: user.email,
         full_name: user.full_name || null,
         phone: user.phone || null,
         address: user.address || null,
+        bio: user.bio || null,
+        cuisine_preferences: cuisinePreferences,
+        daily_budget: dailyBudget,
         role: user.role,
         is_verified: user.is_verified === 1 || user.is_verified === true,
         created_at: user.created_at,
         updated_at: user.updated_at
     };
+
+    // Alias camelCase fields for profile API clients
+    dto.fullName = dto.full_name;
+    dto.cuisinePreferences = dto.cuisine_preferences;
+    dto.dailyBudget = dto.daily_budget;
+
+    return dto;
 };
 
 module.exports = {

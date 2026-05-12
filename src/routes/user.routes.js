@@ -5,7 +5,7 @@
  * Định nghĩa các route cho module User/Admin Profile:
  * - GET  /user/profile       (Auth + Role: user/admin)
  * - GET  /admin/profile      (Auth + Role: admin)
- * - PUT  /user/profile/edit  (Auth + Role: user/admin + Validation)
+ * - PUT  /user/profile       (Auth + Role: user/admin + Validation)
  * 
  * Tất cả route đều yêu cầu JWT Authentication (verifyToken)
  * và Role Authorization (authorize).
@@ -42,14 +42,14 @@ router.get(
 );
 
 /**
- * PUT /user/profile/edit
+ * PUT /user/profile
  * Cập nhật thông tin profile
  * Middlewares: verifyToken -> authorize('user', 'admin') -> Validation -> Controller
  * 
  * Luồng: Client -> AuthMiddleware -> RoleMiddleware -> InputValidation -> UserController.updateProfile
  */
 router.put(
-    '/user/profile/edit',
+    '/user/profile',
     verifyToken,
     authorize('user', 'admin'),
     validateUpdateProfile,

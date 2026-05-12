@@ -238,7 +238,7 @@ class UserService {
      * Cập nhật thông tin profile
      * 
      * @param {number} userId
-     * @param {Object} data - { full_name, phone, address }
+    * @param {Object} data - { full_name, phone, address, bio, cuisine_preferences, daily_budget }
      * @returns {Object} Updated User DTO
      */
     async updateProfile(userId, data) {
@@ -250,11 +250,58 @@ class UserService {
             throw error;
         }
 
+        const normalizeString = (value) => {
+            if (value === undefined) return undefined;
+            if (value === null) return null;
+            if (typeof value !== 'string') return value;
+            const trimmed = value.trim();
+            return trimmed ? trimmed : null;
+        };
+
+        const normalizePhone = (value) => {
+            const normalized = normalizeString(value);
+            if (normalized === undefined || normalized === null) return normalized;
+            if (typeof normalized !== 'string') return normalized;
+            const cleaned = normalized.replace(/[\s-]+/g, '');
+            return cleaned ? cleaned : null;
+        };
+
+        const normalizeCuisinePreferences = (value) => {
+            if (value === undefined) return undefined;
+            if (value === null) return null;
+            if (Array.isArray(value)) {
+                const cleaned = value
+                    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+                    .filter((item) => item);
+                return cleaned.length ? JSON.stringify(cleaned) : null;
+            }
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                return trimmed ? trimmed : null;
+            }
+            return null;
+        };
+
+        const normalizeDailyBudget = (value) => {
+            if (value === undefined) return undefined;
+            if (value === null || value === '') return null;
+            const numberValue = Number(value);
+            return Number.isFinite(numberValue) ? numberValue : undefined;
+        };
+
+        const mergeField = (incoming, existing) => (incoming === undefined ? existing : incoming);
+
         // Bước 2: Merge dữ liệu (giữ giá trị cũ nếu không gửi mới)
         const updateData = {
-            full_name: data.full_name || user.full_name,
-            phone: data.phone || user.phone,
-            address: data.address || user.address
+            full_name: mergeField(normalizeString(data.full_name), user.full_name),
+            phone: mergeField(normalizePhone(data.phone), user.phone),
+            address: mergeField(normalizeString(data.address), user.address),
+            bio: mergeField(normalizeString(data.bio), user.bio),
+            cuisine_preferences: mergeField(
+                normalizeCuisinePreferences(data.cuisine_preferences),
+                user.cuisine_preferences
+            ),
+            daily_budget: mergeField(normalizeDailyBudget(data.daily_budget), user.daily_budget)
         };
 
         // Bước 3: Cập nhật DB

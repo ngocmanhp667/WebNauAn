@@ -68,22 +68,37 @@ class UserController {
     }
 
     /**
-     * PUT /user/profile/edit
+     * PUT /user/profile
      * Cập nhật thông tin profile
      * 
      * Yêu cầu: AuthMiddleware + RoleMiddleware('user', 'admin')
-     * Body: { full_name, phone, address }
+     * Body: { fullName, phone, bio, cuisinePreferences, dailyBudget }
      * 
      * Response: { success, message, data: Updated UserDTO }
      */
     async updateProfile(req, res, next) {
         try {
             const userId = req.user.id;
-            const { full_name, phone, address } = req.body;
+            const {
+                fullName,
+                full_name,
+                phone,
+                address,
+                bio,
+                cuisinePreferences,
+                cuisine_preferences,
+                dailyBudget,
+                daily_budget
+            } = req.body;
 
             // Gọi Service cập nhật profile
             const updatedUserDTO = await UserService.updateProfile(userId, {
-                full_name, phone, address
+                full_name: fullName ?? full_name,
+                phone,
+                address,
+                bio,
+                cuisine_preferences: cuisinePreferences ?? cuisine_preferences,
+                daily_budget: dailyBudget ?? daily_budget
             });
 
             return res.status(200).json({
