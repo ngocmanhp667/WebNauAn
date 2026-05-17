@@ -58,7 +58,7 @@ cd backend
 npm run dev
 ```
 
-### Chay frontend (Vite)
+### Chay frontend
 
 ```bash
 cd frontend
