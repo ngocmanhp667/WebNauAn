@@ -1,72 +1,77 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { clearAuthError, registerAccount, resetAuthState } from '../store/authSlice'
-import FormMessage from './FormMessage'
-import InputField from './InputField'
-import PrimaryButton from './PrimaryButton'
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  clearAuthError,
+  registerAccount,
+  resetAuthState,
+} from "../store/authSlice";
+import FormMessage from "./FormMessage";
+import InputField from "./InputField";
+import PrimaryButton from "./PrimaryButton";
 
 const RegisterForm = () => {
-  const dispatch = useDispatch()
-  const { status, error, result } = useSelector((state) => state.auth)
-  const [clientError, setClientError] = useState('')
+  const dispatch = useDispatch();
+  const { status, error, result } = useSelector((state) => state.auth);
+  const [clientError, setClientError] = useState("");
   const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
     agree: false,
-  })
+  });
 
-  const isLoading = status === 'loading'
-  const isSuccess = status === 'succeeded'
+  const isLoading = status === "loading";
+  const isSuccess = status === "succeeded";
 
   const passwordMismatch = useMemo(() => {
-    return form.confirmPassword && form.password !== form.confirmPassword
-  }, [form.confirmPassword, form.password])
+    return form.confirmPassword && form.password !== form.confirmPassword;
+  }, [form.confirmPassword, form.password]);
 
   useEffect(() => {
     if (error) {
-      setClientError('')
+      setClientError("");
     }
-  }, [error])
+  }, [error]);
 
   const handleChange = (event) => {
-    const { name, value, type, checked } = event.target
+    const { name, value, type, checked } = event.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
+      [name]: type === "checkbox" ? checked : value,
+    }));
 
     if (clientError) {
-      setClientError('')
+      setClientError("");
     }
     if (error) {
-      dispatch(clearAuthError())
+      dispatch(clearAuthError());
     }
-  }
+  };
 
   const handleSubmit = (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
     if (passwordMismatch) {
-      setClientError('Mật khẩu xác nhận chưa khớp.')
-      return
+      setClientError("Mật khẩu xác nhận chưa khớp.");
+      return;
     }
 
     if (!form.agree) {
-      setClientError('Bạn cần đồng ý với điều khoản để tiếp tục.')
-      return
+      setClientError("Bạn cần đồng ý với điều khoản để tiếp tục.");
+      return;
     }
 
-    dispatch(resetAuthState())
+    dispatch(resetAuthState());
     dispatch(
       registerAccount({
         fullName: form.fullName,
         email: form.email,
         password: form.password,
       }),
-    )
-  }
+    );
+  };
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
@@ -85,13 +90,17 @@ const RegisterForm = () => {
       {clientError ? (
         <FormMessage tone="error" title={clientError} />
       ) : error ? (
-        <FormMessage tone="error" title="Đăng ký thất bại" description={error} />
+        <FormMessage
+          tone="error"
+          title="Đăng ký thất bại"
+          description={error}
+        />
       ) : null}
 
       {isSuccess ? (
         <FormMessage
           tone="success"
-          title={result?.message || 'Đăng ký thành công'}
+          title={result?.message || "Đăng ký thành công"}
           description="Hãy kiểm tra email để kích hoạt tài khoản (nếu có)."
         />
       ) : null}
@@ -137,7 +146,7 @@ const RegisterForm = () => {
         onChange={handleChange}
         placeholder="••••••••"
         autoComplete="new-password"
-        error={passwordMismatch ? 'Mật khẩu chưa trùng khớp.' : ''}
+        error={passwordMismatch ? "Mật khẩu chưa trùng khớp." : ""}
         required
       />
 
@@ -156,14 +165,21 @@ const RegisterForm = () => {
       </label>
 
       <PrimaryButton type="submit" disabled={isLoading}>
-        {isLoading ? 'Đang tạo tài khoản...' : 'Đăng ký ngay'}
+        {isLoading ? "Đang tạo tài khoản..." : "Đăng ký ngay"}
       </PrimaryButton>
 
       <p className="text-center text-xs text-ink-700/70">
-        Đã có tài khoản? <span className="font-semibold text-sea-700">Đăng nhập</span>
+        Đã có tài khoản?{" "}
+        <span className="font-semibold text-sea-700">Đăng nhập</span>
+      </p>
+      <p className="text-center text-xs text-ink-700/60">
+        Quên mật khẩu?{" "}
+        <Link to="/forgot-password" className="font-semibold text-sea-700">
+          Lấy lại ngay
+        </Link>
       </p>
     </form>
-  )
-}
+  );
+};
 
-export default RegisterForm
+export default RegisterForm;
