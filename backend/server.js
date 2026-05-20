@@ -13,6 +13,7 @@ const cors = require('cors');
 // Import Routes
 const authRoutes = require('./src/routes/auth.routes');
 const userRoutes = require('./src/routes/user.routes');
+const productRoutes = require('./src/routes/product.routes');
 
 // Import Database Config
 const pool = require('./src/config/database');
@@ -39,6 +40,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Auth routes: /api/login, /api/register, /api/verify-otp, ...
 app.use('/api', authRoutes);
+
+// Product routes: /api/products
+app.use('/api', productRoutes);
 
 // User routes: /user/profile, /admin/profile, ...
 app.use('/', userRoutes);
