@@ -9,7 +9,7 @@
 const pool = require('../config/database');
 
 class ProductRepository {
-    async search(filters) {
+    buildWhere(filters) {
         const where = [];
         const params = [];
 
@@ -45,23 +45,48 @@ class ProductRepository {
 
         const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
+        return { whereClause, params };
+    }
+
+    getOrderBy(sort) {
         let orderBy = 'ORDER BY sold DESC';
-        if (filters.sort === 'rating') {
+        if (sort === 'rating') {
             orderBy = 'ORDER BY rating DESC';
-        } else if (filters.sort === 'price-asc') {
+        } else if (sort === 'price-asc') {
             orderBy = 'ORDER BY price ASC';
-        } else if (filters.sort === 'price-desc') {
+        } else if (sort === 'price-desc') {
             orderBy = 'ORDER BY price DESC';
-        } else if (filters.sort === 'newest') {
+        } else if (sort === 'newest') {
             orderBy = 'ORDER BY created_at DESC';
         }
 
+        return orderBy;
+    }
+
+    async search(filters) {
+        const { whereClause, params } = this.buildWhere(filters);
+
+        const orderBy = this.getOrderBy(filters.sort);
+        const limit = Number.isFinite(filters.limit) ? filters.limit : 10;
+        const page = Number.isFinite(filters.page) && filters.page > 0 ? filters.page : 1;
+        const offset = (page - 1) * limit;
+
         const [rows] = await pool.execute(
-            `SELECT * FROM products ${whereClause} ${orderBy}`,
+            `SELECT * FROM products ${whereClause} ${orderBy} LIMIT ? OFFSET ?`,
+            [...params, limit, offset]
+        );
+
+        const [countRows] = await pool.execute(
+            `SELECT COUNT(*) AS total FROM products ${whereClause}`,
             params
         );
 
-        return rows;
+        return {
+            rows,
+            total: countRows[0] ? Number(countRows[0].total) : 0,
+            page,
+            limit,
+        };
     }
 }
 

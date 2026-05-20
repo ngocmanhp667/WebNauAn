@@ -10,8 +10,8 @@ const productRepository = require('../repositories/product.repository');
 
 class ProductService {
     async searchProducts(filters) {
-        const rows = await productRepository.search(filters);
-        return rows.map((item) => {
+        const result = await productRepository.search(filters);
+        const items = result.rows.map((item) => {
             let images = [];
             let tags = [];
 
@@ -43,6 +43,18 @@ class ProductService {
                 tags,
             };
         });
+
+        const totalPages = result.limit > 0 ? Math.ceil(result.total / result.limit) : 0;
+
+        return {
+            items,
+            pagination: {
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
+                totalPages,
+            },
+        };
     }
 }
 

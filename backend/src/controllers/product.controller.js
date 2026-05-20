@@ -23,7 +23,7 @@ const toBoolean = (value) => {
 class ProductController {
     /**
      * GET /api/products
-     * Query: query, category, minPrice, maxPrice, minRating, inStock, sort
+     * Query: query, category, minPrice, maxPrice, minRating, inStock, sort, page, limit
      */
     async search(req, res, next) {
         try {
@@ -35,14 +35,17 @@ class ProductController {
                 minRating: toNumber(req.query.minRating),
                 inStock: toBoolean(req.query.inStock),
                 sort: req.query.sort ? String(req.query.sort).trim() : 'popular',
+                page: toNumber(req.query.page),
+                limit: toNumber(req.query.limit),
             };
 
-            const products = await ProductService.searchProducts(filters);
+            const result = await ProductService.searchProducts(filters);
 
             return res.status(200).json({
                 success: true,
                 message: 'Lay du lieu mon an thanh cong',
-                data: products,
+                data: result.items,
+                pagination: result.pagination,
             });
         } catch (error) {
             return res.status(error.statusCode || 500).json({
