@@ -1,8 +1,8 @@
-import RegisterForm from '../components/RegisterForm'
+import RegisterForm from "../components/RegisterForm";
 
 const RegisterPage = () => {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-clay-50 text-ink-900">
+    <div className="relative min-h-screen overflow-hidden bg-clay-50 text-ink-900 font-sans">
       <div className="pointer-events-none absolute -left-40 top-[-120px] h-[420px] w-[420px] rounded-full bg-sunset-400/30 blur-[90px]" />
       <div className="pointer-events-none absolute -right-32 top-[120px] h-[380px] w-[380px] rounded-full bg-sea-600/20 blur-[90px]" />
       <div className="pointer-events-none absolute bottom-[-120px] left-[15%] h-[340px] w-[340px] rounded-full bg-amber-200/60 blur-[120px]" />
@@ -26,8 +26,8 @@ const RegisterPage = () => {
 
             <div className="space-y-4 text-sm text-ink-700/80">
               <p>
-                Lưu lại công thức, quản lý danh sách món ăn và chia sẻ trải nghiệm
-                nấu nướng cùng bạn bè.
+                Lưu lại công thức, quản lý danh sách món ăn và chia sẻ trải
+                nghiệm nấu nướng cùng bạn bè.
               </p>
               <div className="grid gap-3 rounded-2xl border border-clay-200 bg-clay-100/60 p-4">
                 <div className="flex items-center justify-between text-xs">
@@ -40,7 +40,9 @@ const RegisterPage = () => {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-ink-900">Kho công thức</span>
+                    <span className="font-semibold text-ink-900">
+                      Kho công thức
+                    </span>
                     <span className="text-ink-700/60">120+ món</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-white">
@@ -68,7 +70,7 @@ const RegisterPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default RegisterPage
+export default RegisterPage;

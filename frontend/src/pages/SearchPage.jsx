@@ -241,7 +241,7 @@ const SearchPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-clay-50 text-ink-900">
+    <div className="min-h-screen bg-clay-50 text-ink-900 font-sans">
       <div className="relative overflow-hidden">
         <div className="pointer-events-none absolute -left-32 top-[-120px] h-[360px] w-[360px] rounded-full bg-sunset-400/25 blur-[90px]" />
         <div className="pointer-events-none absolute -right-40 top-[110px] h-[420px] w-[420px] rounded-full bg-sea-600/20 blur-[110px]" />
@@ -259,12 +259,13 @@ const SearchPage = () => {
                 </h1>
               </div>
               <div className="rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-ink-700 shadow-float backdrop-blur">
-                Tong mon: <span className="font-semibold">{products.length}</span>
+                Tong mon:{" "}
+                <span className="font-semibold">{products.length}</span>
               </div>
             </div>
             <p className="max-w-2xl text-sm text-ink-700/75">
-              Loc mon an theo tu khoa, danh muc, gia tien va danh gia. Co the ket
-              hop nhieu dieu kien de tim nhanh mon phu hop nhat.
+              Loc mon an theo tu khoa, danh muc, gia tien va danh gia. Co the
+              ket hop nhieu dieu kien de tim nhanh mon phu hop nhat.
             </p>
           </header>
 
@@ -358,9 +359,7 @@ const SearchPage = () => {
                   max={maxPriceLimit}
                   step="5000"
                   value={maxPrice ?? 0}
-                  onChange={(event) =>
-                    setMaxPrice(Number(event.target.value))
-                  }
+                  onChange={(event) => setMaxPrice(Number(event.target.value))}
                   className="w-full accent-sea-600"
                 />
                 <p className="text-sm font-semibold text-ink-900">
@@ -518,7 +517,9 @@ const SearchPage = () => {
                           ))}
                         </div>
                         <p className="text-xs text-ink-700/60">
-                          {item.stock > 0 ? `Con ${item.stock} phan` : "Het hang"}
+                          {item.stock > 0
+                            ? `Con ${item.stock} phan`
+                            : "Het hang"}
                         </p>
                       </div>
                     </div>
