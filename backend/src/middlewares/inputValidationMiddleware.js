@@ -191,6 +191,16 @@ const fullNameRegex = /^[\p{L}\s.'-]+$/u;
  * - dailyBudget/daily_budget: optional, phải là số dương
  */
 const validateUpdateProfile = [
+  body("avatarUrl")
+    .optional({ nullable: true })
+    .trim(),
+
+  body("email")
+    .optional({ nullable: true })
+    .trim()
+    .isEmail()
+    .withMessage("Email không đúng định dạng"),
+
   body("fullName").custom((value, { req }) => {
     const target = value ?? req.body.full_name;
     if (target === undefined || target === null) return true;
@@ -224,6 +234,14 @@ const validateUpdateProfile = [
       }
       return true;
     })
+    .trim(),
+
+  body("facebookUrl")
+    .optional({ nullable: true })
+    .trim(),
+
+  body("instagramUsername")
+    .optional({ nullable: true })
     .trim(),
 
   body("cuisinePreferences").custom((value, { req }) => {

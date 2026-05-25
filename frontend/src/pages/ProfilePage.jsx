@@ -19,12 +19,20 @@ const PRESET_CUISINES = [
   "Món cay"
 ];
 
+const navigationItems = [
+  { label: 'Thông tin cá nhân', icon: '👤', active: true },
+  { label: 'Mật khẩu & Bảo mật', icon: '🔒', active: false },
+  { label: 'Thông báo', icon: '🔔', active: false },
+  { label: 'Công thức đã lưu', icon: '🔖', active: false },
+];
+
 const ProfilePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { user, token, profileStatus, profileError } = useSelector((state) => state.auth);
 
+  const [activeTab, setActiveTab] = useState('Thông tin cá nhân');
   const [form, setForm] = useState({
     fullName: "",
     phone: "",
@@ -127,7 +135,7 @@ const ProfilePage = () => {
         setClientMessage({
           tone: "success",
           title: "Cập nhật thành công!",
-          description: "Thông tin hồ sơ và dinh dưỡng của bạn đã được cập nhật."
+          description: "Thông tin hồ sơ và sở thích của bạn đã được cập nhật."
         });
       }
     });
@@ -166,183 +174,221 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-6 -mt-16 relative z-10">
-        <div className="grid gap-6 md:grid-cols-[1fr_2.2fr]">
+      <div className="mx-auto max-w-5xl px-6 -mt-16 relative z-10">
+        <div className="grid gap-8 lg:grid-cols-[20rem_minmax(0,1fr)]">
           
-          {/* Left Column: Avatar and Quick Stats */}
-          <div className="flex flex-col items-center gap-6 rounded-3xl border border-[#2a2326] bg-[#141217] p-6 shadow-float backdrop-blur-md">
-            <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-[#2a2326] bg-[#f59e0b] text-[#111111] text-4xl font-bold shadow-md">
-              {avatarChar}
-            </div>
+          {/* Left Column: Side Navigation & Avatar */}
+          <div className="flex flex-col gap-6">
+            
+            {/* User Card */}
+            <div className="flex flex-col items-center gap-4 rounded-3xl border border-[#2a2326] bg-[#141217] p-6 shadow-float backdrop-blur-md">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-[#2a2326] bg-[#f59e0b] text-[#111111] text-3xl font-bold shadow-md">
+                {avatarChar}
+              </div>
 
-            <div className="text-center w-full">
-              <h2 className="text-xl font-bold text-white truncate px-2">
-                {form.fullName || user.username}
-              </h2>
-              <p className="text-xs text-[#cbd5e1]/60 mt-1">@{user.username}</p>
-              
-              <div className="mt-3 flex items-center justify-center gap-2">
-                <span className="rounded-full bg-[#1b1410] px-3 py-1 text-[10px] font-semibold text-[#f59e0b] border border-[#f59e0b]/20">
-                  {user.role === 'admin' ? 'Administrator' : 'Thành viên'}
-                </span>
-                {user.is_verified ? (
-                  <span className="rounded-full bg-emerald-950/80 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/20">
-                    Đã xác thực
+              <div className="text-center w-full">
+                <h2 className="text-lg font-bold text-white truncate px-2">
+                  {form.fullName || user.username}
+                </h2>
+                <p className="text-xs text-[#cbd5e1]/60 mt-1">@{user.username}</p>
+                
+                <div className="mt-3 flex items-center justify-center gap-2">
+                  <span className="rounded-full bg-[#1b1410] px-3 py-1 text-[10px] font-semibold text-[#f59e0b] border border-[#f59e0b]/20">
+                    {user.role === 'admin' ? 'Administrator' : 'Thành viên'}
                   </span>
-                ) : null}
+                  {user.is_verified ? (
+                    <span className="rounded-full bg-emerald-950/80 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/20">
+                      Đã xác thực
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+
+              <hr className="w-full border-[#2a2326]" />
+
+              {/* User credentials details */}
+              <div className="w-full space-y-3 text-xs text-[#cbd5e1]/80">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-[#cbd5e1]/40">Email của bạn</p>
+                  <p className="font-semibold text-white mt-0.5 truncate">{user.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-[#cbd5e1]/40">Ngày đăng ký</p>
+                  <p className="font-semibold text-white mt-0.5">
+                    {user.created_at ? new Date(user.created_at).toLocaleDateString("vi-VN") : "Hôm nay"}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <hr className="w-full border-[#2a2326]" />
+            {/* Aside Navigation List */}
+            <div className="rounded-3xl border border-[#2a2326] bg-[#141217] p-4 shadow-float">
+              <aside className="w-full space-y-1">
+                {navigationItems.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => setActiveTab(item.label)}
+                    className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors text-sm font-semibold ${
+                      activeTab === item.label
+                        ? "bg-[#1b1410] text-[#f59e0b] border border-[#f59e0b]/20"
+                        : "text-[#cbd5e1] hover:bg-[#1b181f] hover:text-white"
+                    }`}
+                  >
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
 
-            {/* User credentials details */}
-            <div className="w-full space-y-3 text-xs text-[#cbd5e1]/80">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-[#cbd5e1]/40">Email của bạn</p>
-                <p className="font-semibold text-white mt-0.5 truncate">{user.email}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-[#cbd5e1]/40">Ngày đăng ký</p>
-                <p className="font-semibold text-white mt-0.5">
-                  {user.created_at ? new Date(user.created_at).toLocaleDateString("vi-VN") : "Hôm nay"}
-                </p>
-              </div>
+                <div className="pt-4 mt-4 border-t border-[#2a2326]">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-red-400 transition-colors hover:bg-red-950/20 hover:text-red-300 font-semibold text-sm"
+                  >
+                    <span>🚪</span>
+                    <span>Đăng xuất</span>
+                  </button>
+                </div>
+              </aside>
             </div>
 
-            <hr className="w-full border-[#2a2326]" />
-
-            <button 
-              type="button"
-              onClick={handleLogout}
-              className="w-full rounded-2xl border border-red-500/30 bg-red-950/20 py-2.5 text-xs font-semibold text-red-400 hover:bg-red-500 hover:text-white transition"
-            >
-              Đăng xuất tài khoản
-            </button>
           </div>
 
-          {/* Right Column: Information Forms */}
+          {/* Right Column: Dynamic Form Area */}
           <div className="rounded-3xl border border-[#2a2326] bg-[#141217]/95 p-8 shadow-float backdrop-blur-md">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              <div>
-                <h3 className="font-display text-2xl font-semibold text-white">
-                  Thiết lập hồ sơ cá nhân
-                </h3>
-                <p className="text-sm text-[#cbd5e1]/60 mt-1">
-                  Cập nhật các tùy chọn dinh dưỡng và thông tin cá nhân của bạn.
+            
+            {activeTab === 'Thông tin cá nhân' ? (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                
+                <div>
+                  <h3 className="font-display text-2xl font-semibold text-white animate-fadeIn">
+                    Cài đặt hồ sơ
+                  </h3>
+                  <p className="text-sm text-[#cbd5e1]/60 mt-1">
+                    Quản lý thông tin công khai và tùy chọn cá nhân của bạn.
+                  </p>
+                </div>
+
+                {clientMessage ? (
+                  <FormMessage 
+                    tone={clientMessage.tone} 
+                    title={clientMessage.title} 
+                    description={clientMessage.description}
+                  />
+                ) : profileError ? (
+                  <FormMessage
+                    tone="error"
+                    title="Cập nhật thất bại"
+                    description={profileError}
+                  />
+                ) : null}
+
+                {/* Section 1: Basic Info */}
+                <div className="space-y-4">
+                  <h4 className="text-xs uppercase tracking-[0.3em] text-[#f59e0b] font-semibold border-b border-[#2a2326] pb-2">
+                    1. Thông tin liên lạc
+                  </h4>
+                  
+                  <InputField
+                    label="Họ và tên"
+                    name="fullName"
+                    value={form.fullName}
+                    onChange={handleChange}
+                    placeholder="Nguyen Van A"
+                    required
+                  />
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <InputField
+                      label="Số điện thoại"
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="0912345678"
+                    />
+                    <InputField
+                      label="Địa chỉ"
+                      name="address"
+                      value={form.address}
+                      onChange={handleChange}
+                      placeholder="Quận 1, TP. Hồ Chí Minh"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-semibold text-[#cbd5e1]">Giới thiệu bản thân (Bio)</label>
+                    <textarea
+                      name="bio"
+                      value={form.bio}
+                      onChange={handleChange}
+                      rows="3"
+                      placeholder="Chia sẻ đôi chút về niềm đam mê ẩm thực của bạn..."
+                      className="w-full rounded-2xl border border-[#2a2326] bg-[#1b181f] px-4 py-3 text-sm text-[#f3f4f6] placeholder-[#cbd5e1]/30 focus:border-[#f59e0b] focus:outline-none focus:ring-1 focus:ring-[#f59e0b]/50"
+                    />
+                  </div>
+                </div>
+
+                {/* Section 2: Dinh dưỡng & Ngân sách */}
+                <div className="space-y-4 pt-2">
+                  <h4 className="text-xs uppercase tracking-[0.3em] text-[#f59e0b] font-semibold border-b border-[#2a2326] pb-2">
+                    2. Sở thích ẩm thực & Ngân sách
+                  </h4>
+
+                  <InputField
+                    label="Ngân sách ăn uống hàng ngày (VNĐ)"
+                    name="dailyBudget"
+                    value={form.dailyBudget}
+                    onChange={handleChange}
+                    placeholder="80000"
+                    helperText="AI sẽ dựa trên ngân sách này để tính toán thực đơn hợp lý cho bạn."
+                  />
+
+                  {/* Cuisines dynamic tags */}
+                  <div className="flex flex-col gap-3">
+                    <div>
+                      <label className="text-xs font-semibold text-[#cbd5e1]">Sở thích ẩm thực</label>
+                      <p className="text-[11px] text-[#cbd5e1]/50 mt-0.5">Chọn các chủ đề ẩm thực bạn quan tâm (Có thể chọn nhiều):</p>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {PRESET_CUISINES.map((cuisine) => {
+                        const isSelected = form.cuisinePreferences.includes(cuisine);
+                        return (
+                          <button
+                            key={cuisine}
+                            type="button"
+                            onClick={() => handleToggleCuisine(cuisine)}
+                            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${
+                              isSelected
+                                ? "border-[#f59e0b] bg-[#1b1410] text-[#f59e0b]"
+                                : "border-[#2a2326] bg-[#1b181f] text-[#cbd5e1]/80 hover:border-[#f59e0b]/50"
+                            }`}
+                          >
+                            {cuisine} {isSelected ? "✓" : "+"}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <PrimaryButton type="submit" disabled={isUpdating}>
+                    {isUpdating ? "Đang lưu thay đổi..." : "Lưu thay đổi"}
+                  </PrimaryButton>
+                </div>
+
+              </form>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <span className="text-5xl mb-4">🚧</span>
+                <h3 className="text-xl font-bold text-white">Tính năng đang phát triển</h3>
+                <p className="text-sm text-[#cbd5e1]/60 mt-1 max-w-sm">
+                  Tab "{activeTab}" đang được tích hợp thêm dữ liệu và sẽ sớm ra mắt trong bản cập nhật tới!
                 </p>
               </div>
-
-              {clientMessage ? (
-                <FormMessage 
-                  tone={clientMessage.tone} 
-                  title={clientMessage.title} 
-                  description={clientMessage.description}
-                />
-              ) : profileError ? (
-                <FormMessage
-                  tone="error"
-                  title="Cập nhật thất bại"
-                  description={profileError}
-                />
-              ) : null}
-
-              {/* Section 1: Basic Info */}
-              <div className="space-y-4">
-                <h4 className="text-xs uppercase tracking-[0.3em] text-[#f59e0b] font-semibold border-b border-[#2a2326] pb-2">
-                  1. Thông tin cá nhân
-                </h4>
-                
-                <InputField
-                  label="Họ và tên"
-                  name="fullName"
-                  value={form.fullName}
-                  onChange={handleChange}
-                  placeholder="Nguyen Van A"
-                  required
-                />
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <InputField
-                    label="Số điện thoại"
-                    name="phone"
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder="0912345678"
-                  />
-                  <InputField
-                    label="Địa chỉ"
-                    name="address"
-                    value={form.address}
-                    onChange={handleChange}
-                    placeholder="Quận 1, TP. Hồ Chí Minh"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold text-[#cbd5e1]">Tiểu sử (Bio)</label>
-                  <textarea
-                    name="bio"
-                    value={form.bio}
-                    onChange={handleChange}
-                    rows="3"
-                    placeholder="Chia sẻ đôi chút về niềm đam mê ẩm thực của bạn..."
-                    className="w-full rounded-2xl border border-[#2a2326] bg-[#1b181f] px-4 py-3 text-sm text-[#f3f4f6] placeholder-[#cbd5e1]/30 focus:border-[#f59e0b] focus:outline-none focus:ring-1 focus:ring-[#f59e0b]/50"
-                  />
-                </div>
-              </div>
-
-              {/* Section 2: Nutrition & Budget Preferences */}
-              <div className="space-y-4 pt-2">
-                <h4 className="text-xs uppercase tracking-[0.3em] text-[#f59e0b] font-semibold border-b border-[#2a2326] pb-2">
-                  2. Sở thích dinh dưỡng & ngân sách
-                </h4>
-
-                <InputField
-                  label="Ngân sách ăn uống hàng ngày (VNĐ)"
-                  name="dailyBudget"
-                  value={form.dailyBudget}
-                  onChange={handleChange}
-                  placeholder="80000"
-                  helperText="AI sẽ dựa trên ngân sách này để tính toán thực đơn hợp lý cho bạn."
-                />
-
-                {/* Cuisine Tags selection */}
-                <div className="flex flex-col gap-3">
-                  <div>
-                    <label className="text-xs font-semibold text-[#cbd5e1]">Sở thích ẩm thực của bạn</label>
-                    <p className="text-[11px] text-[#cbd5e1]/50 mt-0.5">Chọn các chủ đề ẩm thực bạn quan tâm (Có thể chọn nhiều):</p>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {PRESET_CUISINES.map((cuisine) => {
-                      const isSelected = form.cuisinePreferences.includes(cuisine);
-                      return (
-                        <button
-                          key={cuisine}
-                          type="button"
-                          onClick={() => handleToggleCuisine(cuisine)}
-                          className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${
-                            isSelected
-                              ? "border-[#f59e0b] bg-[#1b1410] text-[#f59e0b]"
-                              : "border-[#2a2326] bg-[#1b181f] text-[#cbd5e1]/80 hover:border-[#f59e0b]/50"
-                          }`}
-                        >
-                          {cuisine} {isSelected ? "✓" : "+"}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <PrimaryButton type="submit" disabled={isUpdating}>
-                  {isUpdating ? "Đang lưu thay đổi..." : "Lưu thay đổi"}
-                </PrimaryButton>
-              </div>
-
-            </form>
+            )}
+            
           </div>
 
         </div>

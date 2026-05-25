@@ -8,18 +8,19 @@ const api = axios.create({
 })
 
 // Tự động thêm Token JWT vào header nếu có trong localStorage
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token')
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token =
+      window.localStorage.getItem('accessToken') ||
+      window.localStorage.getItem('authToken') ||
+      window.localStorage.getItem('token')
+
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`
     }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
   }
-)
+
+  return config
+})
 
 export default api
-

@@ -23,9 +23,12 @@ CREATE TABLE IF NOT EXISTS users (
     
     -- Thông tin cá nhân
     full_name VARCHAR(100) DEFAULT NULL,
+    avatar_url VARCHAR(255) DEFAULT NULL,
     phone VARCHAR(20) DEFAULT NULL,
     address VARCHAR(255) DEFAULT NULL,
     bio TEXT DEFAULT NULL,
+    facebook_url VARCHAR(255) DEFAULT NULL,
+    instagram_username VARCHAR(100) DEFAULT NULL,
     cuisine_preferences TEXT DEFAULT NULL,
     daily_budget DECIMAL(12,2) DEFAULT NULL,
     
@@ -48,6 +51,12 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_email (email),
     INDEX idx_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Nếu database đã tồn tại từ phiên bản cũ, nâng schema lên đúng profile
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(255) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS facebook_url VARCHAR(255) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS instagram_username VARCHAR(100) DEFAULT NULL;
 
 -- Tạo bảng products (mon an)
 CREATE TABLE IF NOT EXISTS products (

@@ -80,11 +80,18 @@ class UserController {
         try {
             const userId = req.user.id;
             const {
+                avatarUrl,
+                avatar_url,
+                email,
                 fullName,
                 full_name,
                 phone,
                 address,
                 bio,
+                facebookUrl,
+                facebook_url,
+                instagramUsername,
+                instagram_username,
                 cuisinePreferences,
                 cuisine_preferences,
                 dailyBudget,
@@ -93,10 +100,14 @@ class UserController {
 
             // Gọi Service cập nhật profile
             const updatedUserDTO = await UserService.updateProfile(userId, {
+                avatar_url: avatarUrl ?? avatar_url,
+                email,
                 full_name: fullName ?? full_name,
                 phone,
                 address,
                 bio,
+                facebook_url: facebookUrl ?? facebook_url,
+                instagram_username: instagramUsername ?? instagram_username,
                 cuisine_preferences: cuisinePreferences ?? cuisine_preferences,
                 daily_budget: dailyBudget ?? daily_budget
             });

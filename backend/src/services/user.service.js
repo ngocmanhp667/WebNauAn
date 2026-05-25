@@ -291,6 +291,20 @@ class UserService {
             return trimmed ? trimmed : null;
         };
 
+        const normalizeEmail = (value) => {
+            const normalized = normalizeString(value);
+            if (normalized === undefined || normalized === null) return normalized;
+            if (typeof normalized !== 'string') return normalized;
+            return normalized.toLowerCase();
+        };
+
+        const normalizeUrl = (value) => {
+            const normalized = normalizeString(value);
+            if (normalized === undefined || normalized === null) return normalized;
+            if (typeof normalized !== 'string') return normalized;
+            return normalized;
+        };
+
         const normalizePhone = (value) => {
             const normalized = normalizeString(value);
             if (normalized === undefined || normalized === null) return normalized;
@@ -324,12 +338,26 @@ class UserService {
 
         const mergeField = (incoming, existing) => (incoming === undefined ? existing : incoming);
 
+        const nextEmail = normalizeEmail(data.email);
+        if (nextEmail !== undefined && nextEmail !== user.email) {
+            const emailOwner = await userRepository.findByEmail(nextEmail);
+            if (emailOwner && emailOwner.id !== userId) {
+                const error = new Error('Email đã được sử dụng');
+                error.statusCode = 409;
+                throw error;
+            }
+        }
+
         // Bước 2: Merge dữ liệu (giữ giá trị cũ nếu không gửi mới)
         const updateData = {
             full_name: mergeField(normalizeString(data.full_name), user.full_name),
+            avatar_url: mergeField(normalizeUrl(data.avatar_url), user.avatar_url),
+            email: mergeField(nextEmail, user.email),
             phone: mergeField(normalizePhone(data.phone), user.phone),
             address: mergeField(normalizeString(data.address), user.address),
             bio: mergeField(normalizeString(data.bio), user.bio),
+            facebook_url: mergeField(normalizeUrl(data.facebook_url), user.facebook_url),
+            instagram_username: mergeField(normalizeString(data.instagram_username), user.instagram_username),
             cuisine_preferences: mergeField(
                 normalizeCuisinePreferences(data.cuisine_preferences),
                 user.cuisine_preferences

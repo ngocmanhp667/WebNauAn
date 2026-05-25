@@ -48,9 +48,12 @@ const toUserDTO = (user) => {
         username: user.username,
         email: user.email,
         full_name: user.full_name || null,
+        avatar_url: user.avatar_url || null,
         phone: user.phone || null,
         address: user.address || null,
         bio: user.bio || null,
+        facebook_url: user.facebook_url || null,
+        instagram_username: user.instagram_username || null,
         cuisine_preferences: cuisinePreferences,
         daily_budget: dailyBudget,
         role: user.role,
@@ -61,6 +64,9 @@ const toUserDTO = (user) => {
 
     // Alias camelCase fields for profile API clients
     dto.fullName = dto.full_name;
+    dto.avatarUrl = dto.avatar_url;
+    dto.facebookUrl = dto.facebook_url;
+    dto.instagramUsername = dto.instagram_username;
     dto.cuisinePreferences = dto.cuisine_preferences;
     dto.dailyBudget = dto.daily_budget;
 
