@@ -1,4 +1,7 @@
 import TopProductsSection from "../components/TopProductsSection.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { logoutAccount } from "../store/authSlice";
 
 const categories = [
   {
@@ -117,6 +120,13 @@ const scheduleItems = [
 ];
 
 const HomePage = () => {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  const handleLogout = () => {
+    dispatch(logoutAccount());
+  };
+
   return (
     <div className="bg-[#0d0b0c] text-[#f3f4f6]">
       <header className="relative overflow-hidden border-b border-[#1f1b1c]">
@@ -157,15 +167,34 @@ const HomePage = () => {
               <a className="transition hover:text-[#f59e0b]" href="#ai">
                 Thực đơn AI
               </a>
-              <a className="transition hover:text-[#f59e0b]" href="/search">
+              <Link className="transition hover:text-[#f59e0b]" to="/search">
                 Tìm kiếm
-              </a>
-              <a
-                className="rounded-full bg-[#f59e0b] px-4 py-2 text-xs text-[#111111] shadow-float transition hover:-translate-y-0.5 hover:bg-[#fbbf24]"
-                href="/register"
-              >
-                Tạo tài khoản
-              </a>
+              </Link>
+              {user ? (
+                <>
+                  <Link className="transition hover:text-[#f59e0b] border-l border-[#2a2326] pl-3 text-[#f59e0b]" to="/profile">
+                    Hồ sơ ({user.fullName || user.full_name || user.username})
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-full bg-[#1b1410] border border-red-500/30 px-3 py-1.5 text-xs text-red-400 font-semibold shadow-float transition hover:-translate-y-0.5 hover:bg-red-500 hover:text-white"
+                  >
+                    Đăng xuất
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link className="transition hover:text-[#f59e0b]" to="/login">
+                    Đăng nhập
+                  </Link>
+                  <Link
+                    className="rounded-full bg-[#f59e0b] px-4 py-2 text-xs text-[#111111] shadow-float transition hover:-translate-y-0.5 hover:bg-[#fbbf24]"
+                    to="/register"
+                  >
+                    Tạo tài khoản
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
 

@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../services/api'
+import { loginApi, updateProfileApi } from '../services/authApi'
 
+// AsyncThunk Đăng ký tài khoản
 export const registerAccount = createAsyncThunk(
   'auth/registerAccount',
   async (payload, { rejectWithValue }) => {
@@ -14,16 +16,74 @@ export const registerAccount = createAsyncThunk(
         error.response?.data?.message ||
         error.response?.data?.error ||
         error.message ||
-        'Registration failed'
+        'Đăng ký thất bại'
       return rejectWithValue(message)
     }
   },
 )
 
+// AsyncThunk Đăng nhập tài khoản
+export const loginAccount = createAsyncThunk(
+  'auth/loginAccount',
+  async ({ username, password }, { rejectWithValue }) => {
+    try {
+      const response = await loginApi(username, password)
+      if (response?.success && response?.data) {
+        // Lưu vào localStorage
+        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('user', JSON.stringify(response.data.user))
+      }
+      return response.data
+    } catch (error) {
+      const message =
+        error.message ||
+        error.error ||
+        'Đăng nhập thất bại'
+      return rejectWithValue(message)
+    }
+  },
+)
+
+// AsyncThunk Cập nhật thông tin Profile
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateUserProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const response = await updateProfileApi(profileData)
+      if (response?.success && response?.data) {
+        // Cập nhật lại thông tin user trong localStorage
+        localStorage.setItem('user', JSON.stringify(response.data))
+      }
+      return response.data
+    } catch (error) {
+      const message =
+        error.message ||
+        error.error ||
+        'Cập nhật thông tin thất bại'
+      return rejectWithValue(message)
+    }
+  },
+)
+
+// Khôi phục session từ localStorage khi khởi động
+const savedToken = localStorage.getItem('token') || null
+let savedUser = null
+try {
+  const userStr = localStorage.getItem('user')
+  savedUser = userStr ? JSON.parse(userStr) : null
+} catch (e) {
+  console.error('Lỗi phân tích user từ localStorage:', e)
+  localStorage.removeItem('user')
+}
+
 const initialState = {
-  status: 'idle',
+  token: savedToken,
+  user: savedUser,
+  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
   error: null,
   result: null,
+  profileStatus: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+  profileError: null,
 }
 
 const authSlice = createSlice({
@@ -32,15 +92,30 @@ const authSlice = createSlice({
   reducers: {
     clearAuthError(state) {
       state.error = null
+      state.profileError = null
     },
     resetAuthState(state) {
       state.status = 'idle'
+      state.profileStatus = 'idle'
       state.error = null
+      state.profileError = null
       state.result = null
+    },
+    logoutAccount(state) {
+      state.token = null
+      state.user = null
+      state.status = 'idle'
+      state.profileStatus = 'idle'
+      state.error = null
+      state.profileError = null
+      state.result = null
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
     },
   },
   extraReducers: (builder) => {
     builder
+      // Đăng ký
       .addCase(registerAccount.pending, (state) => {
         state.status = 'loading'
         state.error = null
@@ -53,8 +128,36 @@ const authSlice = createSlice({
         state.status = 'failed'
         state.error = action.payload
       })
+      // Đăng nhập
+      .addCase(loginAccount.pending, (state) => {
+        state.status = 'loading'
+        state.error = null
+      })
+      .addCase(loginAccount.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.token = action.payload.token
+        state.user = action.payload.user
+        state.result = action.payload
+      })
+      .addCase(loginAccount.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = action.payload
+      })
+      // Cập nhật Profile
+      .addCase(updateUserProfile.pending, (state) => {
+        state.profileStatus = 'loading'
+        state.profileError = null
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.profileStatus = 'succeeded'
+        state.user = action.payload
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        state.profileStatus = 'failed'
+        state.profileError = action.payload
+      })
   },
 })
 
-export const { clearAuthError, resetAuthState } = authSlice.actions
+export const { clearAuthError, resetAuthState, logoutAccount } = authSlice.actions
 export default authSlice.reducer

@@ -16,6 +16,7 @@ const RegisterForm = () => {
   const [clientError, setClientError] = useState("");
   const [form, setForm] = useState({
     fullName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -66,7 +67,8 @@ const RegisterForm = () => {
     dispatch(resetAuthState());
     dispatch(
       registerAccount({
-        fullName: form.fullName,
+        username: form.username,
+        full_name: form.fullName, // Ánh xạ fullName thành full_name để khớp API Backend
         email: form.email,
         password: form.password,
       }),
@@ -76,13 +78,13 @@ const RegisterForm = () => {
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.35em] text-ink-700/60">
+        <p className="text-xs uppercase tracking-[0.35em] text-[#f59e0b]">
           Tạo tài khoản
         </p>
-        <h1 className="font-display text-3xl font-semibold text-ink-900">
-          Chào mừng đến với MamNgon
+        <h1 className="font-display text-3xl font-semibold text-white">
+          Chào mừng đến với MâmNgon
         </h1>
-        <p className="text-sm text-ink-700/70">
+        <p className="text-sm text-[#cbd5e1]/70">
           Đăng ký để lưu công thức và chia sẻ món ăn yêu thích.
         </p>
       </div>
@@ -101,7 +103,7 @@ const RegisterForm = () => {
         <FormMessage
           tone="success"
           title={result?.message || "Đăng ký thành công"}
-          description="Hãy kiểm tra email để kích hoạt tài khoản (nếu có)."
+          description="Hãy kiểm tra email để kích hoạt tài khoản bằng OTP."
         />
       ) : null}
 
@@ -112,6 +114,17 @@ const RegisterForm = () => {
         onChange={handleChange}
         placeholder="Nguyen Van A"
         autoComplete="name"
+        required
+      />
+
+      <InputField
+        label="Tên đăng nhập"
+        name="username"
+        value={form.username}
+        onChange={handleChange}
+        placeholder="username123"
+        autoComplete="username"
+        helperText="Chỉ chứa chữ cái, số và dấu gạch dưới (từ 3 ký tự)."
         required
       />
 
@@ -134,7 +147,7 @@ const RegisterForm = () => {
         onChange={handleChange}
         placeholder="••••••••"
         autoComplete="new-password"
-        helperText="Tối thiểu 8 ký tự, gồm chữ hoa và số."
+        helperText="Tối thiểu 8 ký tự, gồm chữ cái và số."
         required
       />
 
@@ -150,17 +163,16 @@ const RegisterForm = () => {
         required
       />
 
-      <label className="flex items-start gap-3 rounded-2xl border border-dashed border-clay-200 bg-white/70 p-4 text-xs text-ink-700/80">
+      <label className="flex items-start gap-3 rounded-2xl border border-dashed border-[#3a2e32] bg-[#141217]/50 p-4 text-xs text-[#cbd5e1]/80 cursor-pointer">
         <input
           type="checkbox"
           name="agree"
           checked={form.agree}
           onChange={handleChange}
-          className="mt-0.5 h-4 w-4 accent-sea-600"
+          className="mt-0.5 h-4 w-4 accent-[#f59e0b]"
         />
         <span>
-          Tôi đồng ý với chính sách quyền riêng tư và điều khoản sử dụng của
-          MamNgon.
+          Tôi đồng ý với chính sách quyền riêng tư và điều khoản sử dụng của MâmNgon.
         </span>
       </label>
 
@@ -168,13 +180,15 @@ const RegisterForm = () => {
         {isLoading ? "Đang tạo tài khoản..." : "Đăng ký ngay"}
       </PrimaryButton>
 
-      <p className="text-center text-xs text-ink-700/70">
+      <p className="text-center text-xs text-[#cbd5e1]/70 mt-4">
         Đã có tài khoản?{" "}
-        <span className="font-semibold text-sea-700">Đăng nhập</span>
+        <Link to="/login" className="font-semibold text-[#f59e0b] hover:underline">
+          Đăng nhập
+        </Link>
       </p>
-      <p className="text-center text-xs text-ink-700/60">
+      <p className="text-center text-xs text-[#cbd5e1]/60">
         Quên mật khẩu?{" "}
-        <Link to="/forgot-password" className="font-semibold text-sea-700">
+        <Link to="/forgot-password" className="font-semibold text-[#f59e0b] hover:underline">
           Lấy lại ngay
         </Link>
       </p>

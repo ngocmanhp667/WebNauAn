@@ -80,12 +80,12 @@ class ProductRepository {
       Number.isFinite(filters.page) && filters.page > 0 ? filters.page : 1;
     const offset = (page - 1) * limit;
 
-    const [rows] = await pool.execute(
+    const [rows] = await pool.query(
       `SELECT * FROM products ${whereClause} ${orderBy} LIMIT ? OFFSET ?`,
       [...params, limit, offset],
     );
 
-    const [countRows] = await pool.execute(
+    const [countRows] = await pool.query(
       `SELECT COUNT(*) AS total FROM products ${whereClause}`,
       params,
     );
