@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS products (
 INSERT INTO users (username, password_hash, email, full_name, role, is_verified)
 VALUES (
     'admin',
-    '$2a$10$otTCZ5Ym5UJM1XbUaWAzI.xGK6sQfwxmSm9KHLAsKSLRVM5Y6jUzi',
+    '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru',
     'admin@example.com',
     'Administrator',
     'admin',
