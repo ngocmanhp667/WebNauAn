@@ -5,7 +5,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Inter"', "ui-sans-serif", "system-ui"],
-        display: ['"Inter"', "ui-sans-serif", "system-ui"],
+        display: ['"Playfair Display"', "ui-serif", "Georgia", "serif"],
       },
       colors: {
         ink: {
@@ -28,6 +28,7 @@ export default {
       },
       boxShadow: {
         float: "0 20px 50px -20px rgba(15, 23, 42, 0.35)",
+        soft: "0 4px 20px rgba(72, 72, 72, 0.08)",
       },
     },
   },
