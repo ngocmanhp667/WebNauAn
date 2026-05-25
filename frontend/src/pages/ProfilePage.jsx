@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUserProfile, logoutAccount, clearAuthError } from "../store/authSlice";
+import { updateUserProfile, uploadUserAvatar, logoutAccount, clearAuthError } from "../store/authSlice";
 import FormMessage from "../components/FormMessage";
 import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
@@ -39,10 +39,67 @@ const ProfilePage = () => {
     address: "",
     bio: "",
     dailyBudget: "",
-    cuisinePreferences: []
+    cuisinePreferences: [],
+    facebookUrl: "",
+    instagramUsername: ""
   });
 
   const [clientMessage, setClientMessage] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const getAvatarUrl = (avatarUrl) => {
+    if (!avatarUrl) return null;
+    if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://') || avatarUrl.startsWith('data:')) {
+      return avatarUrl;
+    }
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    return `${apiBaseUrl}${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
+  };
+
+  const handleAvatarClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setClientMessage({
+        tone: "error",
+        title: "Tệp không hợp lệ",
+        description: "Vui lòng chọn một file hình ảnh (PNG, JPG, JPEG, WEBP, GIF)."
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setClientMessage({
+        tone: "error",
+        title: "Kích thước quá lớn",
+        description: "Kích thước hình ảnh tối đa là 5MB."
+      });
+      return;
+    }
+
+    dispatch(uploadUserAvatar(file)).then((actionResult) => {
+      if (uploadUserAvatar.fulfilled.match(actionResult)) {
+        setClientMessage({
+          tone: "success",
+          title: "Cập nhật ảnh đại diện thành công",
+          description: "Ảnh đại diện của bạn đã được cập nhật thành công."
+        });
+      } else {
+        setClientMessage({
+          tone: "error",
+          title: "Tải ảnh lên thất bại",
+          description: actionResult.payload || "Đã xảy ra lỗi khi tải ảnh đại diện lên."
+        });
+      }
+    });
+  };
 
   // Redirect to login if guest
   useEffect(() => {
@@ -64,7 +121,9 @@ const ProfilePage = () => {
           ? user.cuisinePreferences || user.cuisine_preferences 
           : typeof (user.cuisinePreferences || user.cuisine_preferences) === 'string'
             ? [user.cuisinePreferences || user.cuisine_preferences]
-            : []
+            : [],
+        facebookUrl: user.facebookUrl || user.facebook_url || "",
+        instagramUsername: user.instagramUsername || user.instagram_username || ""
       });
     }
   }, [user]);
@@ -128,7 +187,9 @@ const ProfilePage = () => {
         address: form.address.trim() || null,
         bio: form.bio.trim() || null,
         dailyBudget: form.dailyBudget ? Number(form.dailyBudget) : null,
-        cuisinePreferences: form.cuisinePreferences
+        cuisinePreferences: form.cuisinePreferences,
+        facebookUrl: form.facebookUrl.trim() || null,
+        instagramUsername: form.instagramUsername.trim() || null
       })
     ).then((actionResult) => {
       if (updateUserProfile.fulfilled.match(actionResult)) {
@@ -182,12 +243,62 @@ const ProfilePage = () => {
             
             {/* User Card */}
             <div className="flex flex-col items-center gap-4 rounded-3xl border border-[#2a2326] bg-[#141217] p-6 shadow-float backdrop-blur-md">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-[#2a2326] bg-[#f59e0b] text-[#111111] text-3xl font-bold shadow-md">
-                {avatarChar}
+              {/* Interactive Avatar Container */}
+              <div className="relative group/avatar cursor-pointer animate-fadeIn" onClick={handleAvatarClick} title="Nhấp vào để đổi ảnh đại diện">
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-[#2a2326] bg-[#1b181f] overflow-hidden shadow-xl transition-all duration-300 group-hover/avatar:border-[#f59e0b]/60 relative">
+                  {user.avatar_url || user.avatarUrl ? (
+                    <img 
+                      src={getAvatarUrl(user.avatar_url || user.avatarUrl)} 
+                      alt={form.fullName || user.username} 
+                      className="h-full w-full object-cover transition-all duration-500 group-hover/avatar:scale-110"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${form.fullName || user.username}`;
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#f59e0b] to-[#d97706] text-[#111111] text-4xl font-bold">
+                      {avatarChar}
+                    </div>
+                  )}
+
+                  {/* Dark Glassmorphic hover overlay */}
+                  <div className="absolute inset-0 bg-[#000000]/60 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all duration-300 backdrop-blur-[2px]">
+                    <svg className="w-6 h-6 text-white mb-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"></path>
+                    </svg>
+                    <span className="text-[10px] font-semibold text-white tracking-wide">Đổi ảnh</span>
+                  </div>
+
+                  {/* Loading Spinner Overlay */}
+                  {isUpdating && (
+                    <div className="absolute inset-0 bg-[#000000]/70 flex items-center justify-center z-10">
+                      <div className="h-6 w-6 rounded-full border-2 border-t-[#f59e0b] border-r-transparent border-b-[#f59e0b] border-l-transparent animate-spin"></div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Visual badge indicator for camera */}
+                <div className="absolute bottom-0 right-0 bg-[#141217] border border-[#2a2326] text-white p-1.5 rounded-full shadow-md group-hover/avatar:border-[#f59e0b] transition-colors duration-300">
+                  <svg className="w-3.5 h-3.5 text-[#cbd5e1] group-hover/avatar:text-[#f59e0b] transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"></path>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"></path>
+                  </svg>
+                </div>
               </div>
 
+              {/* Hidden File Input */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                accept="image/*" 
+                className="hidden" 
+              />
+
               <div className="text-center w-full">
-                <h2 className="text-lg font-bold text-white truncate px-2">
+                <h2 className="text-lg font-bold text-white truncate px-2 animate-fadeIn">
                   {form.fullName || user.username}
                 </h2>
                 <p className="text-xs text-[#cbd5e1]/60 mt-1">@{user.username}</p>
@@ -284,7 +395,7 @@ const ProfilePage = () => {
                 ) : null}
 
                 {/* Section 1: Basic Info */}
-                <div className="space-y-4">
+                <div className="space-y-4 animate-fadeIn">
                   <h4 className="text-xs uppercase tracking-[0.3em] text-[#f59e0b] font-semibold border-b border-[#2a2326] pb-2">
                     1. Thông tin liên lạc
                   </h4>
@@ -323,15 +434,39 @@ const ProfilePage = () => {
                       onChange={handleChange}
                       rows="3"
                       placeholder="Chia sẻ đôi chút về niềm đam mê ẩm thực của bạn..."
-                      className="w-full rounded-2xl border border-[#2a2326] bg-[#1b181f] px-4 py-3 text-sm text-[#f3f4f6] placeholder-[#cbd5e1]/30 focus:border-[#f59e0b] focus:outline-none focus:ring-1 focus:ring-[#f59e0b]/50"
+                      className="w-full rounded-2xl border border-[#2a2326] bg-[#1b181f] px-4 py-3 text-sm text-[#f3f4f6] placeholder-[#cbd5e1]/30 focus:border-[#f59e0b] focus:outline-none focus:ring-1 focus:ring-[#f59e0b]/50 transition-all duration-300"
                     />
                   </div>
                 </div>
 
-                {/* Section 2: Dinh dưỡng & Ngân sách */}
-                <div className="space-y-4 pt-2">
+                {/* Section 2: Mạng xã hội */}
+                <div className="space-y-4 pt-2 animate-fadeIn">
                   <h4 className="text-xs uppercase tracking-[0.3em] text-[#f59e0b] font-semibold border-b border-[#2a2326] pb-2">
-                    2. Sở thích ẩm thực & Ngân sách
+                    2. Mạng xã hội
+                  </h4>
+                  
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <InputField
+                      label="Liên kết Facebook"
+                      name="facebookUrl"
+                      value={form.facebookUrl}
+                      onChange={handleChange}
+                      placeholder="https://facebook.com/username"
+                    />
+                    <InputField
+                      label="Instagram Username"
+                      name="instagramUsername"
+                      value={form.instagramUsername}
+                      onChange={handleChange}
+                      placeholder="username_instagram"
+                    />
+                  </div>
+                </div>
+
+                {/* Section 3: Dinh dưỡng & Ngân sách */}
+                <div className="space-y-4 pt-2 animate-fadeIn">
+                  <h4 className="text-xs uppercase tracking-[0.3em] text-[#f59e0b] font-semibold border-b border-[#2a2326] pb-2">
+                    3. Sở thích ẩm thực & Ngân sách
                   </h4>
 
                   <InputField
@@ -358,7 +493,7 @@ const ProfilePage = () => {
                             key={cuisine}
                             type="button"
                             onClick={() => handleToggleCuisine(cuisine)}
-                            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition ${
+                            className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition duration-300 ${
                               isSelected
                                 ? "border-[#f59e0b] bg-[#1b1410] text-[#f59e0b]"
                                 : "border-[#2a2326] bg-[#1b181f] text-[#cbd5e1]/80 hover:border-[#f59e0b]/50"

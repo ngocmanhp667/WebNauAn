@@ -55,3 +55,17 @@ export const updateProfileApi = async (profileData) => {
   }
 };
 
+export const uploadAvatarApi = async (formData) => {
+  try {
+    const response = await api.post("/user/avatar", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+

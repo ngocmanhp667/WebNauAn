@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../services/api'
-import { loginApi, updateProfileApi } from '../services/authApi'
+import { loginApi, updateProfileApi, uploadAvatarApi } from '../services/authApi'
 
 // AsyncThunk Đăng ký tài khoản
 export const registerAccount = createAsyncThunk(
@@ -60,6 +60,29 @@ export const updateUserProfile = createAsyncThunk(
         error.message ||
         error.error ||
         'Cập nhật thông tin thất bại'
+      return rejectWithValue(message)
+    }
+  },
+)
+
+// AsyncThunk Tải ảnh đại diện
+export const uploadUserAvatar = createAsyncThunk(
+  'auth/uploadUserAvatar',
+  async (file, { rejectWithValue }) => {
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      const response = await uploadAvatarApi(formData)
+      if (response?.success && response?.data) {
+        // Cập nhật lại thông tin user trong localStorage
+        localStorage.setItem('user', JSON.stringify(response.data))
+      }
+      return response.data
+    } catch (error) {
+      const message =
+        error.message ||
+        error.error ||
+        'Tải ảnh đại diện thất bại'
       return rejectWithValue(message)
     }
   },
@@ -153,6 +176,19 @@ const authSlice = createSlice({
         state.user = action.payload
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
+        state.profileStatus = 'failed'
+        state.profileError = action.payload
+      })
+      // Tải ảnh đại diện
+      .addCase(uploadUserAvatar.pending, (state) => {
+        state.profileStatus = 'loading'
+        state.profileError = null
+      })
+      .addCase(uploadUserAvatar.fulfilled, (state, action) => {
+        state.profileStatus = 'succeeded'
+        state.user = action.payload
+      })
+      .addCase(uploadUserAvatar.rejected, (state, action) => {
         state.profileStatus = 'failed'
         state.profileError = action.payload
       })

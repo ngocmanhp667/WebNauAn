@@ -22,6 +22,7 @@ const UserController = require('../controllers/user.controller');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const { authorize } = require('../middlewares/roleMiddleware');
 const { validateUpdateProfile } = require('../middlewares/inputValidationMiddleware');
+const upload = require('../middlewares/uploadMiddleware');
 
 // ========================
 // USER PROFILE ROUTES
@@ -55,6 +56,30 @@ router.put(
     validateUpdateProfile,
     UserController.updateProfile
 );
+
+/**
+ * POST /user/avatar
+ * Tải lên ảnh đại diện của user đang đăng nhập
+ * Middlewares: verifyToken -> authorize('user', 'admin') -> upload.single('avatar') -> Controller
+ */
+router.post(
+    '/user/avatar',
+    verifyToken,
+    authorize('user', 'admin'),
+    (req, res, next) => {
+        upload.single('avatar')(req, res, (err) => {
+            if (err) {
+                return res.status(400).json({
+                    success: false,
+                    message: err.message
+                });
+            }
+            next();
+        });
+    },
+    UserController.updateAvatar
+);
+
 
 // ========================
 // ADMIN PROFILE ROUTES

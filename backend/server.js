@@ -34,6 +34,11 @@ app.use(express.json());
 // Parse URL-encoded body
 app.use(express.urlencoded({ extended: true }));
 
+// Phục vụ thư mục static chứa ảnh upload
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+
 // ========================
 // ROUTES
 // ========================

@@ -124,6 +124,47 @@ class UserController {
             });
         }
     }
+
+    /**
+     * POST /user/avatar
+     * Tải lên ảnh đại diện của user đang đăng nhập
+     * 
+     * Yêu cầu: AuthMiddleware + RoleMiddleware('user', 'admin') + upload.single('avatar')
+     * 
+     * Response: { success, message, data: Updated UserDTO }
+     */
+    async updateAvatar(req, res, next) {
+        try {
+            const userId = req.user.id;
+            
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Vui lòng chọn một file hình ảnh để tải lên'
+                });
+            }
+
+            // Lưu đường dẫn tương đối
+            const avatarUrl = `/uploads/${req.file.filename}`;
+
+            // Cập nhật trường avatar_url thông qua UserService
+            const updatedUserDTO = await UserService.updateProfile(userId, {
+                avatar_url: avatarUrl
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: 'Cập nhật ảnh đại diện thành công',
+                data: updatedUserDTO
+            });
+        } catch (error) {
+            return res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Lỗi server'
+            });
+        }
+    }
 }
 
 module.exports = new UserController();
+

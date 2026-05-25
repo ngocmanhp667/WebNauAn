@@ -5,8 +5,11 @@
 -- Chạy script này trước khi start server
 -- =================================================================
 
--- Tạo database
-CREATE DATABASE IF NOT EXISTS baitap2_canhan
+-- Xóa database cũ nếu tồn tại để reset dữ liệu sạch
+DROP DATABASE IF EXISTS baitap2_canhan;
+
+-- Tạo database mới
+CREATE DATABASE baitap2_canhan
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
@@ -52,11 +55,6 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Nếu database đã tồn tại từ phiên bản cũ, nâng schema lên đúng profile
-ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(255) DEFAULT NULL,
-    ADD COLUMN IF NOT EXISTS facebook_url VARCHAR(255) DEFAULT NULL,
-    ADD COLUMN IF NOT EXISTS instagram_username VARCHAR(100) DEFAULT NULL;
 
 -- Tạo bảng products (mon an)
 CREATE TABLE IF NOT EXISTS products (
@@ -86,7 +84,7 @@ CREATE TABLE IF NOT EXISTS products (
 INSERT INTO users (username, password_hash, email, full_name, role, is_verified)
 VALUES (
     'admin',
-    '$2a$10$8KzaN.XYL0E2YkD9qKbPCOxHjQ5EODANKFxPjxFv.4y6OywJwFBWa',
+    '$2a$10$otTCZ5Ym5UJM1XbUaWAzI.xGK6sQfwxmSm9KHLAsKSLRVM5Y6jUzi',
     'admin@example.com',
     'Administrator',
     'admin',
