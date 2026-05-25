@@ -26,3 +26,18 @@ export const searchProductsApi = async (filters = {}) => {
     throw error.response?.data || error.message;
   }
 };
+
+export const getTopProductsApi = async ({ type, page, limit } = {}) => {
+  try {
+    const response = await api.get("/api/products/top", {
+      params: {
+        ...(type ? { type } : {}),
+        ...(Number.isFinite(page) ? { page } : {}),
+        ...(Number.isFinite(limit) ? { limit } : {}),
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};

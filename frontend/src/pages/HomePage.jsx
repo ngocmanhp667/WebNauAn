@@ -1,3 +1,5 @@
+import TopProductsSection from "../components/TopProductsSection.jsx";
+
 const categories = [
   {
     title: "Món chính",
@@ -374,6 +376,8 @@ const HomePage = () => {
               </div>
             ))}
           </div>
+
+          <TopProductsSection />
 
           <div className="mt-14 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="rounded-3xl border border-[#2a2326] bg-[#141217] p-8 shadow-sm">
