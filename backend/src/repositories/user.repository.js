@@ -56,12 +56,12 @@ class UserRepository {
      * @returns {Object} Kết quả INSERT (chứa insertId)
      */
     async create(userData) {
-        const { username, password_hash, email, full_name, role = 'user' } = userData;
+        const { username, password_hash, email, full_name, role = 'user', is_verified = 1 } = userData;
 
         const [result] = await pool.execute(
             `INSERT INTO users (username, password_hash, email, full_name, role, is_verified) 
-             VALUES (?, ?, ?, ?, ?, 0)`,
-            [username, password_hash, email, full_name || null, role]
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [username, password_hash, email, full_name || null, role, is_verified]
         );
 
         return result;

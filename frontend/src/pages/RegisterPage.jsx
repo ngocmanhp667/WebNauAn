@@ -1,77 +1,252 @@
-import RegisterForm from "../components/RegisterForm";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { registerAccount } from "../store/authSlice";
+import { verifyOtpApi } from "../services/authApi";
 
 const RegisterPage = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [showOtpScreen, setShowOtpScreen] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!firstName || !lastName || !email || !password) {
+      setMessage("Vui lòng điền đầy đủ các thông tin.");
+      return;
+    }
+    setLoading(true);
+    setMessage("");
+    try {
+      const username = email.split("@")[0];
+      const fullName = `${lastName} ${firstName}`;
+
+      const resultAction = await dispatch(
+        registerAccount({
+          username,
+          email,
+          password,
+          full_name: fullName
+        })
+      );
+
+      if (registerAccount.fulfilled.match(resultAction)) {
+        setMessage("Đăng ký thành công! Đang chuyển hướng sang trang đăng nhập...");
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
+      } else {
+        setMessage(resultAction.payload || "Đăng ký thất bại. Vui lòng thử lại.");
+      }
+    } catch (err) {
+      setMessage(err.message || "Đăng ký thất bại.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.length !== 6) {
+      setMessage("Vui lòng nhập đầy đủ mã OTP 6 chữ số.");
+      return;
+    }
+    setLoading(true);
+    setMessage("");
+    try {
+      await verifyOtpApi(email, otpCode);
+      setMessage("Xác thực thành công! Đang chuyển hướng sang trang đăng nhập...");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (err) {
+      setMessage(err.message || "Mã OTP không chính xác hoặc đã hết hạn.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0d0b0c] text-[#f3f4f6] font-sans">
-      {/* Decorative gradients */}
-      <div className="pointer-events-none absolute -left-40 top-[-120px] h-[420px] w-[420px] rounded-full bg-[#f59e0b]/20 blur-[130px]" />
-      <div className="pointer-events-none absolute -right-32 top-[120px] h-[380px] w-[380px] rounded-full bg-[#c2410c]/15 blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-[-120px] left-[15%] h-[340px] w-[340px] rounded-full bg-[#f59e0b]/10 blur-[140px]" />
-
-      <div className="relative mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12 lg:px-10">
-        <div className="grid w-full gap-8 lg:grid-cols-[1fr_1fr] lg:items-center">
-          {/* Info Section */}
-          <div className="flex flex-col justify-center gap-6 rounded-3xl border border-[#2a2326] bg-[#141217]/90 p-8 shadow-float backdrop-blur-md lg:p-10">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f59e0b] text-[#111111]">
-                <span className="font-display text-xl font-bold">MN</span>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#cbd5e1]/60">
-                  MâmNgon
-                </p>
-                <h2 className="font-display text-2xl font-semibold text-white">
-                  Bếp nhà trong lòng bàn tay
-                </h2>
-              </div>
-            </div>
-
-            <div className="space-y-4 text-sm text-[#cbd5e1]/80">
-              <p>
-                Lưu lại công thức, quản lý danh sách món ăn, lên thực đơn theo ngân sách và chia sẻ trải nghiệm nấu nướng tuyệt vời cùng cộng đồng yêu bếp.
+    <div className="bg-background text-on-background min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop font-body-md select-none">
+      <main className="w-full max-w-max-width bg-surface-container-lowest rounded-xl overflow-hidden shadow-soft flex flex-col md:flex-row min-h-[700px] border border-outline-variant/10">
+        {/* Left Side: Image Content */}
+        <section
+          className="hidden md:flex md:w-1/2 relative overflow-hidden items-end p-lg bg-cover bg-center"
+          style={{
+            backgroundImage: "url('https://lh3.googleusercontent.com/aida/ADBb0ujSJCjN5rjcVNsvELodQ-YXgqxcz1-kC7sa7V-0_WpcQyjCmXvZHKuvTN1XqysPK2MYQzhBBLTrKXq_bolH4w9GZcccVP6Thz_8LgHtI5elOGtRTgNX78ff34v5G91cVW7aToAqK2AbtQux9fpR497jnUHaWR6C2sHdKJmDytb4ve8Z0yP-9Q3YFhglxHRL9cR9oY4nhmCID15NNqyjP4PO-qOAhBKr4g4ANuouuF9xMyWFJKrLyfkt')",
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+          <div className="relative z-10 text-white select-none">
+            <h1 className="font-display-lg text-display-lg mb-sm font-bold">CulinShare</h1>
+            <p className="font-body-lg text-body-lg opacity-90 max-w-md leading-relaxed">
+              Tham gia cộng đồng những người yêu ẩm thực, chia sẻ công thức nấu ăn tinh tế và tìm thấy nguồn cảm hứng mỗi ngày trong căn bếp của bạn.
+            </p>
+          </div>
+        </section>
+        
+        {/* Right Side: Auth Form */}
+        <section className="w-full md:w-1/2 flex flex-col justify-center px-md py-lg md:px-xl bg-surface-container-lowest">
+          <div className="max-w-md mx-auto w-full">
+            {/* Header */}
+            <div className="mb-lg">
+              <h2 className="font-headline-md text-headline-md text-primary mb-xs font-bold">
+                {showOtpScreen ? "Kích hoạt tài khoản" : "Tạo tài khoản mới"}
+              </h2>
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                {showOtpScreen ? "Nhập mã xác thực để kích hoạt tài khoản của bạn." : "Bắt đầu chia sẻ những công thức bí mật của bạn."}
               </p>
-              
-              <div className="grid gap-3 rounded-2xl border border-[#2a2326] bg-[#1b181f]/80 p-4">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="uppercase tracking-[0.25em] text-[#cbd5e1]/60">
-                    Trạng thái cộng đồng
-                  </span>
-                  <span className="rounded-full bg-emerald-950/80 border border-emerald-500/30 px-3 py-1 text-emerald-400 font-semibold">
-                    Live
-                  </span>
+            </div>
+            
+            {message && (
+              <div className={`mb-4 p-3 rounded-lg font-label-sm whitespace-pre-line ${message.includes("thành công") ? "bg-tertiary-container text-on-tertiary-container" : "bg-error-container text-on-error-container"}`}>
+                {message}
+              </div>
+            )}
+            
+            {showOtpScreen ? (
+              /* OTP verification Form */
+              <form onSubmit={handleOtpSubmit} className="space-y-md">
+                <div className="space-y-xs">
+                  <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="otp-code">Mã OTP (6 chữ số)</label>
+                  <input
+                    className="w-full px-md py-sm bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none text-on-surface"
+                    id="otp-code"
+                    placeholder="123456"
+                    type="text"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                  />
+                  <p className="text-xs text-on-surface-variant mt-1">Chúng tôi đã gửi một mã OTP gồm 6 chữ số vào email của bạn. Vui lòng kiểm tra hộp thư.</p>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-white">
-                      Kho công thức nấu ăn
-                    </span>
-                    <span className="text-[#f59e0b] font-semibold">500+ món</span>
+                
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-md bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm hover:brightness-95 active:scale-95 transition-all font-bold flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                  ) : (
+                    "Xác Nhận Kích Hoạt"
+                  )}
+                </button>
+              </form>
+            ) : (
+              /* Sign Up Form */
+              <form onSubmit={handleSubmit} className="space-y-md">
+                <div className="grid grid-cols-2 gap-sm">
+                  <div className="space-y-xs">
+                    <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="first-name">Họ</label>
+                    <input
+                      className="w-full px-md py-sm bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none text-on-surface"
+                      id="first-name"
+                      placeholder="Nguyễn"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
                   </div>
-                  <div className="h-2 w-full rounded-full bg-[#2a2326]">
-                    <div className="h-2 w-[85%] rounded-full bg-gradient-to-r from-[#f59e0b] to-[#fbbf24]" />
+                  <div className="space-y-xs">
+                    <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="last-name">Tên</label>
+                    <input
+                      className="w-full px-md py-sm bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none text-on-surface"
+                      id="last-name"
+                      placeholder="An"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
                   </div>
                 </div>
+                
+                <div className="space-y-xs">
+                  <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="signup-email">Email</label>
+                  <input
+                    className="w-full px-md py-sm bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none text-on-surface"
+                    id="signup-email"
+                    placeholder="example@gmail.com"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-xs">
+                  <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="signup-password">Mật khẩu</label>
+                  <input
+                    className="w-full px-md py-sm bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none text-on-surface"
+                    id="signup-password"
+                    placeholder="Tối thiểu 8 ký tự"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-md bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm hover:brightness-95 active:scale-95 transition-all font-bold flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                  ) : (
+                    "Tạo Tài Khoản"
+                  )}
+                </button>
+              </form>
+            )}
+            
+            {/* Divider */}
+            <div className="relative my-lg">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-outline-variant/20"></div>
+              </div>
+              <div className="relative flex justify-center text-label-sm text-label-sm">
+                <span className="px-sm bg-surface-container-lowest text-on-surface-variant">Hoặc tiếp tục với</span>
               </div>
             </div>
-
-            <div className="grid gap-4 text-xs text-[#cbd5e1]/70 sm:grid-cols-2">
-              <div className="rounded-2xl border border-[#2a2326] bg-[#141217]/50 p-4">
-                <p className="font-semibold text-white mb-1">📅 Thực đơn tuần AI</p>
-                <p>AI thông minh tự thiết lập thực đơn 7 ngày khớp ngân sách của bạn.</p>
-              </div>
-              <div className="rounded-2xl border border-[#2a2326] bg-[#141217]/50 p-4">
-                <p className="font-semibold text-white mb-1">💡 Mẹo nấu ăn nhanh</p>
-                <p>Tổng hợp hàng trăm mẹo vặt, cách sơ chế nguyên liệu từ các chuyên gia.</p>
-              </div>
+            
+            {/* Social Logins */}
+            <div className="grid grid-cols-2 gap-sm mb-lg">
+              <button className="flex items-center justify-center gap-xs py-sm border border-outline-variant/30 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors text-secondary font-bold">
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+                </svg>
+                Google
+              </button>
+              <button className="flex items-center justify-center gap-xs py-sm border border-outline-variant/30 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors text-secondary font-bold">
+                <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
+                </svg>
+                Facebook
+              </button>
+            </div>
+            
+            {/* Toggle */}
+            <div className="text-center">
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Đã có tài khoản?{" "}
+                <Link to="/login" className="text-primary font-bold hover:underline">
+                  Đăng nhập
+                </Link>
+              </p>
             </div>
           </div>
-
-          {/* Form Section */}
-          <div className="rounded-3xl border border-[#2a2326] bg-[#141217]/95 p-8 shadow-float backdrop-blur-md lg:p-10">
-            <RegisterForm />
-          </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 };

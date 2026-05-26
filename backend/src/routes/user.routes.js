@@ -43,6 +43,15 @@ router.get(
 );
 
 /**
+ * GET /api/users/:id
+ * Lấy profile của user theo ID (public)
+ */
+router.get(
+    '/api/users/:id',
+    UserController.getProfileById
+);
+
+/**
  * PUT /user/profile
  * Cập nhật thông tin profile
  * Middlewares: verifyToken -> authorize('user', 'admin') -> Validation -> Controller

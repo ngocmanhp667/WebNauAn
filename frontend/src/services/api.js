@@ -23,4 +23,15 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+export const getImageUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+    return url;
+  }
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  const cleanBase = baseUrl.replace(/\/$/, "");
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+  return `${cleanBase}${cleanUrl}`;
+};
+
 export default api

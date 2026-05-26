@@ -1,606 +1,393 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { searchProductsApi } from "../services/productApi";
-
-const formatCurrency = (value) => {
-  if (!Number.isFinite(value)) return "0";
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-const difficultyLabel = {
-  "Mon chinh": "Mon chinh",
-  "Khai vi": "Khai vi",
-  Lau: "Lau",
-  "Trang mieng": "Trang mieng",
-  "Do uong": "Do uong",
-};
-
-const mockProducts = [
-  {
-    id: 1,
-    name: "Com ga nuong mat ong",
-    description: "Ga nuong mat ong thom mem, an kem com nong.",
-    category: "Mon chinh",
-    price: 65000,
-    rating: 4.6,
-    stock: 25,
-    sold: 180,
-    isPromo: true,
-    isNew: false,
-    isBestSeller: true,
-    images: [
-      "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d",
-      "https://images.unsplash.com/photo-1525755662778-989d0524087e",
-    ],
-    tags: ["ga", "nuong", "mon chinh"],
-  },
-  {
-    id: 2,
-    name: "Bun bo Hue",
-    description: "Nuoc dung dam da, thit bo mem, sa ot cay nhe.",
-    category: "Mon chinh",
-    price: 55000,
-    rating: 4.4,
-    stock: 40,
-    sold: 140,
-    isPromo: false,
-    isNew: true,
-    isBestSeller: false,
-    images: [
-      "https://images.unsplash.com/photo-1604908554025-e4775d24af9e",
-      "https://images.unsplash.com/photo-1543353071-873f17a7a088",
-    ],
-    tags: ["bun", "bo", "cay nhe"],
-  },
-  {
-    id: 3,
-    name: "Lau nam hai san",
-    description: "Nuoc lau thanh ngot, nhieu nam tuoi va hai san.",
-    category: "Lau",
-    price: 189000,
-    rating: 4.7,
-    stock: 10,
-    sold: 75,
-    isPromo: true,
-    isNew: false,
-    isBestSeller: true,
-    images: [
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-      "https://images.unsplash.com/photo-1467003909585-2f8a72700288",
-    ],
-    tags: ["lau", "hai san", "nam"],
-  },
-  {
-    id: 4,
-    name: "Goi cuon tom thit",
-    description: "Goi cuon thanh mat, cham nuoc mam chua ngot.",
-    category: "Khai vi",
-    price: 35000,
-    rating: 4.2,
-    stock: 60,
-    sold: 210,
-    isPromo: false,
-    isNew: true,
-    isBestSeller: false,
-    images: [
-      "https://images.unsplash.com/photo-1550304943-4f24f54ddde9",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-    ],
-    tags: ["goi cuon", "tom", "khai vi"],
-  },
-  {
-    id: 5,
-    name: "Che dua nong",
-    description: "Che dua beo, thom, an nong am bung.",
-    category: "Trang mieng",
-    price: 25000,
-    rating: 4.0,
-    stock: 35,
-    sold: 95,
-    isPromo: false,
-    isNew: false,
-    isBestSeller: false,
-    images: [
-      "https://images.unsplash.com/photo-1505253216365-0fbc1f4c2e7b",
-      "https://images.unsplash.com/photo-1481391032119-d89fee407e44",
-    ],
-    tags: ["che", "dua", "ngot"],
-  },
-  {
-    id: 6,
-    name: "Tra dao cam sa",
-    description: "Tra thanh mat, vi chua ngot de uong.",
-    category: "Do uong",
-    price: 28000,
-    rating: 4.3,
-    stock: 80,
-    sold: 260,
-    isPromo: true,
-    isNew: true,
-    isBestSeller: true,
-    images: [
-      "https://images.unsplash.com/photo-1461023058943-07fcbe16d735",
-      "https://images.unsplash.com/photo-1497534446932-c925b458314e",
-    ],
-    tags: ["tra", "dao", "do uong"],
-  },
-];
+import { useSearchParams, Link } from "react-router-dom";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import RecipeCard from "../components/RecipeCard";
+import { getCategoriesApi } from "../services/categoryApi";
+import { searchRecipesApi } from "../services/recipeApi";
 
 const SearchPage = () => {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
-  const [maxPrice, setMaxPrice] = useState(null);
-  const [minRating, setMinRating] = useState("all");
-  const [inStock, setInStock] = useState(false);
-  const [sortBy, setSortBy] = useState("popular");
-  const [products, setProducts] = useState([]);
-  const [maxPriceLimit, setMaxPriceLimit] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [initialized, setInitialized] = useState(false);
-  
-  // Pagination States
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const LIMIT = 6;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const q = searchParams.get("q") || "";
+  const cat = searchParams.get("category") || "";
 
-  // Reset page to 1 whenever search filters change
-  useEffect(() => {
-    setPage(1);
-  }, [category, inStock, maxPrice, minRating, query, sortBy]);
+  const [searchQuery, setSearchQuery] = useState(q);
+  const [selectedCategories, setSelectedCategories] = useState(cat ? [cat] : []);
+  const [selectedTimeRange, setSelectedTimeRange] = useState("all");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [dbRecipes, setDbRecipes] = useState([]);
+  const [dbCategories, setDbCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let active = true;
-
-    const bootstrap = async () => {
-      setLoading(true);
-      setError("");
-
+    const fetchData = async () => {
       try {
-        const response = await searchProductsApi({ page: 1, limit: LIMIT });
-        if (!active) return;
-        const data = response?.data || [];
-        setProducts(data.length ? data : mockProducts.slice(0, LIMIT));
-        setTotalPages(response?.pagination?.totalPages || Math.ceil(mockProducts.length / LIMIT));
-
-        const maxPriceFound = mockProducts.reduce(
-          (maxValue, item) => Math.max(maxValue, Number(item.price) || 0),
-          0,
-        );
-        setMaxPriceLimit(maxPriceFound);
-        setMaxPrice(maxPriceFound);
-        setInitialized(true);
+        setLoading(true);
+        const [cats, recs] = await Promise.all([
+          getCategoriesApi(),
+          searchRecipesApi({ q })
+        ]);
+        setDbCategories(cats);
+        setDbRecipes(recs);
       } catch (err) {
-        if (!active) return;
-        setProducts(mockProducts.slice(0, LIMIT));
-        setTotalPages(Math.ceil(mockProducts.length / LIMIT));
-        const maxPriceFound = mockProducts.reduce(
-          (maxValue, item) => Math.max(maxValue, Number(item.price) || 0),
-          0,
-        );
-        setMaxPriceLimit(maxPriceFound);
-        setMaxPrice(maxPriceFound);
-        setInitialized(true);
+        console.error("Lỗi khi tìm kiếm công thức:", err);
       } finally {
-        if (active) setLoading(false);
+        setLoading(false);
       }
     };
-
-    bootstrap();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+    fetchData();
+  }, [q]);
 
   useEffect(() => {
-    if (!initialized) return undefined;
+    setSearchQuery(q);
+  }, [q]);
 
-    let active = true;
-    const handle = setTimeout(async () => {
-      setLoading(true);
-      setError("");
-
-      try {
-        const response = await searchProductsApi({
-          query,
-          category,
-          maxPrice,
-          minRating: minRating === "all" ? undefined : Number(minRating),
-          inStock,
-          sort: sortBy,
-          page,
-          limit: LIMIT,
-        });
-        if (!active) return;
-        const data = response?.data || [];
-        if (data.length > 0) {
-          setProducts(data);
-          setTotalPages(response?.pagination?.totalPages || 1);
-        } else {
-          // If query/filters match mockProducts fallback
-          const offset = (page - 1) * LIMIT;
-          setProducts(mockProducts.slice(offset, offset + LIMIT));
-          setTotalPages(Math.ceil(mockProducts.length / LIMIT));
-        }
-      } catch (err) {
-        if (!active) return;
-        const offset = (page - 1) * LIMIT;
-        setProducts(mockProducts.slice(offset, offset + LIMIT));
-        setTotalPages(Math.ceil(mockProducts.length / LIMIT));
-      } finally {
-        if (active) setLoading(false);
-      }
-    }, 250);
-
-    return () => {
-      active = false;
-      clearTimeout(handle);
-    };
-  }, [category, inStock, initialized, maxPrice, minRating, query, sortBy, page]);
-
-  const activeFilters = useMemo(() => {
-    const filters = [];
-    if (query.trim()) filters.push(`Tu khoa: ${query.trim()}`);
-    if (category !== "all") filters.push(`Danh muc: ${category}`);
-    if (Number.isFinite(maxPrice) && maxPrice < maxPriceLimit) {
-      filters.push(`Gia toi da: ${formatCurrency(maxPrice)}`);
+  useEffect(() => {
+    if (cat) {
+      setSelectedCategories([cat]);
+    } else {
+      setSelectedCategories([]);
     }
-    if (minRating !== "all") filters.push(`Danh gia tu: ${minRating}+`);
-    if (inStock) filters.push("Con hang");
-    return filters;
-  }, [category, inStock, maxPrice, maxPriceLimit, minRating, query]);
+  }, [cat]);
 
-  const handleReset = () => {
-    setQuery("");
-    setCategory("all");
-    setMaxPrice(maxPriceLimit);
-    setMinRating("all");
-    setInStock(false);
-    setSortBy("popular");
+  const handleCategoryChange = (category) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+    setCurrentPage(1);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setSearchParams({ q: searchQuery, ...(cat ? { category: cat } : {}) });
+    setCurrentPage(1);
+  };
+
+  const handleChipClick = (term) => {
+    setSearchQuery(term);
+    setSearchParams({ q: term });
+    setCurrentPage(1);
+  };
+
+  // Filter recipes logic
+  const filteredRecipes = useMemo(() => {
+    return dbRecipes.filter((recipe) => {
+      // 1. Text Search (already partially filtered by backend, but we can do extra matching in case of client sync)
+      if (q.trim()) {
+        const queryLower = q.toLowerCase();
+        const titleVal = (recipe.title || "").toLowerCase();
+        const descVal = (recipe.description || "").toLowerCase();
+        const authorVal = (recipe.author_name || "").toLowerCase();
+        const matchesName = titleVal.includes(queryLower);
+        const matchesDesc = descVal.includes(queryLower);
+        const matchesAuthor = authorVal.includes(queryLower);
+        if (!matchesName && !matchesDesc && !matchesAuthor) return false;
+      }
+
+      // 2. Categories
+      if (selectedCategories.length > 0) {
+        const matchesCategory = selectedCategories.some(catName => 
+          recipe.categories && recipe.categories.some(rcat => 
+            (typeof rcat === 'string' ? rcat : rcat.name).toLowerCase() === catName.toLowerCase()
+          )
+        );
+        if (!matchesCategory) return false;
+      }
+
+      // 3. Prep Time
+      if (selectedTimeRange !== "all") {
+        const time = (recipe.prep_time_minutes || recipe.prepTimeMinutes || 0) + (recipe.cook_time_minutes || recipe.cookTimeMinutes || 0);
+        if (selectedTimeRange === "under15" && time >= 15) return false;
+        if (selectedTimeRange === "15to30" && (time < 15 || time > 30)) return false;
+        if (selectedTimeRange === "over30" && time <= 30) return false;
+      }
+
+      // 4. Difficulty
+      if (selectedDifficulty !== "all") {
+        const diffMap = {
+          "Dễ": "dễ",
+          "Vừa": "trung bình",
+          "Trung bình": "trung bình",
+          "Khó": "khó"
+        };
+        const mappedDiff = diffMap[selectedDifficulty];
+        if ((recipe.difficulty || "").toLowerCase() !== mappedDiff) return false;
+      }
+
+      return true;
+    }).sort((a, b) => {
+      if (sortBy === "rating") {
+        const ratingA = parseFloat(a.rating || a.average_rating || a.averageRating || 0);
+        const ratingB = parseFloat(b.rating || b.average_rating || b.averageRating || 0);
+        return ratingB - ratingA;
+      }
+      if (sortBy === "newest") {
+        const dateA = new Date(a.created_at || a.createdTime || 0);
+        const dateB = new Date(b.created_at || b.createdTime || 0);
+        return dateB - dateA;
+      }
+      return b.id - a.id;
+    });
+  }, [dbRecipes, q, selectedCategories, selectedTimeRange, selectedDifficulty, sortBy]);
+
+  const totalPages = Math.ceil(filteredRecipes.length / 6);
+  const displayedRecipes = filteredRecipes.slice((currentPage - 1) * 6, currentPage * 6);
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setSelectedCategories([]);
+    setSelectedTimeRange("all");
+    setSelectedDifficulty("all");
+    setSortBy("newest");
+    setSearchParams({});
+    setCurrentPage(1);
   };
 
   return (
-    <div className="min-h-screen bg-clay-50 text-ink-900 font-sans">
-      <div className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -left-32 top-[-120px] h-[360px] w-[360px] rounded-full bg-sunset-400/25 blur-[90px]" />
-        <div className="pointer-events-none absolute -right-40 top-[110px] h-[420px] w-[420px] rounded-full bg-sea-600/20 blur-[110px]" />
-        <div className="pointer-events-none absolute bottom-[-160px] left-[20%] h-[360px] w-[360px] rounded-full bg-amber-200/70 blur-[120px]" />
-
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 lg:px-10">
-          <header className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-ink-700/60">
-                  MamNgon Market
-                </p>
-                <h1 className="font-display text-3xl font-semibold text-ink-900 sm:text-4xl">
-                  Tim kiem mon an
-                </h1>
-              </div>
-              <div className="rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-ink-700 shadow-float backdrop-blur">
-                Tong mon:{" "}
-                <span className="font-semibold">{products.length}</span>
-              </div>
-            </div>
-            <p className="max-w-2xl text-sm text-ink-700/75">
-              Loc mon an theo tu khoa, danh muc, gia tien va danh gia. Co the
-              ket hop nhieu dieu kien de tim nhanh mon phu hop nhat.
-            </p>
-          </header>
-
-          <section className="grid gap-6 rounded-3xl border border-white/60 bg-white/80 p-6 shadow-float backdrop-blur lg:grid-cols-[1.3fr_1fr_0.7fr]">
-            <div className="space-y-4">
-              <label className="text-xs uppercase tracking-[0.3em] text-ink-700/60">
-                Tu khoa
-              </label>
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Com ga, bun bo, che..."
-                className="w-full rounded-2xl border border-clay-200 bg-white/80 px-4 py-3 text-sm text-ink-900 shadow-sm focus:border-sea-600 focus:outline-none focus:ring-2 focus:ring-sea-600/30"
-              />
-              <div className="flex flex-wrap gap-2 text-xs text-ink-700/70">
-                {["ga", "lau", "trang mieng", "do uong"].map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setQuery(tag)}
-                    className="rounded-full border border-clay-200 bg-clay-100/70 px-3 py-1 transition hover:border-sea-600 hover:text-sea-700"
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.3em] text-ink-700/60">
-                  Danh muc
-                </label>
-                <select
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  className="w-full rounded-2xl border border-clay-200 bg-white/80 px-4 py-3 text-sm text-ink-900 shadow-sm focus:border-sea-600 focus:outline-none focus:ring-2 focus:ring-sea-600/30"
-                >
-                  <option value="all">Tat ca</option>
-                  {Object.keys(difficultyLabel).map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.3em] text-ink-700/60">
-                  Danh gia
-                </label>
-                <select
-                  value={minRating}
-                  onChange={(event) => setMinRating(event.target.value)}
-                  className="w-full rounded-2xl border border-clay-200 bg-white/80 px-4 py-3 text-sm text-ink-900 shadow-sm focus:border-sea-600 focus:outline-none focus:ring-2 focus:ring-sea-600/30"
-                >
-                  <option value="all">Tat ca</option>
-                  <option value="4.5">4.5+</option>
-                  <option value="4.0">4.0+</option>
-                  <option value="3.5">3.5+</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.3em] text-ink-700/60">
-                  Sap xep
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value)}
-                  className="w-full rounded-2xl border border-clay-200 bg-white/80 px-4 py-3 text-sm text-ink-900 shadow-sm focus:border-sea-600 focus:outline-none focus:ring-2 focus:ring-sea-600/30"
-                >
-                  <option value="popular">Ban chay</option>
-                  <option value="rating">Danh gia cao</option>
-                  <option value="price-asc">Gia tang dan</option>
-                  <option value="price-desc">Gia giam dan</option>
-                  <option value="newest">Moi nhat</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex flex-col justify-between gap-4">
-              <div className="space-y-3">
-                <label className="text-xs uppercase tracking-[0.3em] text-ink-700/60">
-                  Gia toi da
-                </label>
+    <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+      <Header />
+      
+      {/* Hero Section */}
+      <section className="bg-surface-container-low py-lg select-none">
+        <div className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop">
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-xs mb-md text-label-sm font-label-sm text-on-surface-variant">
+            <Link to="/" className="hover:text-primary">Trang chủ</Link>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-primary font-bold">Khám phá công thức</span>
+          </nav>
+          
+          <div className="grid md:grid-cols-2 gap-lg items-center">
+            <div>
+              <h1 className="font-display-lg text-display-lg text-on-surface mb-md font-bold">
+                Tìm cảm hứng cho bữa tối tiếp theo
+              </h1>
+              <form onSubmit={handleSearchSubmit} className="relative max-w-lg">
                 <input
-                  type="range"
-                  min="0"
-                  max={maxPriceLimit}
-                  step="5000"
-                  value={maxPrice ?? 0}
-                  onChange={(event) => setMaxPrice(Number(event.target.value))}
-                  className="w-full accent-sea-600"
+                  className="w-full h-14 pl-12 pr-32 bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-0 rounded-xl font-body-md text-on-surface outline-none"
+                  placeholder="Tìm tên món, nguyên liệu, đầu bếp..."
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <p className="text-sm font-semibold text-ink-900">
-                  {formatCurrency(maxPrice || 0)}
-                </p>
-              </div>
-
-              <label className="flex items-center gap-3 rounded-2xl border border-dashed border-clay-200 bg-clay-100/60 px-4 py-3 text-xs text-ink-700/80">
-                <input
-                  type="checkbox"
-                  checked={inStock}
-                  onChange={(event) => setInStock(event.target.checked)}
-                  className="h-4 w-4 accent-sea-600"
-                />
-                Chi hien mon con hang
-              </label>
-
-              <button
-                type="button"
-                onClick={handleReset}
-                className="rounded-2xl border border-clay-200 bg-white/80 px-4 py-3 text-sm font-semibold text-ink-700 transition hover:border-sea-600 hover:text-sea-700"
-              >
-                Dat lai bo loc
-              </button>
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm text-ink-700/80">
-                Ket qua tim kiem:{" "}
-                <span className="font-semibold text-ink-900">
-                  {products.length}
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                  search
                 </span>
-              </p>
-              {activeFilters.length ? (
-                <div className="flex flex-wrap gap-2 text-xs text-ink-700/70">
-                  {activeFilters.map((filter) => (
-                    <span
-                      key={filter}
-                      className="rounded-full border border-clay-200 bg-white/80 px-3 py-1"
-                    >
-                      {filter}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-ink-700/60">Chua ap dung bo loc.</p>
-              )}
+                <button
+                  type="submit"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-on-primary px-md py-2.5 rounded-lg font-label-md hover:opacity-90 transition-all font-bold"
+                >
+                  Tìm kiếm
+                </button>
+              </form>
             </div>
+            
+            <div className="hidden md:block relative h-[300px] rounded-xl overflow-hidden shadow-md">
+              <img
+                className="w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAffFMQq_0Q67H-vnKJ0E5blK0Rqt6ar7t--bR-Ud9VgGfdCpVu-cORUjZCUVcji-5dNi9kcUiivQoTCM-uqvdSgVeb1TF7keQcy-jcClgSSwQ82LZTWkZjk3YA3PKPSwFmXMgUof_7_3CYQhEFsr0abNyY-SF9hFW81PLwqjViY3pM6mB87X3hMu0rWPGZo_RtG2jrttzdJQe1xou7iTueHBMPjrRSgiaUIABNqq0qqaMUl_8v5X9oidqbHjf_6y4oj-1im_JrvA"
+                alt="Table setup"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {loading ? (
-              <div className="rounded-3xl border border-dashed border-clay-200 bg-white/70 p-10 text-center text-sm text-ink-700/70">
-                Dang tai du lieu...
-              </div>
-            ) : error ? (
-              <div className="rounded-3xl border border-dashed border-clay-200 bg-white/70 p-10 text-center text-sm text-ink-700/70">
-                {error}
-              </div>
-            ) : products.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-clay-200 bg-white/70 p-10 text-center text-sm text-ink-700/70">
-                Khong tim thay mon an phu hop. Thu giam bo loc hoac doi tu khoa.
-              </div>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2">
-                {products.map((item) => (
-                  <article
-                    key={item.id}
-                    className="flex flex-col overflow-hidden rounded-3xl border border-white/70 bg-white/80 shadow-float backdrop-blur"
-                  >
-                    <div className="relative h-44 overflow-hidden">
-                      <img
-                        src={item.images?.[0]}
-                        alt={item.name}
-                        className="h-full w-full object-cover"
-                      />
-                      <div className="absolute left-4 top-4 flex flex-wrap gap-2 text-xs">
-                        {item.isPromo && (
-                          <span className="rounded-full bg-sunset-400/90 px-3 py-1 text-white">
-                            Khuyen mai
-                          </span>
-                        )}
-                        {item.isNew && (
-                          <span className="rounded-full bg-emerald-500/90 px-3 py-1 text-white">
-                            Moi
-                          </span>
-                        )}
-                        {item.isBestSeller && (
-                          <span className="rounded-full bg-sea-600/90 px-3 py-1 text-white">
-                            Ban chay
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-1 flex-col gap-4 p-5">
-                      <div className="space-y-2">
-                        <div className="flex items-start justify-between gap-3">
-                          <h3 className="font-display text-xl text-ink-900">
-                            {item.name}
-                          </h3>
-                          <span className="rounded-full bg-clay-100 px-3 py-1 text-xs text-ink-700/80">
-                            {item.category}
-                          </span>
-                        </div>
-                        <p className="text-sm text-ink-700/75">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      <div className="grid gap-3 text-xs text-ink-700/80 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-clay-200 bg-clay-50 px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-[0.3em] text-ink-700/50">
-                            Danh gia
-                          </p>
-                          <p className="text-sm font-semibold text-ink-900">
-                            {item.rating} / 5
-                          </p>
-                        </div>
-                        <div className="rounded-2xl border border-clay-200 bg-clay-50 px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-[0.3em] text-ink-700/50">
-                            Da ban
-                          </p>
-                          <p className="text-sm font-semibold text-ink-900">
-                            {item.sold}
-                          </p>
-                        </div>
-                        <div className="rounded-2xl border border-clay-200 bg-clay-50 px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-[0.3em] text-ink-700/50">
-                            Ton kho
-                          </p>
-                          <p className="text-sm font-semibold text-ink-900">
-                            {item.stock}
-                          </p>
-                        </div>
-                        <div className="rounded-2xl border border-clay-200 bg-clay-50 px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-[0.3em] text-ink-700/50">
-                            Gia
-                          </p>
-                          <p className="text-sm font-semibold text-ink-900">
-                            {formatCurrency(item.price)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-clay-100">
-                        <div className="flex flex-wrap gap-2 text-xs text-ink-700/70">
-                          {(item.tags || []).map((tag) => (
-                            <span
-                              key={`${item.id}-${tag}`}
-                              className="rounded-full border border-clay-200 bg-white/80 px-3 py-1"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <p className="text-xs text-ink-700/60 font-medium">
-                          {item.stock > 0
-                            ? `Còn ${item.stock} phần`
-                            : "Hết hàng"}
-                        </p>
-                      </div>
-
-                      <div className="mt-2 flex">
-                        <Link
-                          to={`/product/${item.id}`}
-                          className="w-full text-center rounded-2xl bg-[#f59e0b] px-4 py-2.5 text-xs font-bold text-[#111111] shadow-sm hover:bg-[#fbbf24] transition"
-                        >
-                          Xem chi tiết món ngon →
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
+      {/* Main Content Area */}
+      <main className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl flex-grow flex flex-col md:flex-row gap-lg w-full">
+        {/* Filter Sidebar */}
+        <aside className="w-full md:w-64 flex-shrink-0 select-none">
+          <div className="sticky top-24 space-y-lg">
+            {/* Categories */}
+            {/* Categories */}
+            <div>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold">Danh mục</h3>
+              <div className="space-y-sm">
+                {loading ? (
+                  <p className="text-xs text-on-surface-variant">Đang tải...</p>
+                ) : dbCategories.map((cat) => (
+                  <label key={cat.id} className="flex items-center gap-sm cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(cat.name)}
+                      onChange={() => handleCategoryChange(cat.name)}
+                      className="w-5 h-5 border-outline-variant text-primary rounded focus:ring-primary focus:outline-none"
+                    />
+                    <span className="font-body-md text-on-surface-variant group-hover:text-primary transition-colors">
+                      {cat.name}
+                    </span>
+                  </label>
                 ))}
               </div>
-            )}
-
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={page <= 1}
-                  className="rounded-2xl border border-clay-200 bg-white/80 px-4 py-2 text-ink-700 shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed hover:border-sea-600 hover:text-sea-700"
-                >
-                  ← Trước
-                </button>
-                
-                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
+            </div>
+            
+            {/* Prep Time */}
+            <div>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold">Thời gian nấu</h3>
+              <div className="space-y-sm">
+                {[
+                  { label: "Tất cả", value: "all" },
+                  { label: "Dưới 15 phút", value: "under15" },
+                  { label: "15 - 30 phút", value: "15to30" },
+                  { label: "Trên 30 phút", value: "over30" }
+                ].map((option) => (
+                  <label key={option.value} className="flex items-center gap-sm cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="time"
+                      checked={selectedTimeRange === option.value}
+                      onChange={() => { setSelectedTimeRange(option.value); setCurrentPage(1); }}
+                      className="w-5 h-5 border-outline-variant text-primary focus:ring-primary focus:outline-none"
+                    />
+                    <span className="font-body-md text-on-surface-variant group-hover:text-primary transition-colors">
+                      {option.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            
+            {/* Difficulty */}
+            <div>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold">Độ khó</h3>
+              <div className="flex flex-wrap gap-xs">
+                {["all", "Dễ", "Vừa", "Khó"].map((diff) => (
                   <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPage(p)}
-                    className={`h-9 w-9 rounded-xl border font-bold transition ${
-                      page === p
-                        ? "border-sea-600 bg-sea-600 text-white shadow-sm"
-                        : "border-clay-200 bg-white/80 text-ink-700 hover:border-sea-600 hover:text-sea-700"
+                    key={diff}
+                    onClick={() => { setSelectedDifficulty(diff); setCurrentPage(1); }}
+                    className={`px-4 py-2 rounded-full border text-label-md font-label-md transition-all font-bold ${
+                      selectedDifficulty === diff
+                        ? "border-primary bg-primary-container/10 text-primary"
+                        : "border-outline-variant text-secondary hover:bg-secondary-container hover:text-on-secondary-container"
                     }`}
                   >
-                    {p}
+                    {diff === "all" ? "Tất cả" : diff}
                   </button>
                 ))}
-
-                <button
-                  type="button"
-                  onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={page >= totalPages}
-                  className="rounded-2xl border border-clay-200 bg-white/80 px-4 py-2 text-ink-700 shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed hover:border-sea-600 hover:text-sea-700"
-                >
-                  Tiếp →
-                </button>
               </div>
-            )}
-          </section>
-        </div>
-      </div>
+            </div>
+
+            <button
+              onClick={resetFilters}
+              className="w-full py-2.5 rounded-xl border border-outline text-secondary font-label-md font-bold hover:bg-surface-container-low transition-all active:scale-95"
+            >
+              Đặt lại bộ lọc
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Recipe Grid / Results */}
+        <section className="flex-grow">
+          {loading ? (
+            <div className="text-center py-16">
+              <span className="material-symbols-outlined text-4xl animate-spin text-primary">progress_activity</span>
+              <p className="mt-4 text-on-surface-variant">Đang tải danh sách công thức...</p>
+            </div>
+          ) : filteredRecipes.length > 0 ? (
+            <>
+              {/* Header & Sort */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-md mb-lg">
+                <p className="font-body-md text-on-surface-variant">
+                  Hiển thị <span className="font-bold text-on-surface">{filteredRecipes.length} công thức</span> phù hợp
+                </p>
+                <div className="flex items-center gap-sm select-none">
+                  <span className="font-label-md text-label-md text-on-surface-variant">Sắp xếp:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-surface-container-lowest border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface py-2 pr-10 pl-3 focus:ring-primary focus:border-primary focus:outline-none"
+                  >
+                    <option value="newest">Mới nhất</option>
+                    <option value="rating">Đánh giá cao</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Bento Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+                {displayedRecipes.map((recipe) => (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ))}
+              </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-xl flex justify-center items-center gap-sm select-none">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-variant transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                  >
+                    <span className="material-symbols-outlined">chevron_left</span>
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setCurrentPage(p)}
+                      className={`w-10 h-10 flex items-center justify-center rounded-lg font-label-md font-bold ${
+                        currentPage === p
+                          ? "bg-primary text-on-primary"
+                          : "text-on-surface-variant hover:bg-surface-variant"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-variant transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                  >
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            /* Empty State Search Section */
+            <div className="w-full flex flex-col items-center text-center select-none py-lg animate-in fade-in duration-300">
+              <div className="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center mb-md">
+                <span className="material-symbols-outlined text-primary text-3xl font-bold">search_off</span>
+              </div>
+              <h2 className="font-headline-md text-headline-md text-on-surface mb-sm leading-tight font-bold">
+                Không tìm thấy công thức nào phù hợp
+              </h2>
+              <p className="font-body-md text-body-md text-on-surface-variant mb-lg max-w-md">
+                Thử điều chỉnh lại từ khóa hoặc sử dụng các gợi ý bên dưới để tìm món ăn khác nhé!
+              </p>
+              
+              <div className="flex flex-wrap justify-center gap-sm mb-xl">
+                {["Bún chả", "Chay", "Tráng miệng"].map((chip) => (
+                  <span
+                    key={chip}
+                    onClick={() => handleChipClick(chip)}
+                    className="px-md py-2 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full font-label-md text-label-md border border-outline-variant cursor-pointer hover:bg-tertiary-fixed-dim transition-colors font-bold shadow-sm"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+              
+              {/* Suggested Recipes Grid */}
+              <div className="w-full border-t border-outline-variant/10 pt-xl">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface mb-lg font-bold">Có thể bạn quan tâm</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-md max-w-3xl mx-auto text-left">
+                  {dbRecipes.slice(0, 2).map((recipe) => (
+                    <RecipeCard key={recipe.id} recipe={recipe} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      </main>
+      
+      <Footer />
     </div>
   );
 };

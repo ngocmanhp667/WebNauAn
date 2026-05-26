@@ -1,539 +1,305 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { getProductByIdApi, searchProductsApi } from "../services/productApi";
-import { logoutAccount } from "../store/authSlice";
-
-const formatCurrency = (value) => {
-  if (!Number.isFinite(value)) return "0";
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(value);
-};
+import { useState } from "react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const ProductDetailPage = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const [mainImage, setMainImage] = useState(
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBzlEGUhapaAw4y93C2fwvUbI_D_i6gaF9GHd1DuWLg8-IDrPacSa2cbCVuR6BVoJ3cmijxz1TIAhv_ewjDiIwj47Y1G2MoP7m7B3qXRLH6nYN8-PX0spV4N_LzSCWO47jTuJne-5DAP0H8Tsnsq2gDai0em_D_SHwUAkRvvrUW3QcpwIeHilckKsvCzidzsjvG1CVfadqd551IvGSW41TWLMB3HRD-HpUF7dMvZsWoaLc47eSJQmheoUxsGrpkXu4cgbCkFlarHA"
+  );
+  const [qty, setQty] = useState(1);
+  const [activeTab, setActiveTab] = useState("description");
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [similarProducts, setSimilarProducts] = useState([]);
-  const [similarLoading, setSimilarLoading] = useState(false);
+  const images = [
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBzlEGUhapaAw4y93C2fwvUbI_D_i6gaF9GHd1DuWLg8-IDrPacSa2cbCVuR6BVoJ3cmijxz1TIAhv_ewjDiIwj47Y1G2MoP7m7B3qXRLH6nYN8-PX0spV4N_LzSCWO47jTuJne-5DAP0H8Tsnsq2gDai0em_D_SHwUAkRvvrUW3QcpwIeHilckKsvCzidzsjvG1CVfadqd551IvGSW41TWLMB3HRD-HpUF7dMvZsWoaLc47eSJQmheoUxsGrpkXu4cgbCkFlarHA",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuBBUb3k7t7NXFvy4FoKR5mzGwKEhDXppxlvFu3Sq7WVAsSTtioVRaQzuAcDkls9auvRYYwjeoNfloPGKMzoCQ3JxBU1FyV2cjxMI0BSEB5yfnomNKLVM8X6cyfPk6E3WgG1TPYn6IxwTamt87xmKN93yBushbdzz8Gc2S6nVK9h13QeY0c3pntqkgPl0Ph0Zct6uSu5q52J4y_xj5G6QEGi4rOEKRhH7s92Z7ZUeGVuwjUYg-0elvFeO7bec-X6MEhRqPmv859UpA",
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuCuoYfSVmwIKrpAjl99MdEgGZ4E0dr419ysnGCxXhT1HQ6Dqg8Z_zXYwtC2Gl7xovvExYj1_Nlv8UTZNkHH4fB0ksIhZniZeZJnoOB1V-jRozzVqP84sjplxd9DilAKpAeIa9FT1HEOTCEOD6RueoObWaE8wnY5CwXXD5q4Hkfct_CydTItkKRSEoAn5qbQskOeVrla8vI29vx42UOG5QptKo5jekXPFJzrn0JMQzJnpXmPRqelRkfbJ92qDDtHOWC2wB1tPJR_wA"
+  ];
 
-  const handleLogout = () => {
-    dispatch(logoutAccount());
-    navigate("/login");
-  };
-
-  useEffect(() => {
-    let active = true;
-
-    const fetchProductDetails = async () => {
-      setLoading(true);
-      setError("");
-      setActiveImageIndex(0);
-      setQuantity(1);
-
-      try {
-        const response = await getProductByIdApi(id);
-        if (!active) return;
-        
-        if (response?.success && response?.data) {
-          setProduct(response.data);
-          
-          // Fetch similar products based on category
-          if (response.data.category) {
-            fetchSimilar(response.data.category, response.data.id);
-          }
-        } else {
-          setError("Không tìm thấy thông tin sản phẩm.");
-        }
-      } catch (err) {
-        if (!active) return;
-        setError(err?.message || "Không thể tải thông tin chi tiết món ăn lúc này.");
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-
-    const fetchSimilar = async (categoryName, currentId) => {
-      setSimilarLoading(true);
-      try {
-        const response = await searchProductsApi({
-          category: categoryName,
-          limit: 5,
-        });
-        if (!active) return;
-        if (response?.data) {
-          // Filter out current product
-          const filtered = response.data.filter((item) => item.id !== currentId);
-          setSimilarProducts(filtered.slice(0, 4));
-        }
-      } catch (err) {
-        console.error("Lỗi lấy sản phẩm tương tự:", err);
-      } finally {
-        if (active) setSimilarLoading(false);
-      }
-    };
-
-    fetchProductDetails();
-
-    return () => {
-      active = false;
-    };
-  }, [id]);
-
-  const handlePrevImage = () => {
-    if (!product?.images?.length) return;
-    setActiveImageIndex((prev) => 
-      prev === 0 ? product.images.length - 1 : prev - 1
-    );
-  };
-
-  const handleNextImage = () => {
-    if (!product?.images?.length) return;
-    setActiveImageIndex((prev) => 
-      prev === product.images.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const handleQtyDecrease = () => {
-    setQuantity((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleQtyIncrease = () => {
-    if (!product) return;
-    setQuantity((prev) => {
-      if (product.stock > 0 && prev >= product.stock) {
-        return product.stock;
-      }
-      return prev + 1;
-    });
-  };
-
-  const handleAddToCart = () => {
-    if (!product || product.stock <= 0) return;
-    alert(`Đã thêm ${quantity} phần "${product.name}" vào giỏ hàng thành công!`);
-  };
-
-  const handleBuyNow = () => {
-    if (!product || product.stock <= 0) return;
-    alert(`Mua ngay ${quantity} phần "${product.name}". Chuyển hướng thanh toán...`);
-  };
-
-  const images = product?.images?.length 
-    ? product.images 
-    : ["https://images.unsplash.com/photo-1546069901-ba9599a7e63c"];
-
-  const tags = product?.tags || [];
+  const relatedProducts = [
+    {
+      id: 1,
+      name: "Bộ Dao Đầu Bếp",
+      price: "1.250.000đ",
+      rating: "4.8",
+      category: "Dụng cụ",
+      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDCOkJKhbNizdcpAcvN6_toQjSaq2bw6wannRuy8iOFZEtlEsEmWwC9ndv25NKjNZbWjIo8bV5C5a-DUSYS4cuWr2DzlYXXZLIgM5U6NA-9rpD-gB0e_apnk4sEgaxbVXuVhgGFK_R4-wjEdHNmUSYVCXakgk3j269y9wqi5AbYUpaoXj5UAiAUzTEJqA04dnd7EemjXT1RuPaZ8bWIoTsKArBtGmUH4lRVIfv9mBUANfO2V1RojpMEfi6JvcP1EkUjydGoDUOqCg"
+    },
+    {
+      id: 2,
+      name: "Nước Mắm Truyền Thống",
+      price: "185.000đ",
+      rating: "5.0",
+      category: "Gia vị lỏng",
+      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAuL4Si5gBwhGM2hN62N9AKgqWjP-JNy2a3Z0swrNRd_npl_StAtJGxVTiJ8NFAAjqt-lLVoZo2jbC0lJcPMh0n7RgKjnXB8VS4cDDjFwLgcZnIEnduShJmcteUuFgyHQzbyjA6b0Z56kNv_yA1t-sg4IS6578N0XT0h_uhymXJo_mHhQjVbAOODmx7BcWS-TQovO6hX-vO3mBQSSBXvyIT80P_VYG_7jYuCEZzhup4iCUwqr-bmAdRqIBvq7fVOFbzbPuNEHU_8Q"
+    },
+    {
+      id: 3,
+      name: "Thớt Gỗ Nghiến",
+      price: "320.000đ",
+      rating: "4.7",
+      category: "Gia dụng",
+      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDqkCyZm_ibvenqgAAqEnoiRq3K5N3L0qEPlaeqQWaKNWBG2dZG3YhnK-Bo-4dB-1RmEA4nW_XfbHxfU5RVGot98r-SfpPoB71GcSoFLQma5NtnyJqCsKYauSSmwnQlWL2AeOLq_ZtQiGMenl4EZX2pkM151RL25Q-sbVozMeoZqIiNavdaGzupE9PzlAEIOYygf3QEYMb61n_ayas9gi6OS2Vb7VgbroZCgwPIR7HYhwFoVqS4Q1lqyu8BClSv76B6CJSHWSvzag"
+    },
+    {
+      id: 4,
+      name: "Cối Đá Marble",
+      price: "550.000đ",
+      rating: "4.9",
+      category: "Dụng cụ",
+      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBph_Q14GKad9Tw-w5Xg8kKgeLaiL6AhQY5khwBB1L4-GtMQ1fnJbjkinCHuFxeeM20EH7G3pjqjcJibSlFVK5lpkqSnVRwm6meMfPWrBV5SzdgbQbXi8-TA3xbKSnYhnM6wqOvMHXaCwggj3hyDpCkfbRji_qWEBvYgojl4k0aU8CBJzj8HHDFv16vBOWJ5KNrMETwLDu8M41Qt5XWj9z01eyiAnj6xtVHeErERXoDxKCl65CI0FOrIMimh87kLBvSs3kBn4zOMQ"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-[#0d0b0c] text-[#f3f4f6]">
-      <header className="relative overflow-hidden border-b border-[#1f1b1c]">
-        {/* Decorative Gradients */}
-        <div className="pointer-events-none absolute -left-24 top-[-140px] h-[340px] w-[340px] rounded-full bg-[#f59e0b]/15 blur-[130px]" />
-        <div className="pointer-events-none absolute right-[-90px] top-[140px] h-[300px] w-[300px] rounded-full bg-[#c2410c]/15 blur-[140px]" />
+    <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+      <Header />
+      
+      <main className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-md flex-grow w-full">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-xs text-label-sm font-label-sm text-on-surface-variant mb-md select-none">
+          <a href="#" className="hover:text-primary">Home</a>
+          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <a href="#" className="hover:text-primary">Cửa hàng</a>
+          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <span className="text-primary font-semibold">Gia vị & Thảo mộc</span>
+        </nav>
 
-        {/* Top Mini Bar */}
-        <div className="border-b border-[#1f1b1c] bg-[#141217]/90">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3 text-xs text-[#cbd5e1]/70 lg:px-10">
-            <span className="rounded-full bg-[#1b1410] px-3 py-1 font-semibold text-[#f59e0b]">
-              Giao hàng tận nơi · Đảm bảo tươi ngon
-            </span>
-            <Link to="/" className="hover:text-[#f59e0b] transition">
-              ← Trở về Trang chủ
-            </Link>
-          </div>
-        </div>
-
-        {/* Navbar */}
-        <div className="relative mx-auto max-w-6xl px-6 py-6 lg:px-10">
-          <nav className="flex flex-wrap items-center justify-between gap-4">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f59e0b] text-[#111111]">
-                <span className="font-display text-lg font-bold">NM</span>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#cbd5e1]/60">
-                  NutriMeal
-                </p>
-                <p className="font-display text-base font-semibold">
-                  Nấu thông minh, ăn lành mạnh
-                </p>
-              </div>
-            </Link>
-            <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-[#e5e7eb]">
-              <Link className="transition hover:text-[#f59e0b]" to="/">
-                Công thức
-              </Link>
-              <Link className="transition hover:text-[#f59e0b]" to="/search">
-                Tìm kiếm / Bộ lọc
-              </Link>
-              {user ? (
-                <>
-                  <Link className="transition hover:text-[#f59e0b] border-l border-[#2a2326] pl-3 text-[#f59e0b]" to="/profile">
-                    Hồ sơ ({user.fullName || user.full_name || user.username})
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="rounded-full bg-[#1b1410] border border-red-500/30 px-3 py-1.5 text-xs text-red-400 font-semibold shadow-float transition hover:-translate-y-0.5 hover:bg-red-500 hover:text-white"
-                  >
-                    Đăng xuất
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link className="transition hover:text-[#f59e0b]" to="/login">
-                    Đăng nhập
-                  </Link>
-                  <Link
-                    className="rounded-full bg-[#f59e0b] px-4 py-2 text-xs text-[#111111] shadow-float transition hover:-translate-y-0.5 hover:bg-[#fbbf24]"
-                    to="/register"
-                  >
-                    Tạo tài khoản
-                  </Link>
-                </>
-              )}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-xl">
+          {/* Left Column: Image Gallery */}
+          <div className="md:col-span-7 space-y-md">
+            <div className="aspect-[4/3] w-full bg-white rounded-xl overflow-hidden shadow-soft border border-outline-variant/15 flex items-center justify-center">
+              <img
+                alt="Main spice set"
+                className="w-full h-full object-cover transition-all duration-300"
+                src={mainImage}
+              />
             </div>
-          </nav>
-        </div>
-      </header>
-
-      {/* Main Content Body */}
-      <main className="mx-auto max-w-6xl px-6 py-10 lg:px-10">
-        {loading ? (
-          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-3xl border border-[#2a2326] bg-[#141217] p-8 text-center shadow-float">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#f59e0b] border-t-transparent" />
-            <p className="mt-4 text-sm text-[#cbd5e1]/70">Đang tải chi tiết món ngon...</p>
-          </div>
-        ) : error ? (
-          <div className="min-h-[400px] rounded-3xl border border-red-500/20 bg-red-500/5 p-12 text-center shadow-float backdrop-blur">
-            <span className="text-4xl">⚠️</span>
-            <h2 className="mt-4 text-2xl font-bold text-red-400">Có lỗi xảy ra</h2>
-            <p className="mt-2 text-sm text-[#cbd5e1]/80">{error}</p>
-            <div className="mt-6 flex justify-center gap-4">
-              <Link to="/search" className="rounded-2xl bg-[#f59e0b] px-6 py-2.5 text-sm font-semibold text-[#111111] transition hover:bg-[#fbbf24]">
-                Tìm món khác
-              </Link>
-              <Link to="/" className="rounded-2xl border border-[#3a2e32] px-6 py-2.5 text-sm font-semibold transition hover:border-[#cbd5e1]/50">
-                Về Trang chủ
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-12">
-            {/* Navigation Breadcrumb */}
-            <div className="flex items-center gap-2 text-xs text-[#cbd5e1]/60">
-              <Link to="/" className="hover:text-[#f59e0b] transition">NutriMeal</Link>
-              <span>/</span>
-              <Link to="/search" className="hover:text-[#f59e0b] transition">Món ăn</Link>
-              <span>/</span>
-              <span className="text-[#f59e0b]">{product.category}</span>
-              <span>/</span>
-              <span className="text-[#cbd5e1]/80">{product.name}</span>
-            </div>
-
-            {/* Product Detail Top Block */}
-            <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+            
+            <div className="grid grid-cols-4 md:grid-cols-5 gap-sm select-none">
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setMainImage(img)}
+                  className={`aspect-square bg-white rounded-lg overflow-hidden border-2 transition-all ${
+                    mainImage === img ? "border-primary shadow-sm" : "border-transparent hover:border-outline-variant/50"
+                  }`}
+                >
+                  <img alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" src={img} />
+                </button>
+              ))}
               
-              {/* Left Column: Image Slider with thumbnails */}
-              <div className="space-y-4">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-[#2a2326] bg-[#141217] shadow-float">
-                  <img
-                    src={images[activeImageIndex]}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-all duration-300"
-                  />
-
-                  {/* Hot Badges */}
-                  <div className="absolute left-4 top-4 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-wider">
-                    {product.isPromo ? (
-                      <span className="rounded-full bg-[#f59e0b] px-3 py-1 text-[#111111] shadow-md">
-                        Khuyến mãi
-                      </span>
-                    ) : null}
-                    {product.isNew ? (
-                      <span className="rounded-full bg-emerald-500 px-3 py-1 text-white shadow-md">
-                        Món mới
-                      </span>
-                    ) : null}
-                    {product.isBestSeller ? (
-                      <span className="rounded-full bg-indigo-600 px-3 py-1 text-white shadow-md">
-                        Bán chạy nhất
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {/* Navigation Arrows */}
-                  {images.length > 1 && (
-                    <>
-                      <button
-                        onClick={handlePrevImage}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-[#3a2e32]/40 bg-[#141217]/80 text-[#cbd5e1] hover:bg-[#f59e0b] hover:text-[#111111] transition"
-                        title="Hình trước"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        onClick={handleNextImage}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-[#3a2e32]/40 bg-[#141217]/80 text-[#cbd5e1] hover:bg-[#f59e0b] hover:text-[#111111] transition"
-                        title="Hình kế"
-                      >
-                        ›
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Thumbnails Swiper Row */}
-                {images.length > 1 && (
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                    {images.map((img, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setActiveImageIndex(idx)}
-                        className={`relative h-20 w-24 flex-shrink-0 overflow-hidden rounded-2xl border transition ${
-                          activeImageIndex === idx
-                            ? "border-[#f59e0b] ring-2 ring-[#f59e0b]/20"
-                            : "border-[#2a2326] hover:border-[#cbd5e1]/40"
-                        }`}
-                      >
-                        <img src={img} alt={`Thumbnail ${idx}`} className="h-full w-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                )}
+              <div className="aspect-square bg-surface-container flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-outline-variant text-on-surface-variant cursor-pointer hover:bg-surface-variant/30 transition-all">
+                <span className="material-symbols-outlined">video_library</span>
+                <span className="text-[10px] font-bold">VIDEO</span>
               </div>
-
-              {/* Right Column: Details & Actions */}
-              <div className="rounded-3xl border border-[#2a2326] bg-[#141217]/95 p-8 shadow-float backdrop-blur">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2a2326] pb-5">
-                  <div>
-                    <span className="rounded-full bg-[#1b1410] px-3 py-1 text-xs font-semibold text-[#f59e0b]">
-                      {product.category}
-                    </span>
-                    <h1 className="mt-3 font-display text-3xl font-semibold leading-tight text-[#f3f4f6]">
-                      {product.name}
-                    </h1>
-                  </div>
-                  <div className="flex items-center gap-1.5 rounded-2xl bg-[#1b181f] px-3 py-1.5 text-xs text-[#f59e0b]">
-                    <span className="text-sm">★</span>
-                    <span className="font-bold text-[#e5e7eb]">{Number(product.rating || 0).toFixed(1)}</span>
-                    <span className="text-[#cbd5e1]/60">/ 5.0</span>
-                  </div>
-                </div>
-
-                <div className="mt-6 space-y-6">
-                  {/* Pricing Block */}
-                  <div className="flex items-baseline gap-4">
-                    <p className="text-3xl font-bold text-[#f59e0b]">
-                      {formatCurrency(product.price)}
-                    </p>
-                    {product.isPromo && (
-                      <p className="text-sm text-[#cbd5e1]/50 line-through">
-                        {formatCurrency(product.price * 1.2)}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-sm text-[#cbd5e1]/80 leading-relaxed">
-                    {product.description || "Chưa có mô tả chi tiết cho món ăn này. Chúng tôi luôn lựa chọn nguồn nguyên liệu tươi xanh sạch đạt chứng nhận dinh dưỡng cao cấp nhất."}
-                  </p>
-
-                  {/* Stock and Sales stats */}
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-[#2a2326] bg-[#1b181f] px-4 py-3 text-xs text-[#cbd5e1]/70">
-                      <p className="uppercase tracking-[0.2em] text-[#cbd5e1]/40">Đã bán được</p>
-                      <p className="mt-1.5 text-base font-semibold text-[#f3f4f6]">{product.sold || 0} phần ăn</p>
-                    </div>
-                    <div className="rounded-2xl border border-[#2a2326] bg-[#1b181f] px-4 py-3 text-xs text-[#cbd5e1]/70">
-                      <p className="uppercase tracking-[0.2em] text-[#cbd5e1]/40">Tình trạng tồn kho</p>
-                      {product.stock > 0 ? (
-                        <p className="mt-1.5 text-base font-semibold text-emerald-400">
-                          Còn {product.stock} phần ăn
-                        </p>
-                      ) : (
-                        <p className="mt-1.5 text-base font-semibold text-red-500">
-                          Tạm hết hàng
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Tags */}
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 items-center">
-                      <span className="text-xs text-[#cbd5e1]/50 uppercase tracking-widest mr-1">Thẻ:</span>
-                      {tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full bg-[#1b181f] border border-[#2a2326] px-3 py-1 text-xs text-[#cbd5e1]/80"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Quantity & Actions Area */}
-                  {product.stock > 0 ? (
-                    <div className="space-y-4 pt-4 border-t border-[#2a2326]">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-[#cbd5e1]/85">Chọn số lượng:</span>
-                        <div className="flex items-center rounded-2xl border border-[#3a2e32] bg-[#1b181f] p-1">
-                          <button
-                            type="button"
-                            onClick={handleQtyDecrease}
-                            disabled={quantity <= 1}
-                            className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#141217] text-base hover:bg-[#3a2e32] transition disabled:opacity-40 disabled:cursor-not-allowed"
-                          >
-                            -
-                          </button>
-                          <span className="w-12 text-center text-sm font-bold text-[#f3f4f6]">
-                            {quantity}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={handleQtyIncrease}
-                            disabled={quantity >= product.stock}
-                            className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#141217] text-base hover:bg-[#3a2e32] transition disabled:opacity-40 disabled:cursor-not-allowed"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-4 pt-2">
-                        <button
-                          type="button"
-                          onClick={handleAddToCart}
-                          className="flex-1 rounded-2xl border border-[#f59e0b]/40 bg-[#1b1410] px-5 py-3.5 text-sm font-bold text-[#f59e0b] shadow-sm transition hover:-translate-y-0.5 hover:border-[#f59e0b] hover:bg-[#2a2326]/60"
-                        >
-                          Thêm giỏ hàng
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleBuyNow}
-                          className="flex-1 rounded-2xl bg-[#f59e0b] px-5 py-3.5 text-sm font-bold text-[#111111] transition hover:-translate-y-0.5 hover:bg-[#fbbf24]"
-                        >
-                          Mua ngay
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="pt-4 border-t border-[#2a2326]">
-                      <button
-                        disabled
-                        className="w-full rounded-2xl bg-[#2a2326] px-5 py-3.5 text-sm font-semibold text-[#cbd5e1]/45 cursor-not-allowed text-center"
-                      >
-                        Món ăn tạm hết hàng
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            {/* Product Details Section (Cooking profile) */}
-            <section className="rounded-3xl border border-[#2a2326] bg-[#141217] p-8 shadow-sm">
-              <h3 className="font-display text-xl font-bold border-b border-[#2a2326] pb-3 text-[#f59e0b]">
-                Hồ Sơ Dinh Dưỡng & Cách Thưởng Thức
-              </h3>
-              <div className="mt-6 grid gap-6 md:grid-cols-3">
-                <div className="rounded-2xl bg-[#1b181f] p-4 text-center">
-                  <span className="text-xl">⏱️</span>
-                  <h4 className="mt-2 text-xs uppercase tracking-wider text-[#cbd5e1]/50">Thời gian nấu</h4>
-                  <p className="mt-1 font-semibold text-[#f3f4f6]">15 - 30 phút</p>
-                </div>
-                <div className="rounded-2xl bg-[#1b181f] p-4 text-center">
-                  <span className="text-xl">🌶️</span>
-                  <h4 className="mt-2 text-xs uppercase tracking-wider text-[#cbd5e1]/50">Độ cay</h4>
-                  <p className="mt-1 font-semibold text-[#f3f4f6]">Không cay hoặc cay nhẹ</p>
-                </div>
-                <div className="rounded-2xl bg-[#1b181f] p-4 text-center">
-                  <span className="text-xl">🥗</span>
-                  <h4 className="mt-2 text-xs uppercase tracking-wider text-[#cbd5e1]/50">Chất lượng</h4>
-                  <p className="mt-1 font-semibold text-[#f3f4f6]">Nguyên liệu sạch 100%</p>
-                </div>
-              </div>
-              <div className="mt-6 space-y-4 text-sm text-[#cbd5e1]/85">
-                <p>
-                  <strong>NutriMeal Cam kết:</strong> Tất cả sản phẩm thuộc hệ thống của chúng tôi đều tuân thủ nghiêm ngặt quy trình vệ sinh an toàn thực phẩm. Món ăn <strong>{product.name}</strong> được chế biến trong ngày bởi đội ngũ đầu bếp chuyên nghiệp, giữ nguyên hương vị đặc trưng, béo ngậy mà không làm mất chất dinh dưỡng có lợi.
-                </p>
-                <p>
-                  <strong>Gợi ý cách dùng:</strong> Dùng ngay khi còn nóng để cảm nhận vị thịt mềm ngọt cùng nước dùng đậm đà nhất. Thích hợp ăn kèm cùng xà lách sạch và rau thơm các loại.
-                </p>
-              </div>
-            </section>
-
-            {/* Similar Products Section */}
-            <section className="space-y-6">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#cbd5e1]/60">Gợi ý dành cho bạn</p>
-                <h3 className="mt-2 font-display text-2xl">Món Ăn Tương Tự</h3>
-              </div>
-
-              {similarLoading ? (
-                <div className="rounded-3xl border border-dashed border-[#2a2326] bg-[#141217] p-8 text-center text-xs text-[#cbd5e1]/60">
-                  Đang tìm các món ăn cùng danh mục...
-                </div>
-              ) : similarProducts.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-[#2a2326] bg-[#141217] p-8 text-center text-xs text-[#cbd5e1]/60">
-                  Không có sản phẩm tương tự cùng danh mục nào khác.
-                </div>
-              ) : (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  {similarProducts.map((item) => (
-                    <Link
-                      key={item.id}
-                      to={`/product/${item.id}`}
-                      className="group rounded-3xl border border-[#2a2326] bg-[#141217] p-4 shadow-sm hover:shadow-float transition hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#1b181f]">
-                        <img
-                          src={item.images?.[0] || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"}
-                          alt={item.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="mt-4 flex items-center justify-between text-xs text-[#cbd5e1]/60">
-                        <span>{item.category}</span>
-                        <span>{Number(item.rating || 0).toFixed(1)} ★</span>
-                      </div>
-                      <h4 className="mt-2 font-display text-base font-semibold group-hover:text-[#f59e0b] transition line-clamp-1">
-                        {item.name}
-                      </h4>
-                      <div className="mt-3 flex items-center justify-between text-xs font-semibold">
-                        <span className="text-[#f59e0b]">{formatCurrency(item.price)}</span>
-                        <span className="text-[#cbd5e1]/50">Đã bán {item.sold || 0}</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </section>
+            </div>
           </div>
-        )}
-      </main>
-
-      <footer className="border-t border-[#1f1b1c] bg-[#141217] mt-16">
-        <div className="mx-auto flex flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-[#cbd5e1]/70 lg:px-10">
-          <p>NutriMeal 2026. Xây dựng cho lối sống năng động và lành mạnh.</p>
-          <div className="flex flex-wrap items-center gap-4">
-            <Link to="/" className="font-semibold text-[#f3f4f6]">Trang chủ</Link>
-            <Link to="/search">Tìm kiếm</Link>
-            <Link to="/profile">Hồ sơ cá nhân</Link>
+          
+          {/* Right Column: Product Info */}
+          <div className="md:col-span-5 flex flex-col">
+            <div className="mb-sm select-none">
+              <span className="inline-block px-3 py-1 bg-tertiary-container/20 text-tertiary font-label-md text-label-sm rounded-full mb-base">
+                Sản phẩm đặc tuyển
+              </span>
+              <h2 className="font-headline-md text-headline-md text-on-surface leading-tight mb-xs font-bold">
+                Bộ Gia Vị Việt Cao Cấp - Hương Vị Truyền Thống
+              </h2>
+              <div className="flex items-center gap-md py-xs">
+                <div className="flex items-center gap-xs">
+                  <div className="flex text-primary">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <span key={i} className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    ))}
+                    <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star_half</span>
+                  </div>
+                  <span className="font-label-md text-label-md text-on-surface-variant">4.9 (120 đánh giá)</span>
+                </div>
+                <div className="w-px h-4 bg-outline-variant/50"></div>
+                <span className="font-label-md text-label-md text-on-surface-variant">450 đã bán</span>
+              </div>
+            </div>
+            
+            <div className="py-md border-y border-outline-variant/10 mb-md select-none">
+              <span className="font-display-lg text-display-lg text-primary font-bold">450.000đ</span>
+              <p className="text-label-md text-tertiary mt-base flex items-center gap-xs font-bold">
+                <span className="material-symbols-outlined scale-75">inventory_2</span>
+                Còn 25 sản phẩm trong kho
+              </p>
+            </div>
+            
+            <p className="font-body-md text-body-md text-on-surface-variant mb-xl leading-relaxed">
+              Bộ gia vị gồm 8 loại thảo mộc đặc trưng, được tuyển chọn kỹ lưỡng để mang lại hương vị chuẩn nhất cho món ăn Việt. Từ hạt tiêu Phú Quốc đến quế thanh Yên Bái, mỗi thành phần đều mang hơi thở của đất trời Việt Nam.
+            </p>
+            
+            <div className="space-y-lg select-none">
+              <div className="flex items-center gap-lg">
+                <span className="font-label-md text-label-md text-secondary font-bold">Số lượng:</span>
+                <div className="flex items-center border border-outline-variant rounded-lg overflow-hidden bg-white">
+                  <button
+                    onClick={() => qty > 1 && setQty(qty - 1)}
+                    className="px-4 py-2 hover:bg-surface-variant/20 transition-colors text-secondary"
+                  >
+                    <span className="material-symbols-outlined text-[20px] font-bold">remove</span>
+                  </button>
+                  <span className="w-12 text-center font-label-md font-bold text-on-surface">{qty}</span>
+                  <button
+                    onClick={() => setQty(qty + 1)}
+                    className="px-4 py-2 hover:bg-surface-variant/20 transition-colors text-secondary"
+                  >
+                    <span className="material-symbols-outlined text-[20px] font-bold">add</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-md">
+                <button className="flex-1 py-4 bg-white border border-primary text-primary font-label-md font-bold rounded-lg hover:bg-primary/5 transition-all shadow-sm active:scale-95">
+                  Thêm vào giỏ hàng
+                </button>
+                <button className="flex-1 py-4 bg-primary text-on-primary font-label-md font-bold rounded-lg hover:opacity-90 transition-all shadow-lg active:scale-95">
+                  Mua ngay
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-md pt-lg border-t border-outline-variant/10">
+                <div className="flex items-center gap-sm">
+                  <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+                    <span className="material-symbols-outlined text-on-secondary-container">local_shipping</span>
+                  </div>
+                  <span className="text-label-sm font-label-sm font-bold text-on-surface">Giao hàng toàn quốc</span>
+                </div>
+                <div className="flex items-center gap-sm">
+                  <div className="w-10 h-10 rounded-full bg-tertiary-fixed flex items-center justify-center">
+                    <span className="material-symbols-outlined text-on-tertiary-fixed">verified_user</span>
+                  </div>
+                  <span className="text-label-sm font-label-sm font-bold text-on-surface">Bảo hành 12 tháng</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </footer>
+
+        {/* Tabs Section */}
+        <section className="mt-xl border-t border-outline-variant/10 pt-xl">
+          <div className="flex gap-xl border-b border-outline-variant/10 mb-lg select-none">
+            <button
+              onClick={() => setActiveTab("description")}
+              className={`pb-md font-label-md font-bold ${
+                activeTab === "description" ? "border-b-2 border-primary text-primary" : "text-secondary hover:text-primary"
+              }`}
+            >
+              Mô tả chi tiết
+            </button>
+            <button
+              onClick={() => setActiveTab("usage")}
+              className={`pb-md font-label-md font-bold ${
+                activeTab === "usage" ? "border-b-2 border-primary text-primary" : "text-secondary hover:text-primary"
+              }`}
+            >
+              Hướng dẫn sử dụng
+            </button>
+            <button
+              onClick={() => setActiveTab("reviews")}
+              className={`pb-md font-label-md font-bold ${
+                activeTab === "reviews" ? "border-b-2 border-primary text-primary" : "text-secondary hover:text-primary"
+              }`}
+            >
+              Đánh giá (120)
+            </button>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-xl">
+            {activeTab === "description" && (
+              <div className="space-y-md text-on-surface-variant animate-in fade-in duration-300">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Khởi nguồn từ gian bếp Việt</h3>
+                <p className="text-body-md leading-relaxed">
+                  Hương vị Việt không chỉ nằm ở kỹ thuật chế biến mà còn ở sự kết hợp tinh tế của các loại thảo mộc tự nhiên. Bộ gia vị cao cấp của CulinShare là kết tinh của quá trình tìm kiếm và tuyển chọn khắt khe tại các vùng nguyên liệu trứ danh.
+                </p>
+                <ul className="space-y-sm select-none">
+                  <li className="flex items-start gap-sm">
+                    <span className="material-symbols-outlined text-primary text-[20px] mt-1 font-bold">check_circle</span>
+                    <span><strong>Hạt tiêu Phú Quốc:</strong> Cay nồng, thơm đậm đặc trưng.</span>
+                  </li>
+                  <li className="flex items-start gap-sm">
+                    <span className="material-symbols-outlined text-primary text-[20px] mt-1 font-bold">check_circle</span>
+                    <span><strong>Quế thanh Yên Bái:</strong> Vị ngọt hậu, mùi thơm ấm áp.</span>
+                  </li>
+                  <li className="flex items-start gap-sm">
+                    <span className="material-symbols-outlined text-primary text-[20px] mt-1 font-bold">check_circle</span>
+                    <span><strong>Hồi Lạng Sơn:</strong> Cánh to, hương nồng nàn.</span>
+                  </li>
+                </ul>
+              </div>
+            )}
+            
+            {activeTab === "usage" && (
+              <div className="space-y-md text-on-surface-variant animate-in fade-in duration-300">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Nâng tầm mọi món ăn</h3>
+                <p className="text-body-md leading-relaxed">
+                  Sử dụng rất đơn giản: lấy một lượng gia vị nhỏ ướp trực tiếp vào các loại thịt trước khi nấu từ 15-30 phút hoặc thả hồi/quế vào nồi nước dùng phở, nước lẩu để hầm chiết xuất hương vị thơm ngon nhất.
+                </p>
+              </div>
+            )}
+
+            {activeTab === "reviews" && (
+              <div className="space-y-md text-on-surface-variant animate-in fade-in duration-300">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Ý kiến từ những người yêu bếp</h3>
+                <p className="text-body-md leading-relaxed">
+                  Đánh giá trung bình đạt <strong>4.9 / 5 sao</strong> dựa trên 120 bình chọn chất lượng thực tế. Khách hàng hài lòng vì hương vị mộc mạc tự nhiên không chất bảo quản.
+                </p>
+              </div>
+            )}
+            
+            <div className="rounded-xl overflow-hidden shadow-soft border border-outline-variant/10">
+              <img
+                className="w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM04e0c-R3rF_JOg5NaHmJ_3Ag7SC0Qn8FDaTLX9VrEdLUAjMR7RAIa-786G264BN4KQPXzMBkwpLLd3dT3meiOTSyTy3Bu1GhDENWCiQpjRHsfao1TbFdYD3g0Ff14AtphAQZP6dER1I1as5fwdz5eEkger-QLAMKRxrXRZMNDiEJRKEVn8uR7BcU9gpx5oMokvj9xf7irCJfGyE6yArKO8R1CwTKX9YX-GHpzLPLME1thViC42uDqzCsw5II0n_AbUj1oYDfZg"
+                alt="Spices context"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Related Products Section */}
+        <section className="mt-xl mb-xl">
+          <div className="flex items-center justify-between mb-lg select-none">
+            <h3 className="font-headline-sm text-headline-sm font-bold">Sản phẩm tương tự</h3>
+            <a href="#" className="text-label-md text-primary flex items-center gap-xs hover:underline decoration-primary font-bold">
+              Xem tất cả <span className="material-symbols-outlined scale-75 text-sm">arrow_forward</span>
+            </a>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-gutter">
+            {relatedProducts.map((p) => (
+              <div
+                key={p.id}
+                className="bg-white rounded-xl overflow-hidden shadow-soft border border-outline-variant/10 group hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              >
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src={p.image}
+                    alt={p.name}
+                  />
+                </div>
+                <div className="p-md">
+                  <span className="text-label-sm font-label-sm font-bold text-tertiary bg-tertiary-fixed-dim/20 px-2 py-0.5 rounded-full select-none">
+                    {p.category}
+                  </span>
+                  <h4 className="font-headline-sm text-[18px] mt-sm mb-xs font-bold text-on-surface group-hover:text-primary transition-colors">
+                    {p.name}
+                  </h4>
+                  <div className="flex items-center justify-between select-none">
+                    <span className="font-bold text-primary">{p.price}</span>
+                    <span className="text-label-sm text-on-surface-variant font-bold">{p.rating} ★</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+      
+      <Footer />
     </div>
   );
 };

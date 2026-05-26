@@ -1,211 +1,175 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { loginAccount, resetAuthState, clearAuthError } from "../store/authSlice";
-import FormMessage from "../components/FormMessage";
-import InputField from "../components/InputField";
-import PrimaryButton from "../components/PrimaryButton";
+import { useDispatch } from "react-redux";
+import { loginAccount } from "../store/authSlice";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
-  const { status, error, token } = useSelector((state) => state.auth);
-  
-  const [form, setForm] = useState({
-    username: "",
-    password: "",
-    rememberMe: false,
-  });
-  
-  const [clientError, setClientError] = useState("");
-  const isLoading = status === "loading";
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  // Reset auth state when mounting
-  useEffect(() => {
-    dispatch(resetAuthState());
-    return () => {
-      dispatch(clearAuthError());
-    };
-  }, [dispatch]);
-
-  // Redirect to home if logged in successfully
-  useEffect(() => {
-    if (token) {
-      navigate("/");
-    }
-  }, [token, navigate]);
-
-  const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-    
-    if (clientError) setClientError("");
-    if (error) dispatch(clearAuthError());
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    
-    if (!form.username.trim() || !form.password) {
-      setClientError("Vui lòng điền đầy đủ tên đăng nhập và mật khẩu.");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!usernameOrEmail && !password) {
+      setMessage("Vui lòng nhập Tên đăng nhập/Email và Mật khẩu.");
       return;
     }
-
-    dispatch(
-      loginAccount({
-        username: form.username.trim(),
-        password: form.password,
-      })
-    );
+    if (!usernameOrEmail) {
+      setMessage("Vui lòng nhập Tên đăng nhập hoặc Email.");
+      return;
+    }
+    if (!password) {
+      setMessage("Vui lòng nhập Mật khẩu.");
+      return;
+    }
+    setLoading(true);
+    setMessage("");
+    try {
+      const resultAction = await dispatch(loginAccount({ username: usernameOrEmail, password }));
+      if (loginAccount.fulfilled.match(resultAction)) {
+        navigate("/");
+      } else {
+        setMessage(resultAction.payload || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+      }
+    } catch (err) {
+      setMessage(err.message || "Đăng nhập thất bại.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0d0b0c] text-[#f3f4f6] font-sans">
-      {/* Decorative gradients */}
-      <div className="pointer-events-none absolute -left-40 top-[-120px] h-[420px] w-[420px] rounded-full bg-[#f59e0b]/20 blur-[130px]" />
-      <div className="pointer-events-none absolute -right-32 top-[120px] h-[380px] w-[380px] rounded-full bg-[#c2410c]/15 blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-[-120px] left-[15%] h-[340px] w-[340px] rounded-full bg-[#f59e0b]/10 blur-[140px]" />
-
-      <div className="relative mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12 lg:px-10">
-        <div className="grid w-full gap-8 lg:grid-cols-[1fr_1fr] lg:items-center">
-          
-          {/* Info Section */}
-          <div className="flex flex-col justify-center gap-6 rounded-3xl border border-[#2a2326] bg-[#141217]/90 p-8 shadow-float backdrop-blur-md lg:p-10">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f59e0b] text-[#111111]">
-                <span className="font-display text-xl font-bold">MN</span>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#cbd5e1]/60">
-                  MâmNgon
-                </p>
-                <h2 className="font-display text-2xl font-semibold text-white">
-                  Đăng nhập & Trải nghiệm
-                </h2>
-              </div>
+    <div className="bg-background text-on-background min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop font-body-md select-none">
+      <main className="w-full max-w-max-width bg-surface-container-lowest rounded-xl overflow-hidden shadow-soft flex flex-col md:flex-row min-h-[700px] border border-outline-variant/10">
+        {/* Left Side: Image Content */}
+        <section
+          className="hidden md:flex md:w-1/2 relative overflow-hidden items-end p-lg bg-cover bg-center"
+          style={{
+            backgroundImage: "url('https://lh3.googleusercontent.com/aida/ADBb0ujSJCjN5rjcVNsvELodQ-YXgqxcz1-kC7sa7V-0_WpcQyjCmXvZHKuvTN1XqysPK2MYQzhBBLTrKXq_bolH4w9GZcccVP6Thz_8LgHtI5elOGtRTgNX78ff34v5G91cVW7aToAqK2AbtQux9fpR497jnUHaWR6C2sHdKJmDytb4ve8Z0yP-9Q3YFhglxHRL9cR9oY4nhmCID15NNqyjP4PO-qOAhBKr4g4ANuouuF9xMyWFJKrLyfkt')",
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+          <div className="relative z-10 text-white select-none">
+            <h1 className="font-display-lg text-display-lg mb-sm font-bold">CulinShare</h1>
+            <p className="font-body-lg text-body-lg opacity-90 max-w-md leading-relaxed">
+              Tham gia cộng đồng những người yêu ẩm thực, chia sẻ công thức nấu ăn tinh tế và tìm thấy nguồn cảm hứng mỗi ngày trong căn bếp của bạn.
+            </p>
+          </div>
+        </section>
+        
+        {/* Right Side: Auth Form */}
+        <section className="w-full md:w-1/2 flex flex-col justify-center px-md py-lg md:px-xl bg-surface-container-lowest">
+          <div className="max-w-md mx-auto w-full">
+            {/* Header */}
+            <div className="mb-lg">
+              <h2 className="font-headline-md text-headline-md text-primary mb-xs font-bold">Chào mừng trở lại</h2>
+              <p className="font-body-md text-body-md text-on-surface-variant">Đăng nhập để tiếp tục hành trình nấu nướng của bạn.</p>
             </div>
-
-            <div className="space-y-4 text-sm text-[#cbd5e1]/80">
-              <p>
-                Đăng nhập để tiếp tục lên kế hoạch thực đơn dinh dưỡng cá nhân hóa, khám phá hàng trăm công thức hấp dẫn và kết nối cùng cộng đồng đầu bếp.
-              </p>
-
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 rounded-xl border border-[#2a2326] bg-[#1b181f]/40 p-4">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#111111] text-[#f59e0b] text-lg">💡</span>
-                  <div>
-                    <p className="font-semibold text-white">Tối ưu dinh dưỡng</p>
-                    <p className="text-xs text-[#cbd5e1]/60">AI tự phân tích calo, protein, carb, fat từ nguyên liệu.</p>
-                  </div>
+            
+            {message && (
+              <div className="mb-4 p-3 bg-error-container text-on-error-container rounded-lg font-label-sm">
+                {message}
+              </div>
+            )}
+            
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-md">
+              <div className="space-y-xs">
+                <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="login-username">Tên đăng nhập hoặc Email</label>
+                <input
+                  className="w-full px-md py-sm bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none text-on-surface"
+                  id="login-username"
+                  placeholder="Tên đăng nhập hoặc email..."
+                  type="text"
+                  value={usernameOrEmail}
+                  onChange={(e) => setUsernameOrEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-xs">
+                <div className="flex justify-between items-center">
+                  <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="login-password">Mật khẩu</label>
+                  <Link to="/forgot-password" className="font-label-sm text-label-sm text-primary hover:underline font-bold">Quên mật khẩu?</Link>
                 </div>
-
-                <div className="flex items-center gap-3 rounded-xl border border-[#2a2326] bg-[#1b181f]/40 p-4">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#111111] text-[#f59e0b] text-lg">🛒</span>
-                  <div>
-                    <p className="font-semibold text-white">Danh sách mua sắm thông minh</p>
-                    <p className="text-xs text-[#cbd5e1]/60">Xuất danh sách nguyên liệu và kết nối nhanh tới Shopee/Tiki.</p>
-                  </div>
-                </div>
+                <input
+                  className="w-full px-md py-sm bg-surface-container-lowest border border-outline-variant/30 rounded-lg font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none text-on-surface"
+                  id="login-password"
+                  placeholder="••••••••"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-xs cursor-pointer">
+                <input
+                  className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
+                  id="remember"
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                />
+                <label className="font-label-sm text-label-sm text-on-surface-variant select-none" htmlFor="remember">
+                  Ghi nhớ đăng nhập
+                </label>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-md bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm hover:brightness-95 active:scale-95 transition-all font-bold flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                ) : (
+                  "Đăng Nhập"
+                )}
+              </button>
+            </form>
+            
+            {/* Divider */}
+            <div className="relative my-lg">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-outline-variant/20"></div>
+              </div>
+              <div className="relative flex justify-center text-label-sm text-label-sm">
+                <span className="px-sm bg-surface-container-lowest text-on-surface-variant">Hoặc tiếp tục với</span>
               </div>
             </div>
             
-            <div className="rounded-2xl border border-dashed border-[#3a2e32] bg-[#1b181f]/50 p-4 text-center">
-              <p className="text-xs text-[#cbd5e1]/70">
-                Tài khoản dùng thử Admin mặc định:
-              </p>
-              <p className="text-xs font-mono text-[#f59e0b] mt-1">
-                Username: <span className="text-white">admin</span> | Password: <span className="text-white">admin123</span>
+            {/* Social Logins */}
+            <div className="grid grid-cols-2 gap-sm mb-lg">
+              <button className="flex items-center justify-center gap-xs py-sm border border-outline-variant/30 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors text-secondary font-bold">
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+                </svg>
+                Google
+              </button>
+              <button className="flex items-center justify-center gap-xs py-sm border border-outline-variant/30 rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors text-secondary font-bold">
+                <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
+                </svg>
+                Facebook
+              </button>
+            </div>
+            
+            {/* Toggle */}
+            <div className="text-center">
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Chưa có tài khoản?{" "}
+                <Link to="/register" className="text-primary font-bold hover:underline">
+                  Đăng ký ngay
+                </Link>
               </p>
             </div>
           </div>
-
-          {/* Form Section */}
-          <div className="rounded-3xl border border-[#2a2326] bg-[#141217]/95 p-8 shadow-float backdrop-blur-md lg:p-10">
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-[0.35em] text-[#f59e0b]">
-                  Đăng nhập hệ thống
-                </p>
-                <h1 className="font-display text-3xl font-semibold text-white">
-                  Mừng bạn trở lại!
-                </h1>
-                <p className="text-sm text-[#cbd5e1]/70">
-                  Nhập thông tin tài khoản của bạn để khám phá ẩm thực ngay.
-                </p>
-              </div>
-
-              {clientError ? (
-                <FormMessage tone="error" title={clientError} />
-              ) : error ? (
-                <FormMessage
-                  tone="error"
-                  title="Đăng nhập thất bại"
-                  description={error}
-                />
-              ) : null}
-
-              <InputField
-                label="Tên đăng nhập"
-                name="username"
-                value={form.username}
-                onChange={handleChange}
-                placeholder="Tên đăng nhập hoặc username"
-                autoComplete="username"
-                required
-              />
-
-              <InputField
-                label="Mật khẩu"
-                name="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                required
-              />
-
-              <div className="flex items-center justify-between text-xs text-[#cbd5e1]/80">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    name="rememberMe"
-                    checked={form.rememberMe}
-                    onChange={handleChange}
-                    className="h-4 w-4 accent-[#f59e0b]"
-                  />
-                  <span>Ghi nhớ đăng nhập</span>
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="font-semibold text-[#f59e0b] hover:underline"
-                >
-                  Quên mật khẩu?
-                </Link>
-              </div>
-
-              <PrimaryButton type="submit" disabled={isLoading}>
-                {isLoading ? "Đang đăng nhập..." : "Đăng nhập ngay"}
-              </PrimaryButton>
-
-              <p className="text-center text-xs text-[#cbd5e1]/70 mt-6">
-                Chưa có tài khoản?{" "}
-                <Link
-                  to="/register"
-                  className="font-semibold text-[#f59e0b] hover:underline"
-                >
-                  Đăng ký tài khoản mới
-                </Link>
-              </p>
-            </form>
-          </div>
-          
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 };

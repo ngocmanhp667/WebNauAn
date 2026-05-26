@@ -40,7 +40,7 @@ export const resetPasswordApi = async (
 export const getProfileApi = async () => {
   try {
     const response = await api.get("/user/profile");
-    return response.data;
+    return response.data.data;
   } catch (error) {
     throw error.response?.data || error.message;
   }
@@ -49,7 +49,7 @@ export const getProfileApi = async () => {
 export const updateProfileApi = async (profileData) => {
   try {
     const response = await api.put("/user/profile", profileData);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     throw error.response?.data || error.message;
   }
@@ -62,6 +62,15 @@ export const uploadAvatarApi = async (formData) => {
         "Content-Type": "multipart/form-data",
       },
     });
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const verifyOtpApi = async (email, otp) => {
+  try {
+    const response = await api.post("/api/verify-otp", { email, otp });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

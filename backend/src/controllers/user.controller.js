@@ -41,6 +41,28 @@ class UserController {
     }
 
     /**
+     * GET /api/users/:id
+     * Lấy thông tin profile của user theo ID (public)
+     */
+    async getProfileById(req, res, next) {
+        try {
+            const { id } = req.params;
+            const userDTO = await UserService.getProfileData(id);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Lấy thông tin profile thành công',
+                data: userDTO
+            });
+        } catch (error) {
+            return res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Lỗi server'
+            });
+        }
+    }
+
+    /**
      * GET /admin/profile
      * Lấy thông tin profile admin
      * 

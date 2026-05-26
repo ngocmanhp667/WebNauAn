@@ -8,10 +8,16 @@ export const registerAccount = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const endpoint =
-        import.meta.env.VITE_REGISTER_ENDPOINT || '/api/auth/register'
+        import.meta.env.VITE_REGISTER_ENDPOINT || '/api/register'
       const response = await api.post(endpoint, payload)
       return response.data
     } catch (error) {
+      // Nếu backend trả về danh sách lỗi validation, gom tất cả lại
+      const validationErrors = error.response?.data?.errors
+      if (validationErrors && Array.isArray(validationErrors) && validationErrors.length > 0) {
+        const allMessages = validationErrors.map(e => e.message).join('\n')
+        return rejectWithValue(allMessages)
+      }
       const message =
         error.response?.data?.message ||
         error.response?.data?.error ||
@@ -50,11 +56,11 @@ export const updateUserProfile = createAsyncThunk(
   async (profileData, { rejectWithValue }) => {
     try {
       const response = await updateProfileApi(profileData)
-      if (response?.success && response?.data) {
+      if (response) {
         // Cập nhật lại thông tin user trong localStorage
-        localStorage.setItem('user', JSON.stringify(response.data))
+        localStorage.setItem('user', JSON.stringify(response))
       }
-      return response.data
+      return response
     } catch (error) {
       const message =
         error.message ||
@@ -73,11 +79,11 @@ export const uploadUserAvatar = createAsyncThunk(
       const formData = new FormData()
       formData.append('avatar', file)
       const response = await uploadAvatarApi(formData)
-      if (response?.success && response?.data) {
+      if (response) {
         // Cập nhật lại thông tin user trong localStorage
-        localStorage.setItem('user', JSON.stringify(response.data))
+        localStorage.setItem('user', JSON.stringify(response))
       }
-      return response.data
+      return response
     } catch (error) {
       const message =
         error.message ||

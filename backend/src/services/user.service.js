@@ -25,8 +25,12 @@ class UserService {
      * @throws {Error} Nếu sai thông tin đăng nhập
      */
     async verifyCredentials(username, password) {
-        // Bước 1: Tìm user theo username từ Repository
-        const user = await userRepository.findByUsername(username);
+        // Bước 1: Tìm user theo username hoặc email từ Repository
+        let user = await userRepository.findByUsername(username);
+        if (!user) {
+            user = await userRepository.findByEmail(username);
+        }
+        
         if (!user) {
             const error = new Error('Tên đăng nhập hoặc mật khẩu không đúng');
             error.statusCode = 401;
@@ -72,38 +76,32 @@ class UserService {
             return trimmed ? trimmed : null;
         };
 
-        const username = normalizeString(data.username);
+        let username = normalizeString(data.username);
         const email = typeof data.email === 'string' ? data.email.trim().toLowerCase() : data.email;
         const full_name = normalizeString(data.full_name);
         const password = data.password;
 
         const otpTtlMinutes = Number(process.env.OTP_TTL_MINUTES) || 10;
 
-        // Bước 1: Kiểm tra username đã tồn tại chưa
-        const existingUser = await userRepository.findByUsername(username);
+        // Bước 1: Kiểm tra username đã tồn tại chưa và tự động sinh suffix nếu trùng lặp
+        let existingUser = await userRepository.findByUsername(username);
         if (existingUser) {
-            const error = new Error('Username đã tồn tại');
-            error.statusCode = 409;
-            throw error;
+            let suffix = 1;
+            let candidate = username;
+            while (existingUser) {
+                candidate = `${username}${suffix}`;
+                existingUser = await userRepository.findByUsername(candidate);
+                if (!existingUser) {
+                    username = candidate;
+                    break;
+                }
+                suffix++;
+            }
         }
 
         // Bước 2: Kiểm tra email đã tồn tại chưa
         const existingEmail = await userRepository.findByEmail(email);
         if (existingEmail) {
-            if (!existingEmail.is_verified) {
-                const otp = generateOtp();
-                const otpExpiry = getOtpExpiry(otpTtlMinutes);
-
-                await userRepository.updateOtp(email, otp, otpExpiry);
-                await EmailService.sendOtpEmail(email, otp, otpTtlMinutes);
-
-                return {
-                    message: 'Email đã đăng ký nhưng chưa xác thực. OTP mới đã được gửi lại.',
-                    userId: existingEmail.id,
-                    email
-                };
-            }
-
             const error = new Error('Email đã được sử dụng');
             error.statusCode = 409;
             throw error;
@@ -113,26 +111,23 @@ class UserService {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
-        // Bước 4: Lưu user vào DB với is_verified = false
+        // Bước 4: Lưu user vào DB với is_verified = 1 (không cần OTP xác thực)
         const result = await userRepository.create({
             username,
             password_hash,
             email,
-            full_name
+            full_name,
+            is_verified: 1
         });
 
-        // Bước 5: Sinh mã OTP ngẫu nhiên
-        const otp = generateOtp();
-        const otpExpiry = getOtpExpiry(otpTtlMinutes);
-
-        // Bước 6: Lưu OTP vào DB
-        await userRepository.updateOtp(email, otp, otpExpiry);
-
-        // Bước 7: Gửi OTP qua email
-        await EmailService.sendOtpEmail(email, otp, otpTtlMinutes);
+        // Tạm tắt các bước sinh và gửi OTP
+        // const otp = generateOtp();
+        // const otpExpiry = getOtpExpiry(otpTtlMinutes);
+        // await userRepository.updateOtp(email, otp, otpExpiry);
+        // await EmailService.sendOtpEmail(email, otp, otpTtlMinutes);
 
         return {
-            message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
+            message: 'Đăng ký thành công!',
             userId: result.insertId,
             email
         };

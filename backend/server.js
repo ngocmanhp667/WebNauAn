@@ -13,9 +13,13 @@ const cors = require('cors');
 // Import Routes
 const authRoutes = require('./src/routes/auth.routes');
 const userRoutes = require('./src/routes/user.routes');
-const productRoutes = require('./src/routes/product.routes');
+const recipeRoutes = require('./src/routes/recipe.routes');
+const categoryRoutes = require('./src/routes/category.routes');
+const reviewRoutes = require('./src/routes/review.routes');
+const commentRoutes = require('./src/routes/comment.routes');
+const savedRecipeRoutes = require('./src/routes/savedRecipe.routes');
+const followRoutes = require('./src/routes/follow.routes');
 
-// Import Database Config
 const pool = require('./src/config/database');
 
 const app = express();
@@ -46,8 +50,23 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 // Auth routes: /api/login, /api/register, /api/verify-otp, ...
 app.use('/api', authRoutes);
 
-// Product routes: /api/products
-app.use('/api', productRoutes);
+// Recipe routes
+app.use('/api', recipeRoutes);
+
+// Category routes
+app.use('/api', categoryRoutes);
+
+// Review routes
+app.use('/api', reviewRoutes);
+
+// Comment routes
+app.use('/api', commentRoutes);
+
+// Saved recipe routes
+app.use('/api', savedRecipeRoutes);
+
+// Follow routes
+app.use('/api', followRoutes);
 
 // User routes: /user/profile, /admin/profile, ...
 app.use('/', userRoutes);
