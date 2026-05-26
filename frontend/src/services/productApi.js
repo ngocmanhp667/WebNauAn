@@ -14,6 +14,8 @@ const buildParams = (filters) => {
   if (filters.isPromo === true) params.isPromo = true;
   if (filters.isNew === true) params.isNew = true;
   if (filters.isBestSeller === true) params.isBestSeller = true;
+  if (Number.isFinite(filters.page)) params.page = filters.page;
+  if (Number.isFinite(filters.limit)) params.limit = filters.limit;
   if (filters.sort && filters.sort !== "popular") params.sort = filters.sort;
 
   return params;

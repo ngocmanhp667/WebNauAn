@@ -86,9 +86,9 @@ const TopProductsSection = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-[#cbd5e1]/60">
-            Top cong thuc
+            Nổi bật
           </p>
-          <h3 className="mt-2 font-display text-2xl">{headerText}</h3>
+          <h3 className="mt-2 font-display text-2xl">Công thức nổi bật</h3>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {typeOptions.map((option) => (

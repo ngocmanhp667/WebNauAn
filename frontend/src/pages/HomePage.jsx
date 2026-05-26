@@ -410,58 +410,6 @@ const HomePage = () => {
 
       <section id="recipes" className="bg-[#0d0b0c]">
         <div className="mx-auto max-w-6xl px-6 py-16 lg:px-10">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-[#cbd5e1]/60">
-                Nổi bật
-              </p>
-              <h2 className="mt-3 font-display text-3xl">Công thức nổi bật</h2>
-            </div>
-            <a className="text-sm font-semibold text-[#f59e0b]" href="/search">
-              Xem tất cả công thức
-            </a>
-          </div>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {(bestSellers.length ? bestSellers : promoProducts.length ? promoProducts : [
-              { id: 1, name: "Cơm gà nướng mật ong", category: "Món chính", rating: 4.6, price: 65000, sold: 180, description: "Gà nướng mật ong thơm mềm, ăn kèm cơm nóng." },
-              { id: 2, name: "Bún bò Huế", category: "Món chính", rating: 4.4, price: 55000, sold: 140, description: "Nước dùng đậm đà, thịt bò mềm, sả ớt cay nhẹ." },
-              { id: 3, name: "Lẩu nấm hải sản", category: "Lẩu", rating: 4.7, price: 189000, sold: 75, description: "Nước lẩu thanh ngọt, nhiều nấm tươi và hải sản." }
-            ]).map((item) => (
-              <Link
-                to={`/product/${item.id}`}
-                key={item.id}
-                className="group rounded-3xl border border-[#2a2326] bg-[#141217] p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-float flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between text-xs text-[#cbd5e1]/60">
-                    <span>{item.category}</span>
-                    <span>{Number(item.rating || 0).toFixed(1)} ★</span>
-                  </div>
-                  <h3 className="mt-4 font-display text-xl text-[#f3f4f6] group-hover:text-[#f59e0b] transition">
-                    {item.name}
-                  </h3>
-                  <p className="mt-2 line-clamp-2 text-xs text-[#cbd5e1]/70">
-                    {item.description}
-                  </p>
-                </div>
-                <div>
-                  <div className="mt-4 flex items-center justify-between text-xs font-semibold">
-                    <span className="text-[#f59e0b]">
-                      {formatCurrency(Number(item.price))}
-                    </span>
-                    <span className="text-[#cbd5e1]/60">
-                      Đã bán {item.sold || 0}
-                    </span>
-                  </div>
-                  <button className="mt-4 w-full rounded-2xl bg-[#f59e0b] py-2 text-xs font-semibold text-[#111111] transition group-hover:bg-[#fbbf24]">
-                    Xem chi tiết
-                  </button>
-                </div>
-              </Link>
-            ))}
-          </div>
-
           <TopProductsSection />
 
           <div className="mt-14 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
