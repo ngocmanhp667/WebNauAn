@@ -11,6 +11,7 @@ import RecipeDetailPage from "./pages/RecipeDetailPage.jsx";
 import EditRecipePage from "./pages/EditRecipePage.jsx";
 import ChefProfilePage from "./pages/ChefProfilePage.jsx";
 import SubmitRecipePage from "./pages/SubmitRecipePage.jsx";
+import SavedRecipesPage from "./pages/SavedRecipesPage.jsx";
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
@@ -28,6 +29,7 @@ function App() {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/chef/:id" element={<ChefProfilePage />} />
       <Route path="/submit-recipe" element={<SubmitRecipePage />} />
+      <Route path="/saved-recipes" element={<SavedRecipesPage />} />
       <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />

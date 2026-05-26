@@ -56,6 +56,7 @@ const Header = () => {
             <Link to="/" className={linkClass("/")}>Home</Link>
             <Link to="/search" className={linkClass("/search")}>Browse</Link>
             <Link to={chefProfileUrl} className={linkClass("/chef")}>Top Chefs</Link>
+            {user && <Link to="/saved-recipes" className={linkClass("/saved-recipes")}>Yêu thích</Link>}
             <Link to="/submit-recipe" className={linkClass("/submit-recipe")}>Submit Recipe</Link>
           </div>
         </div>
@@ -115,6 +116,14 @@ const Header = () => {
                     >
                       <span className="material-symbols-outlined text-sm">settings</span>
                       Cài đặt hồ sơ
+                    </Link>
+                    <Link
+                      to="/saved-recipes"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-label-md text-secondary hover:text-primary hover:bg-surface-container-low transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-sm">favorite</span>
+                      Công thức yêu thích
                     </Link>
                     <Link
                       to={chefProfileUrl}
@@ -199,6 +208,13 @@ const Header = () => {
             className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/chef") ? "text-primary font-bold" : "text-secondary"}`}
           >
             Top Chefs
+          </Link>
+          <Link
+            to="/saved-recipes"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/saved-recipes") ? "text-primary font-bold" : "text-secondary"}`}
+          >
+            Yêu thích
           </Link>
           <Link
             to="/submit-recipe"

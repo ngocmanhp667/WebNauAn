@@ -143,7 +143,7 @@ const ProfilePage = () => {
                 <span className="material-symbols-outlined text-sm">notifications</span>
                 <span className="font-label-md text-label-md">Thông báo</span>
               </a>
-              <Link to="/chef/hoang-anh" className="flex items-center gap-sm px-md py-3 rounded-lg text-secondary hover:bg-surface-container-low transition-colors">
+              <Link to="/saved-recipes" className="flex items-center gap-sm px-md py-3 rounded-lg text-secondary hover:bg-surface-container-low transition-colors">
                 <span className="material-symbols-outlined text-sm">bookmark</span>
                 <span className="font-label-md text-label-md">Công thức đã lưu</span>
               </Link>

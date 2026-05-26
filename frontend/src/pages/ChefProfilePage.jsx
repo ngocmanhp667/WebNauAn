@@ -101,6 +101,12 @@ const ChefProfilePage = () => {
     alert("Đã sao chép liên kết trang cá nhân!");
   };
 
+  const handleSavedRecipeChange = (isSaved, recipe) => {
+    if (!isSaved) {
+      setSavedRecipes((current) => current.filter((item) => item.id !== recipe.id));
+    }
+  };
+
   const featuredRecipe = recipes.length > 0 ? recipes[0] : null;
   const otherRecipes = recipes.length > 1 ? recipes.slice(1) : [];
 
@@ -313,7 +319,12 @@ const ChefProfilePage = () => {
             {savedRecipes.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
                 {savedRecipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    initiallySaved
+                    onSavedChange={handleSavedRecipeChange}
+                  />
                 ))}
               </div>
             ) : (
