@@ -76,6 +76,12 @@ class ProductRepository {
   }
 
   getTopOrderBy(type) {
+    if (type === "most-viewed") {
+      return "ORDER BY rating DESC";
+    }
+    if (type === "best-seller") {
+      return "ORDER BY sold DESC";
+    }
     if (type === "top-rated") {
       return "ORDER BY rating DESC";
     }

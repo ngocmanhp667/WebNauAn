@@ -103,7 +103,7 @@ class ProductController {
       const type = req.query.type
         ? String(req.query.type).trim()
         : "most-viewed";
-      if (!["most-viewed", "top-rated"].includes(type)) {
+      if (!["most-viewed", "top-rated", "best-seller"].includes(type)) {
         return res.status(400).json({
           success: false,
           message: "type khong hop le",

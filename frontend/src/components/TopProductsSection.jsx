@@ -4,14 +4,14 @@ import { getTopProductsApi } from "../services/productApi";
 
 const typeOptions = [
   {
-    key: "most-viewed",
-    label: "Xem nhieu nhat",
-    description: "Duoc yeu thich nhieu nhat",
+    key: "best-seller",
+    label: "Bán chạy nhất",
+    description: "10 món ăn bán chạy được yêu thích nhất",
   },
   {
-    key: "top-rated",
-    label: "Danh gia cao",
-    description: "Cong thuc co danh gia tot",
+    key: "most-viewed",
+    label: "Xem nhiều nhất",
+    description: "10 món ngon thu hút lượt xem nhiều nhất",
   },
 ];
 
@@ -25,7 +25,7 @@ const formatCurrency = (value) => {
 };
 
 const TopProductsSection = () => {
-  const [type, setType] = useState("most-viewed");
+  const [type, setType] = useState("best-seller");
   const [page, setPage] = useState(1);
   const [items, setItems] = useState([]);
   const [pagination, setPagination] = useState({
@@ -154,9 +154,9 @@ const TopProductsSection = () => {
             {items.map((item) => {
               const image = item?.images?.[0];
               const metric =
-                type === "top-rated"
+                type === "most-viewed"
                   ? `${Number(item.rating || 0).toFixed(1)} ★`
-                  : `${item.sold || 0} luot`;
+                  : `${item.sold || 0} đã bán`;
 
               return (
                 <Link

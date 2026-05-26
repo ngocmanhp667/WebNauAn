@@ -142,6 +142,16 @@ const SearchPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [initialized, setInitialized] = useState(false);
+  
+  // Pagination States
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const LIMIT = 6;
+
+  // Reset page to 1 whenever search filters change
+  useEffect(() => {
+    setPage(1);
+  }, [category, inStock, maxPrice, minRating, query, sortBy]);
 
   useEffect(() => {
     let active = true;
@@ -151,13 +161,13 @@ const SearchPage = () => {
       setError("");
 
       try {
-        const response = await searchProductsApi();
+        const response = await searchProductsApi({ page: 1, limit: LIMIT });
         if (!active) return;
         const data = response?.data || [];
-        const fallback = data.length ? data : mockProducts;
-        setProducts(fallback);
+        setProducts(data.length ? data : mockProducts.slice(0, LIMIT));
+        setTotalPages(response?.pagination?.totalPages || Math.ceil(mockProducts.length / LIMIT));
 
-        const maxPriceFound = fallback.reduce(
+        const maxPriceFound = mockProducts.reduce(
           (maxValue, item) => Math.max(maxValue, Number(item.price) || 0),
           0,
         );
@@ -166,7 +176,8 @@ const SearchPage = () => {
         setInitialized(true);
       } catch (err) {
         if (!active) return;
-        setProducts(mockProducts);
+        setProducts(mockProducts.slice(0, LIMIT));
+        setTotalPages(Math.ceil(mockProducts.length / LIMIT));
         const maxPriceFound = mockProducts.reduce(
           (maxValue, item) => Math.max(maxValue, Number(item.price) || 0),
           0,
@@ -202,13 +213,25 @@ const SearchPage = () => {
           minRating: minRating === "all" ? undefined : Number(minRating),
           inStock,
           sort: sortBy,
+          page,
+          limit: LIMIT,
         });
         if (!active) return;
         const data = response?.data || [];
-        setProducts(data.length ? data : mockProducts);
+        if (data.length > 0) {
+          setProducts(data);
+          setTotalPages(response?.pagination?.totalPages || 1);
+        } else {
+          // If query/filters match mockProducts fallback
+          const offset = (page - 1) * LIMIT;
+          setProducts(mockProducts.slice(offset, offset + LIMIT));
+          setTotalPages(Math.ceil(mockProducts.length / LIMIT));
+        }
       } catch (err) {
         if (!active) return;
-        setProducts(mockProducts);
+        const offset = (page - 1) * LIMIT;
+        setProducts(mockProducts.slice(offset, offset + LIMIT));
+        setTotalPages(Math.ceil(mockProducts.length / LIMIT));
       } finally {
         if (active) setLoading(false);
       }
@@ -218,7 +241,7 @@ const SearchPage = () => {
       active = false;
       clearTimeout(handle);
     };
-  }, [category, inStock, initialized, maxPrice, minRating, query, sortBy]);
+  }, [category, inStock, initialized, maxPrice, minRating, query, sortBy, page]);
 
   const activeFilters = useMemo(() => {
     const filters = [];
@@ -535,6 +558,44 @@ const SearchPage = () => {
                     </div>
                   </article>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={page <= 1}
+                  className="rounded-2xl border border-clay-200 bg-white/80 px-4 py-2 text-ink-700 shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed hover:border-sea-600 hover:text-sea-700"
+                >
+                  ← Trước
+                </button>
+                
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPage(p)}
+                    className={`h-9 w-9 rounded-xl border font-bold transition ${
+                      page === p
+                        ? "border-sea-600 bg-sea-600 text-white shadow-sm"
+                        : "border-clay-200 bg-white/80 text-ink-700 hover:border-sea-600 hover:text-sea-700"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={page >= totalPages}
+                  className="rounded-2xl border border-clay-200 bg-white/80 px-4 py-2 text-ink-700 shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed hover:border-sea-600 hover:text-sea-700"
+                >
+                  Tiếp →
+                </button>
               </div>
             )}
           </section>
