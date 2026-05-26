@@ -55,6 +55,7 @@ const Header = () => {
           <div className="hidden md:flex gap-6 items-center">
             <Link to="/" className={linkClass("/")}>Home</Link>
             <Link to="/search" className={linkClass("/search")}>Browse</Link>
+            <Link to="/fridge" className={linkClass("/fridge")}>Tủ lạnh ảo</Link>
             <Link to={chefProfileUrl} className={linkClass("/chef")}>Top Chefs</Link>
             {user && <Link to="/saved-recipes" className={linkClass("/saved-recipes")}>Yêu thích</Link>}
             <Link to="/submit-recipe" className={linkClass("/submit-recipe")}>Submit Recipe</Link>
@@ -201,6 +202,13 @@ const Header = () => {
             className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/search") ? "text-primary font-bold" : "text-secondary"}`}
           >
             Browse
+          </Link>
+          <Link
+            to="/fridge"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/fridge") ? "text-primary font-bold" : "text-secondary"}`}
+          >
+            Tủ lạnh ảo
           </Link>
           <Link
             to={chefProfileUrl}

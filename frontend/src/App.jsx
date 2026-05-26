@@ -14,6 +14,7 @@ import SubmitRecipePage from "./pages/SubmitRecipePage.jsx";
 import SavedRecipesPage from "./pages/SavedRecipesPage.jsx";
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
+import SmartFridgePage from "./pages/SmartFridgePage.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
       <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/fridge" element={<SmartFridgePage />} />
       <Route path="*" element={<ErrorPage />} />
     </Routes>
   );

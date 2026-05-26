@@ -19,6 +19,7 @@ const reviewRoutes = require('./src/routes/review.routes');
 const commentRoutes = require('./src/routes/comment.routes');
 const savedRecipeRoutes = require('./src/routes/savedRecipe.routes');
 const followRoutes = require('./src/routes/follow.routes');
+const aiRoutes = require('./src/routes/ai.routes');
 
 const pool = require('./src/config/database');
 
@@ -67,6 +68,9 @@ app.use('/api', savedRecipeRoutes);
 
 // Follow routes
 app.use('/api', followRoutes);
+
+// AI routes
+app.use('/api', aiRoutes);
 
 // User routes: /user/profile, /admin/profile, ...
 app.use('/', userRoutes);
