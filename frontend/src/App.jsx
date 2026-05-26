@@ -8,6 +8,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import RecipeDetailPage from "./pages/RecipeDetailPage.jsx";
+import EditRecipePage from "./pages/EditRecipePage.jsx";
 import ChefProfilePage from "./pages/ChefProfilePage.jsx";
 import SubmitRecipePage from "./pages/SubmitRecipePage.jsx";
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx";
@@ -21,6 +22,7 @@ function App() {
       <Route path="/search" element={<SearchPage />} />
       <Route path="/product/:id" element={<ProductDetailPage />} />
       <Route path="/recipe/:id" element={<RecipeDetailPage />} />
+      <Route path="/edit-recipe/:id" element={<EditRecipePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/profile" element={<ProfilePage />} />

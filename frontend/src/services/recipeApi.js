@@ -43,9 +43,48 @@ export const getRecipeBySlugApi = async (slug) => {
   }
 };
 
+const hasRecipeFiles = (recipeData) =>
+  recipeData.coverImageFile || recipeData.steps?.some((step) => step.image_file);
+
+const buildRecipeFormData = (recipeData) => {
+  const formData = new FormData();
+  const { coverImageFile, steps = [], ...fields } = recipeData;
+
+  Object.entries(fields).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, Array.isArray(value) || typeof value === "object" ? JSON.stringify(value) : value);
+    }
+  });
+
+  const sanitizedSteps = steps.map((step) => {
+    const sanitizedStep = { ...step };
+    delete sanitizedStep.image_file;
+    delete sanitizedStep.image_preview;
+    return sanitizedStep;
+  });
+  const stepImageIndexes = [];
+  steps.forEach((step, index) => {
+    if (step.image_file) {
+      formData.append("stepImages", step.image_file);
+      stepImageIndexes.push(index);
+    }
+  });
+  formData.append("steps", JSON.stringify(sanitizedSteps));
+  formData.append("stepImageIndexes", JSON.stringify(stepImageIndexes));
+
+  if (coverImageFile) {
+    formData.append("coverImage", coverImageFile);
+  }
+
+  return formData;
+};
+
 export const createRecipeApi = async (recipeData) => {
   try {
-    const response = await api.post("/api/recipes", recipeData);
+    const hasFiles = hasRecipeFiles(recipeData);
+    const response = await api.post("/api/recipes", hasFiles ? buildRecipeFormData(recipeData) : recipeData, hasFiles ? {
+      headers: { "Content-Type": "multipart/form-data" },
+    } : undefined);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -54,7 +93,10 @@ export const createRecipeApi = async (recipeData) => {
 
 export const updateRecipeApi = async (id, recipeData) => {
   try {
-    const response = await api.put(`/api/recipes/${id}`, recipeData);
+    const hasFiles = hasRecipeFiles(recipeData);
+    const response = await api.put(`/api/recipes/${id}`, hasFiles ? buildRecipeFormData(recipeData) : recipeData, hasFiles ? {
+      headers: { "Content-Type": "multipart/form-data" },
+    } : undefined);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

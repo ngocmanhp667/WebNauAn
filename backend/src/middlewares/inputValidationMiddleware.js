@@ -276,6 +276,81 @@ const validateUpdateProfile = [
   handleValidationErrors,
 ];
 
+/**
+ * Validation rules cho API Create/Update Recipe
+ */
+const validateRecipe = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Tiêu đề công thức không được để trống")
+    .isLength({ max: 150 })
+    .withMessage("Tiêu đề công thức tối đa 150 ký tự"),
+
+  body("description")
+    .optional({ nullable: true })
+    .trim(),
+
+  body("prep_time_minutes")
+    .optional({ nullable: true })
+    .custom((value, { req }) => {
+      const target = value ?? req.body.prepTimeMinutes;
+      if (target === undefined || target === null || target === "") return true;
+      const num = Number(target);
+      if (!Number.isInteger(num) || num < 0) {
+        throw new Error("Thời gian chuẩn bị phải là số nguyên không âm");
+      }
+      return true;
+    }),
+
+  body("cook_time_minutes")
+    .optional({ nullable: true })
+    .custom((value, { req }) => {
+      const target = value ?? req.body.cookTimeMinutes;
+      if (target === undefined || target === null || target === "") return true;
+      const num = Number(target);
+      if (!Number.isInteger(num) || num < 0) {
+        throw new Error("Thời gian chế biến phải là số nguyên không âm");
+      }
+      return true;
+    }),
+
+  body("servings")
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === undefined || value === null || value === "") return true;
+      const num = Number(value);
+      if (!Number.isInteger(num) || num < 0) {
+        throw new Error("Khẩu phần phải là số nguyên không âm");
+      }
+      return true;
+    }),
+
+  body("calories")
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === undefined || value === null || value === "") return true;
+      const num = Number(value);
+      if (!Number.isInteger(num) || num < 0) {
+        throw new Error("Calories phải là số nguyên không âm");
+      }
+      return true;
+    }),
+
+  body("difficulty")
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === undefined || value === null || value === "") return true;
+      const allowed = ["dễ", "trung bình", "khó"];
+      if (!allowed.includes(value.toLowerCase())) {
+        throw new Error("Độ khó phải là 'dễ', 'trung bình' hoặc 'khó'");
+      }
+      return true;
+    }),
+
+  handleValidationErrors,
+];
+
 module.exports = {
   validateLogin,
   validateRegister,
@@ -283,4 +358,5 @@ module.exports = {
   validateForgotPassword,
   validateResetPassword,
   validateUpdateProfile,
+  validateRecipe,
 };

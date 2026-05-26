@@ -24,7 +24,13 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+        const prefixByField = {
+            avatar: 'avatar',
+            coverImage: 'recipe-cover',
+            stepImages: 'recipe-step'
+        };
+        const prefix = prefixByField[file.fieldname] || 'image';
+        cb(null, prefix + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 

@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import DeleteSuccessModal from "../components/DeleteSuccessModal";
 import { getImageUrl } from "../services/api";
 import {
   getRecipeByIdApi,
@@ -12,7 +15,8 @@ import {
   checkSavedStatusApi,
   followUserApi,
   unfollowUserApi,
-  checkFollowStatusApi
+  checkFollowStatusApi,
+  deleteRecipeApi
 } from "../services/recipeApi";
 
 const RecipeDetailPage = () => {
@@ -28,8 +32,30 @@ const RecipeDetailPage = () => {
   const [userRating, setUserRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleteSuccessOpen, setIsDeleteSuccessOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || localStorage.getItem("authToken");
+
+  const handleDeleteRecipe = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteRecipeApi(id);
+      setIsDeleteModalOpen(false);
+      setIsDeleteSuccessOpen(true);
+    } catch (err) {
+      alert(err.message || "Lỗi khi xóa công thức");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteSuccessClose = () => {
+    setIsDeleteSuccessOpen(false);
+    navigate("/");
+  };
 
   const fetchRecipeDetails = async () => {
     try {
@@ -174,7 +200,7 @@ const RecipeDetailPage = () => {
   return (
     <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-base flex-grow w-full">
         {/* Banner Section */}
         <section className="relative w-full mb-lg overflow-hidden rounded-xl select-none shadow-sm">
@@ -191,6 +217,24 @@ const RecipeDetailPage = () => {
                 </span>
               </div>
               <h1 className="text-white font-display-lg text-display-lg-mobile md:text-display-lg mb-2 font-bold">{recipe.title}</h1>
+              {user && (user.id === recipe.author_id || user.role === "admin") && (
+                <div className="flex gap-3 mt-4 mb-2 select-none">
+                  <button
+                    onClick={() => navigate(`/edit-recipe/${recipe.id}`)}
+                    className="flex items-center gap-2 px-4 py-2 bg-surface-container-low/20 backdrop-blur-md text-white border border-white/30 rounded-full font-label-md hover:bg-white/20 transition-all active:scale-95 cursor-pointer font-bold"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">edit</span>
+                    Chỉnh sửa
+                  </button>
+                  <button
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-error/80 backdrop-blur-md text-white border border-error/30 rounded-full font-label-md hover:bg-error transition-all active:scale-95 cursor-pointer font-bold"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">delete</span>
+                    Xóa bài
+                  </button>
+                </div>
+              )}
               <p className="text-white/90 font-body-lg max-w-2xl">{recipe.description}</p>
             </div>
           </div>
@@ -498,6 +542,17 @@ const RecipeDetailPage = () => {
           </aside>
         </div>
       </main>
+
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteRecipe}
+        isSubmitting={isDeleting}
+      />
+      <DeleteSuccessModal
+        isOpen={isDeleteSuccessOpen}
+        onClose={handleDeleteSuccessClose}
+      />
 
       <Footer />
     </div>

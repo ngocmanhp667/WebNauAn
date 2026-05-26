@@ -11,8 +11,10 @@ const SubmitRecipePage = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState([""]);
-  const [steps, setSteps] = useState([{ instruction: "", image_url: "" }]);
+  const [steps, setSteps] = useState([{ instruction: "", image_url: "", image_file: null, image_preview: "" }]);
   const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [coverImageFile, setCoverImageFile] = useState(null);
+  const [coverImagePreview, setCoverImagePreview] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [prepTime, setPrepTime] = useState(15);
   const [cookTime, setCookTime] = useState(15);
@@ -55,19 +57,33 @@ const SubmitRecipePage = () => {
   };
 
   const handleAddStep = () => {
-    setSteps([...steps, { instruction: "", image_url: "" }]);
+    setSteps([...steps, { instruction: "", image_url: "", image_file: null, image_preview: "" }]);
   };
 
   const handleStepChange = (index, field, value) => {
-    const list = [...steps];
-    list[index][field] = value;
-    setSteps(list);
+    setSteps((currentSteps) => currentSteps.map((step, stepIndex) => (
+      stepIndex === index ? { ...step, [field]: value } : step
+    )));
   };
 
   const handleRemoveStep = (index) => {
     if (steps.length > 1) {
       setSteps(steps.filter((_, i) => i !== index));
     }
+  };
+
+  const handleCoverFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setCoverImageFile(file);
+    setCoverImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleStepFileChange = (index, event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    handleStepChange(index, "image_file", file);
+    handleStepChange(index, "image_preview", URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
@@ -85,6 +101,7 @@ const SubmitRecipePage = () => {
         title,
         description,
         cover_image_url: coverImageUrl || "https://images.unsplash.com/photo-1596797038530-2c107229654b",
+        coverImageFile,
         prep_time_minutes: prepTime,
         cook_time_minutes: cookTime,
         servings,
@@ -94,7 +111,8 @@ const SubmitRecipePage = () => {
         steps: steps.filter(s => s.instruction.trim() !== "").map((s, idx) => ({
           step_number: idx + 1,
           instruction: s.instruction,
-          image_url: s.image_url
+          image_url: s.image_url,
+          image_file: s.image_file
         })),
         categoryIds: selectedCategoryId ? [parseInt(selectedCategoryId)] : []
       };
@@ -251,8 +269,29 @@ const SubmitRecipePage = () => {
                           placeholder="Link ảnh minh họa bước"
                           type="text"
                           value={step.image_url}
-                          onChange={(e) => handleStepChange(idx, "image_url", e.target.value)}
+                          onChange={(e) => {
+                            handleStepChange(idx, "image_url", e.target.value);
+                            handleStepChange(idx, "image_file", null);
+                            handleStepChange(idx, "image_preview", "");
+                          }}
                         />
+                        <label className="flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-primary/50 rounded-lg text-primary text-sm font-bold cursor-pointer hover:bg-primary/5 transition-colors">
+                          <span className="material-symbols-outlined text-[18px]">upload</span>
+                          Tải ảnh bước
+                          <input
+                            className="hidden"
+                            type="file"
+                            accept="image/jpeg,image/png,image/gif,image/webp"
+                            onChange={(e) => handleStepFileChange(idx, e)}
+                          />
+                        </label>
+                        {(step.image_preview || step.image_url) && (
+                          <img
+                            src={step.image_preview || step.image_url}
+                            alt={`Bước ${idx + 1}`}
+                            className="w-full h-24 object-cover rounded-lg border border-outline-variant/20"
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -271,11 +310,25 @@ const SubmitRecipePage = () => {
                 placeholder="Dán link ảnh bìa (Unsplash, v.v.)"
                 type="text"
                 value={coverImageUrl}
-                onChange={(e) => setCoverImageUrl(e.target.value)}
+                onChange={(e) => {
+                  setCoverImageUrl(e.target.value);
+                  setCoverImageFile(null);
+                  setCoverImagePreview("");
+                }}
               />
-              {coverImageUrl && (
+              <label className="mb-3 flex items-center justify-center gap-2 px-md py-2.5 border border-dashed border-primary/50 rounded-lg text-primary font-label-md font-bold cursor-pointer hover:bg-primary/5 transition-colors">
+                <span className="material-symbols-outlined">upload</span>
+                Tải ảnh từ máy
+                <input
+                  className="hidden"
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={handleCoverFileChange}
+                />
+              </label>
+              {(coverImagePreview || coverImageUrl) && (
                 <div className="aspect-[4/3] rounded-lg overflow-hidden border border-outline-variant/20">
-                  <img src={coverImageUrl} alt="Review" className="w-full h-full object-cover" />
+                  <img src={coverImagePreview || coverImageUrl} alt="Ảnh bìa xem trước" className="w-full h-full object-cover" />
                 </div>
               )}
             </section>

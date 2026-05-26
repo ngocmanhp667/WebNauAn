@@ -1,5 +1,30 @@
 const recipeService = require('../services/recipe.service');
 
+const attachUploadedImages = (body, files = {}) => {
+    const data = { ...body };
+    const coverFile = files.coverImage?.[0];
+    if (coverFile) {
+        data.cover_image_url = `/uploads/${coverFile.filename}`;
+    }
+
+    if (data.steps) {
+        const steps = typeof data.steps === 'string' ? JSON.parse(data.steps) : data.steps;
+        const indexes = data.stepImageIndexes
+            ? JSON.parse(data.stepImageIndexes)
+            : [];
+
+        (files.stepImages || []).forEach((file, fileIndex) => {
+            const stepIndex = indexes[fileIndex];
+            if (steps[stepIndex]) {
+                steps[stepIndex].image_url = `/uploads/${file.filename}`;
+            }
+        });
+        data.steps = steps;
+    }
+
+    return data;
+};
+
 class RecipeController {
     async getAllRecipes(req, res, next) {
         try {
@@ -43,7 +68,7 @@ class RecipeController {
     async createRecipe(req, res, next) {
         try {
             const authorId = req.user.id;
-            const recipe = await recipeService.createRecipe(authorId, req.body);
+            const recipe = await recipeService.createRecipe(authorId, attachUploadedImages(req.body, req.files));
             return res.status(201).json({
                 success: true,
                 message: 'Tạo công thức thành công',
@@ -59,7 +84,7 @@ class RecipeController {
             const { id } = req.params;
             const authorId = req.user.id;
             const userRole = req.user.role;
-            const recipe = await recipeService.updateRecipe(id, authorId, userRole, req.body);
+            const recipe = await recipeService.updateRecipe(id, authorId, userRole, attachUploadedImages(req.body, req.files));
             return res.status(200).json({
                 success: true,
                 message: 'Cập nhật công thức thành công',
