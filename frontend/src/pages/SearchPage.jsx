@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { searchProductsApi } from "../services/productApi";
 
 const formatCurrency = (value) => {
@@ -505,7 +506,7 @@ const SearchPage = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-clay-100">
                         <div className="flex flex-wrap gap-2 text-xs text-ink-700/70">
                           {(item.tags || []).map((tag) => (
                             <span
@@ -516,11 +517,20 @@ const SearchPage = () => {
                             </span>
                           ))}
                         </div>
-                        <p className="text-xs text-ink-700/60">
+                        <p className="text-xs text-ink-700/60 font-medium">
                           {item.stock > 0
-                            ? `Con ${item.stock} phan`
-                            : "Het hang"}
+                            ? `Còn ${item.stock} phần`
+                            : "Hết hàng"}
                         </p>
+                      </div>
+
+                      <div className="mt-2 flex">
+                        <Link
+                          to={`/product/${item.id}`}
+                          className="w-full text-center rounded-2xl bg-[#f59e0b] px-4 py-2.5 text-xs font-bold text-[#111111] shadow-sm hover:bg-[#fbbf24] transition"
+                        >
+                          Xem chi tiết món ngon →
+                        </Link>
                       </div>
                     </div>
                   </article>

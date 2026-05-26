@@ -43,6 +43,18 @@ class ProductRepository {
       where.push("stock > 0");
     }
 
+    if (filters.isPromo === true) {
+      where.push("is_promo = 1");
+    }
+
+    if (filters.isNew === true) {
+      where.push("is_new = 1");
+    }
+
+    if (filters.isBestSeller === true) {
+      where.push("is_best_seller = 1");
+    }
+
     const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
     return { whereClause, params };
@@ -69,6 +81,11 @@ class ProductRepository {
     }
 
     return "ORDER BY sold DESC";
+  }
+
+  async findById(id) {
+    const [rows] = await pool.query("SELECT * FROM products WHERE id = ?", [id]);
+    return rows[0] || null;
   }
 
   async search(filters) {

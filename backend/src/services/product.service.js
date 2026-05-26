@@ -60,6 +60,12 @@ class ProductService {
     };
   }
 
+  async getProductById(id) {
+    const item = await productRepository.findById(id);
+    if (!item) return null;
+    return this.mapProduct(item);
+  }
+
   async getTopProducts({ type, page, limit }) {
     const result = await productRepository.getTopList({ type, page, limit });
     const items = result.rows.map((item) => this.mapProduct(item));

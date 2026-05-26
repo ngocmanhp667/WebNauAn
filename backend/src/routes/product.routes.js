@@ -15,5 +15,6 @@ const ProductController = require("../controllers/product.controller");
 
 router.get("/products", ProductController.search);
 router.get("/products/top", ProductController.top);
+router.get("/products/:id", ProductController.getById);
 
 module.exports = router;

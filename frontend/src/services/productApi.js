@@ -11,6 +11,9 @@ const buildParams = (filters) => {
   if (Number.isFinite(filters.maxPrice)) params.maxPrice = filters.maxPrice;
   if (Number.isFinite(filters.minRating)) params.minRating = filters.minRating;
   if (filters.inStock === true) params.inStock = true;
+  if (filters.isPromo === true) params.isPromo = true;
+  if (filters.isNew === true) params.isNew = true;
+  if (filters.isBestSeller === true) params.isBestSeller = true;
   if (filters.sort && filters.sort !== "popular") params.sort = filters.sort;
 
   return params;
@@ -21,6 +24,15 @@ export const searchProductsApi = async (filters = {}) => {
     const response = await api.get("/api/products", {
       params: buildParams(filters),
     });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const getProductByIdApi = async (id) => {
+  try {
+    const response = await api.get(`/api/products/${id}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

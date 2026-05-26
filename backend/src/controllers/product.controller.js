@@ -36,6 +36,9 @@ class ProductController {
         maxPrice: toNumber(req.query.maxPrice),
         minRating: toNumber(req.query.minRating),
         inStock: toBoolean(req.query.inStock),
+        isPromo: toBoolean(req.query.isPromo),
+        isNew: toBoolean(req.query.isNew),
+        isBestSeller: toBoolean(req.query.isBestSeller),
         sort: req.query.sort ? String(req.query.sort).trim() : "popular",
         page: toNumber(req.query.page),
         limit: toNumber(req.query.limit),
@@ -48,6 +51,40 @@ class ProductController {
         message: "Lay du lieu mon an thanh cong",
         data: result.items,
         pagination: result.pagination,
+      });
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
+        success: false,
+        message: error.message || "Loi server",
+      });
+    }
+  }
+
+  /**
+   * GET /api/products/:id
+   */
+  async getById(req, res, next) {
+    try {
+      const id = toNumber(req.params.id);
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "ID san pham khong hop le",
+        });
+      }
+
+      const product = await ProductService.getProductById(id);
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: "Khong tim thay san pham",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Lay chi tiet san pham thanh cong",
+        data: product,
       });
     } catch (error) {
       return res.status(error.statusCode || 500).json({

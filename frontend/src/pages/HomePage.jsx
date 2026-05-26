@@ -1,7 +1,18 @@
+import { useEffect, useState } from "react";
 import TopProductsSection from "../components/TopProductsSection.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { logoutAccount } from "../store/authSlice";
+import { searchProductsApi } from "../services/productApi";
+
+const formatCurrency = (value) => {
+  if (!Number.isFinite(value)) return "0";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(value);
+};
 
 const categories = [
   {
@@ -122,6 +133,39 @@ const scheduleItems = [
 const HomePage = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+
+  const [bestSellers, setBestSellers] = useState([]);
+  const [newProducts, setNewProducts] = useState([]);
+  const [promoProducts, setPromoProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const fetchHomeProducts = async () => {
+      setLoadingProducts(true);
+      try {
+        const [bestRes, newRes, promoRes] = await Promise.all([
+          searchProductsApi({ isBestSeller: true, limit: 3 }),
+          searchProductsApi({ isNew: true, limit: 3 }),
+          searchProductsApi({ isPromo: true, limit: 3 }),
+        ]);
+        if (!active) return;
+        if (bestRes?.data) setBestSellers(bestRes.data);
+        if (newRes?.data) setNewProducts(newRes.data);
+        if (promoRes?.data) setPromoProducts(promoRes.data);
+      } catch (err) {
+        console.error("Lỗi tải sản phẩm cho trang chủ:", err);
+      } finally {
+        if (active) setLoadingProducts(false);
+      }
+    };
+
+    fetchHomeProducts();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleLogout = () => {
     dispatch(logoutAccount());
@@ -379,30 +423,42 @@ const HomePage = () => {
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {featuredRecipes.map((recipe) => (
-              <div
-                key={recipe.title}
-                className="group rounded-3xl border border-[#2a2326] bg-[#141217] p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-float"
+            {(bestSellers.length ? bestSellers : promoProducts.length ? promoProducts : [
+              { id: 1, name: "Cơm gà nướng mật ong", category: "Món chính", rating: 4.6, price: 65000, sold: 180, description: "Gà nướng mật ong thơm mềm, ăn kèm cơm nóng." },
+              { id: 2, name: "Bún bò Huế", category: "Món chính", rating: 4.4, price: 55000, sold: 140, description: "Nước dùng đậm đà, thịt bò mềm, sả ớt cay nhẹ." },
+              { id: 3, name: "Lẩu nấm hải sản", category: "Lẩu", rating: 4.7, price: 189000, sold: 75, description: "Nước lẩu thanh ngọt, nhiều nấm tươi và hải sản." }
+            ]).map((item) => (
+              <Link
+                to={`/product/${item.id}`}
+                key={item.id}
+                className="group rounded-3xl border border-[#2a2326] bg-[#141217] p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-float flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between text-xs text-[#cbd5e1]/60">
-                  <span>{recipe.tag}</span>
-                  <span>{recipe.rating} ★</span>
+                <div>
+                  <div className="flex items-center justify-between text-xs text-[#cbd5e1]/60">
+                    <span>{item.category}</span>
+                    <span>{Number(item.rating || 0).toFixed(1)} ★</span>
+                  </div>
+                  <h3 className="mt-4 font-display text-xl text-[#f3f4f6] group-hover:text-[#f59e0b] transition">
+                    {item.name}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 text-xs text-[#cbd5e1]/70">
+                    {item.description}
+                  </p>
                 </div>
-                <h3 className="mt-4 font-display text-xl text-ink-900">
-                  {recipe.title}
-                </h3>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full bg-[#1b181f] px-3 py-1">
-                    {recipe.time}
-                  </span>
-                  <span className="rounded-full bg-[#1b181f] px-3 py-1">
-                    {recipe.difficulty}
-                  </span>
+                <div>
+                  <div className="mt-4 flex items-center justify-between text-xs font-semibold">
+                    <span className="text-[#f59e0b]">
+                      {formatCurrency(Number(item.price))}
+                    </span>
+                    <span className="text-[#cbd5e1]/60">
+                      Đã bán {item.sold || 0}
+                    </span>
+                  </div>
+                  <button className="mt-4 w-full rounded-2xl bg-[#f59e0b] py-2 text-xs font-semibold text-[#111111] transition group-hover:bg-[#fbbf24]">
+                    Xem chi tiết
+                  </button>
                 </div>
-                <button className="mt-6 rounded-2xl bg-[#f59e0b] px-4 py-2 text-xs font-semibold text-[#111111] transition hover:-translate-y-0.5 hover:bg-[#fbbf24]">
-                  Xem công thức
-                </button>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -411,27 +467,32 @@ const HomePage = () => {
           <div className="mt-14 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="rounded-3xl border border-[#2a2326] bg-[#141217] p-8 shadow-sm">
               <p className="text-xs uppercase tracking-[0.3em] text-[#cbd5e1]/60">
-                Công thức mới nhất
+                Món ăn mới nhất
               </p>
               <div className="mt-6 space-y-4">
-                {latestRecipes.map((recipe) => (
-                  <div
-                    key={recipe.title}
-                    className="flex flex-col gap-2 rounded-2xl border border-[#2a2326] bg-[#1b181f] p-4 sm:flex-row sm:items-center sm:justify-between"
+                {(newProducts.length ? newProducts : promoProducts.length ? promoProducts : [
+                  { id: 4, name: "Gỏi cuốn tôm thịt", category: "Khai vị", description: "Gỏi cuốn thanh mát, chấm nước mắm chua ngọt.", price: 35000, stock: 60 },
+                  { id: 5, name: "Chè dừa nóng", category: "Tráng miệng", description: "Chè dừa béo, thơm, ăn nóng ấm bụng.", price: 25000, stock: 35 },
+                  { id: 6, name: "Trà đào cam sả", category: "Đồ uống", description: "Trà thanh mát, vị chua ngọt dễ uống.", price: 28000, stock: 80 }
+                ]).map((item) => (
+                  <Link
+                    key={item.id}
+                    to={`/product/${item.id}`}
+                    className="flex flex-col gap-2 rounded-2xl border border-[#2a2326] bg-[#1b181f] p-4 sm:flex-row sm:items-center sm:justify-between hover:border-[#f59e0b]/40 transition group"
                   >
                     <div>
-                      <p className="font-semibold text-ink-900">
-                        {recipe.title}
+                      <p className="font-semibold text-[#f3f4f6] group-hover:text-[#f59e0b] transition">
+                        {item.name}
                       </p>
-                      <p className="text-xs text-[#cbd5e1]/70">
-                        {recipe.description}
+                      <p className="text-xs text-[#cbd5e1]/70 line-clamp-1">
+                        {item.description}
                       </p>
                     </div>
-                    <div className="text-xs text-[#cbd5e1]/60">
-                      <span className="mr-3">{recipe.time}</span>
-                      <span>{recipe.calories}</span>
+                    <div className="text-xs text-[#cbd5e1]/60 flex items-center gap-3">
+                      <span className="text-[#f59e0b] font-semibold">{formatCurrency(Number(item.price))}</span>
+                      <span className="rounded-full bg-[#141217] px-2.5 py-1 text-[#cbd5e1]/80">Còn {item.stock || 0} phần</span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

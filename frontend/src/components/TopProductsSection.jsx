@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { getTopProductsApi } from "../services/productApi";
 
 const typeOptions = [
@@ -158,9 +159,10 @@ const TopProductsSection = () => {
                   : `${item.sold || 0} luot`;
 
               return (
-                <article
+                <Link
                   key={item.id}
-                  className="min-w-[240px] snap-start rounded-3xl border border-[#2a2326] bg-[#1b181f] p-4 shadow-sm"
+                  to={`/product/${item.id}`}
+                  className="min-w-[240px] snap-start rounded-3xl border border-[#2a2326] bg-[#1b181f] p-4 shadow-sm hover:border-[#f59e0b]/40 hover:-translate-y-0.5 transition block"
                 >
                   <div
                     className="h-36 w-full rounded-2xl bg-gradient-to-br from-[#1f1b1c] to-[#2a2326] bg-cover bg-center"
@@ -176,7 +178,7 @@ const TopProductsSection = () => {
                     <span>{item.category}</span>
                     <span>{metric}</span>
                   </div>
-                  <h4 className="mt-3 font-display text-lg text-[#f3f4f6]">
+                  <h4 className="mt-3 font-display text-lg text-[#f3f4f6] hover:text-[#f59e0b] transition">
                     {item.name}
                   </h4>
                   <p className="mt-2 line-clamp-2 text-xs text-[#cbd5e1]/70">
@@ -190,7 +192,7 @@ const TopProductsSection = () => {
                       </span>
                     ) : null}
                   </div>
-                </article>
+                </Link>
               );
             })}
           </div>
