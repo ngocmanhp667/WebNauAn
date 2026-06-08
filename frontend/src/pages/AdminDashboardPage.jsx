@@ -1,8 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminHeader from "../components/AdminHeader";
+import api from "../services/api";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend
+} from "recharts";
+
+const COLORS = ["#ab2e10", "#0284c7", "#059669", "#d97706", "#7c3aed", "#ec4899", "#6b7280"];
+const DIFFICULTY_COLORS = {
+  "dễ": "#059669",
+  "trung bình": "#d97706",
+  "khó": "#ab2e10"
+};
 
 const AdminDashboardPage = () => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [pendingRecipes, setPendingRecipes] = useState([
     {
       id: 1,
@@ -27,6 +53,27 @@ const AdminDashboardPage = () => {
     }
   ]);
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/api/admin/stats");
+        if (response.data.success) {
+          setStats(response.data.data);
+        } else {
+          throw new Error(response.data.message || "Không thể lấy dữ liệu thống kê");
+        }
+      } catch (err) {
+        console.error("Lỗi lấy dữ liệu thống kê:", err);
+        setError(err.response?.data?.message || err.message || "Lỗi kết nối server");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   const handleApprove = (id) => {
     setPendingRecipes((prev) => prev.filter((recipe) => recipe.id !== id));
   };
@@ -34,6 +81,24 @@ const AdminDashboardPage = () => {
   const handleReject = (id) => {
     setPendingRecipes((prev) => prev.filter((recipe) => recipe.id !== id));
   };
+
+  // Chuẩn bị dữ liệu cho các biểu đồ
+  const recipeData = stats?.recipeStats?.map(item => ({
+    name: item.month,
+    "Số công thức": item.count
+  })) || [];
+
+  const aiLogsData = stats?.aiLogsStats?.map(item => ({
+    name: item.month,
+    "Lượt dùng AI": item.count
+  })) || [];
+
+  const preferenceData = stats?.preferenceStats?.slice(0, 7) || []; // Lấy tối đa top 7 sở thích
+
+  const difficultyData = stats?.difficultyStats?.map(item => ({
+    name: item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1),
+    value: item.count
+  })) || [];
 
   return (
     <div className="bg-surface text-on-surface font-body-md min-h-screen flex">
@@ -47,16 +112,25 @@ const AdminDashboardPage = () => {
         
         {/* Content Padding Area */}
         <main className="p-gutter max-w-max-width mx-auto w-full flex-grow">
+          {error && (
+            <div className="mb-md bg-error-container/30 border border-error text-error p-md rounded-xl text-sm flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">error</span>
+              {error}
+            </div>
+          )}
+
           {/* Statistics Bento Grid */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-md mb-lg select-none">
             {/* Stat 1 */}
             <div className="bg-surface-container-lowest p-md rounded-xl recipe-card-shadow flex items-center justify-between border-l-4 border-primary border-t border-r border-b border-outline-variant/15">
               <div>
                 <p className="text-on-surface-variant font-label-md text-label-md uppercase tracking-wider mb-xs font-bold">Tổng Người Dùng</p>
-                <p className="font-headline-md text-headline-md text-on-surface font-bold">12,482</p>
+                <p className="font-headline-md text-headline-md text-on-surface font-bold">
+                  {loading ? "..." : (stats?.summary?.totalUsers?.toLocaleString() || "0")}
+                </p>
                 <p className="text-tertiary font-label-sm text-label-sm mt-xs flex items-center gap-1 font-bold">
                   <span className="material-symbols-outlined text-[14px]">trending_up</span>
-                  +12% so với tháng trước
+                  Dữ liệu thời gian thực
                 </p>
               </div>
               <div className="bg-primary-fixed p-sm rounded-full text-primary shadow-inner">
@@ -68,10 +142,12 @@ const AdminDashboardPage = () => {
             <div className="bg-surface-container-lowest p-md rounded-xl recipe-card-shadow flex items-center justify-between border-l-4 border-tertiary border-t border-r border-b border-outline-variant/15">
               <div>
                 <p className="text-on-surface-variant font-label-md text-label-md uppercase tracking-wider mb-xs font-bold">Tổng Công Thức</p>
-                <p className="font-headline-md text-headline-md text-on-surface font-bold">8,950</p>
+                <p className="font-headline-md text-headline-md text-on-surface font-bold">
+                  {loading ? "..." : (stats?.summary?.totalRecipes?.toLocaleString() || "0")}
+                </p>
                 <p className="text-tertiary font-label-sm text-label-sm mt-xs flex items-center gap-1 font-bold">
                   <span className="material-symbols-outlined text-[14px]">trending_up</span>
-                  +5.4% so với tháng trước
+                  Dữ liệu thời gian thực
                 </p>
               </div>
               <div className="bg-tertiary-fixed p-sm rounded-full text-tertiary shadow-inner">
@@ -83,7 +159,7 @@ const AdminDashboardPage = () => {
             <div className="bg-surface-container-lowest p-md rounded-xl recipe-card-shadow flex items-center justify-between border-l-4 border-error border-t border-r border-b border-outline-variant/15">
               <div>
                 <p className="text-on-surface-variant font-label-md text-label-md uppercase tracking-wider mb-xs font-bold">Chờ Duyệt</p>
-                <p className="font-headline-md text-headline-md text-on-surface font-bold">{pendingRecipes.length + 121}</p>
+                <p className="font-headline-md text-headline-md text-on-surface font-bold">{pendingRecipes.length}</p>
                 <p className="text-error font-label-sm text-label-sm mt-xs font-bold">Cần xử lý gấp</p>
               </div>
               <div className="bg-error-container p-sm rounded-full text-error shadow-inner">
@@ -91,6 +167,145 @@ const AdminDashboardPage = () => {
               </div>
             </div>
           </section>
+
+          {/* ═══ BIỂU ĐỒ THỐNG KÊ (NHIỆM VỤ CỦA MINH) ═══ */}
+          <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold mb-md select-none">Biểu đồ thống kê hoạt động & AI</h2>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-md mb-lg">
+              <div className="bg-surface-container-lowest p-md rounded-xl h-[360px] animate-pulse border border-outline-variant/15 flex flex-col justify-center items-center">
+                <span className="material-symbols-outlined text-[32px] text-outline-variant animate-spin">progress_activity</span>
+                <p className="text-on-surface-variant text-sm mt-2 font-bold">Đang tải biểu đồ công thức...</p>
+              </div>
+              <div className="bg-surface-container-lowest p-md rounded-xl h-[360px] animate-pulse border border-outline-variant/15 flex flex-col justify-center items-center">
+                <span className="material-symbols-outlined text-[32px] text-outline-variant animate-spin">progress_activity</span>
+                <p className="text-on-surface-variant text-sm mt-2 font-bold">Đang tải biểu đồ AI...</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Row 1: Line Chart & Bar Chart */}
+              <section className="grid grid-cols-1 lg:grid-cols-2 gap-md mb-lg">
+                {/* Chart 1: Công thức mới */}
+                <div className="bg-surface-container-lowest p-md rounded-xl recipe-card-shadow border border-outline-variant/15 flex flex-col">
+                  <h3 className="font-headline-sm text-[16px] text-on-surface font-bold mb-md select-none flex items-center gap-1">
+                    <span className="material-symbols-outlined text-primary text-[20px]">calendar_month</span>
+                    Công thức mới theo tháng
+                  </h3>
+                  <div className="w-full h-[300px]">
+                    {recipeData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={recipeData} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(225,191,183,0.15)" />
+                          <XAxis dataKey="name" stroke="#665e49" fontSize={11} fontWeight={600} />
+                          <YAxis stroke="#665e49" fontSize={11} fontWeight={600} />
+                          <Tooltip contentStyle={{ background: "#fff", border: "1px solid rgba(225,191,183,0.2)", borderRadius: 12 }} />
+                          <Legend wrapperStyle={{ fontSize: 12, fontWeight: 700 }} />
+                          <Line type="monotone" dataKey="Số công thức" stroke="#ab2e10" strokeWidth={3} dot={{ r: 4, stroke: "#ab2e10", strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-on-surface-variant text-sm font-bold">Không có dữ liệu bài viết mới</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Chart 2: AI Logs */}
+                <div className="bg-surface-container-lowest p-md rounded-xl recipe-card-shadow border border-outline-variant/15 flex flex-col">
+                  <h3 className="font-headline-sm text-[16px] text-on-surface font-bold mb-md select-none flex items-center gap-1">
+                    <span className="material-symbols-outlined text-tertiary text-[20px]">auto_awesome</span>
+                    Lượt sử dụng AI Tủ lạnh ảo
+                  </h3>
+                  <div className="w-full h-[300px]">
+                    {aiLogsData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={aiLogsData} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(225,191,183,0.15)" />
+                          <XAxis dataKey="name" stroke="#665e49" fontSize={11} fontWeight={600} />
+                          <YAxis stroke="#665e49" fontSize={11} fontWeight={600} />
+                          <Tooltip contentStyle={{ background: "#fff", border: "1px solid rgba(225,191,183,0.2)", borderRadius: 12 }} />
+                          <Legend wrapperStyle={{ fontSize: 12, fontWeight: 700 }} />
+                          <Bar dataKey="Lượt dùng AI" fill="#0284c7" radius={[4, 4, 0, 0]} barSize={40} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-on-surface-variant text-sm font-bold">Chưa có lượt sử dụng AI nào được log</div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Row 2: Pie Chart & Doughnut Chart */}
+              <section className="grid grid-cols-1 lg:grid-cols-2 gap-md mb-lg">
+                {/* Chart 3: Sở thích ẩm thực */}
+                <div className="bg-surface-container-lowest p-md rounded-xl recipe-card-shadow border border-outline-variant/15 flex flex-col">
+                  <h3 className="font-headline-sm text-[16px] text-on-surface font-bold mb-md select-none flex items-center gap-1">
+                    <span className="material-symbols-outlined text-primary text-[20px]">volunteer_activism</span>
+                    Sở thích & Mục tiêu dinh dưỡng (Top 7)
+                  </h3>
+                  <div className="w-full h-[300px] flex items-center justify-center">
+                    {preferenceData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={preferenceData}
+                            cx="50%"
+                            cy="45%"
+                            labelLine={true}
+                            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                            outerRadius={80}
+                            dataKey="value"
+                          >
+                            {preferenceData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ background: "#fff", border: "1px solid rgba(225,191,183,0.2)", borderRadius: 12 }} />
+                          <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700 }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <p className="text-on-surface-variant text-sm font-bold">Chưa cập nhật sở thích người dùng</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Chart 4: Phân bố độ khó */}
+                <div className="bg-surface-container-lowest p-md rounded-xl recipe-card-shadow border border-outline-variant/15 flex flex-col">
+                  <h3 className="font-headline-sm text-[16px] text-on-surface font-bold mb-md select-none flex items-center gap-1">
+                    <span className="material-symbols-outlined text-error text-[20px]">fitness_center</span>
+                    Phân bổ độ khó của công thức
+                  </h3>
+                  <div className="w-full h-[300px] flex items-center justify-center">
+                    {difficultyData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={difficultyData}
+                            cx="50%"
+                            cy="45%"
+                            innerRadius={60}
+                            outerRadius={85}
+                            paddingAngle={5}
+                            dataKey="value"
+                            label={({ name, value }) => `${name}: ${value}`}
+                          >
+                            {difficultyData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={DIFFICULTY_COLORS[entry.name.toLowerCase()] || "#6b7280"} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ background: "#fff", border: "1px solid rgba(225,191,183,0.2)", borderRadius: 12 }} />
+                          <Legend wrapperStyle={{ fontSize: 11, fontWeight: 700 }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <p className="text-on-surface-variant text-sm font-bold">Không có dữ liệu độ khó</p>
+                    )}
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
 
           {/* Table Section: Công thức chờ duyệt */}
           <section className="bg-surface-container-lowest rounded-xl shadow-soft overflow-hidden border border-outline-variant/10">

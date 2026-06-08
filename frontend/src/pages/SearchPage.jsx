@@ -160,7 +160,7 @@ const SearchPage = () => {
             <Link to="/" className="hover:text-primary">Trang chủ</Link>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             <span className="text-primary font-bold">Khám phá công thức</span>
-          </nav>
+            </nav>
           
           <div className="grid md:grid-cols-2 gap-lg items-center">
             <div>
@@ -202,33 +202,41 @@ const SearchPage = () => {
       <main className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl flex-grow flex flex-col md:flex-row gap-lg w-full">
         {/* Filter Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0 select-none">
-          <div className="sticky top-24 space-y-lg">
-            {/* Categories */}
+          <div className="sticky top-24 space-y-lg bg-surface-container-lowest p-md rounded-xl border border-outline-variant/15 shadow-sm">
+            
             {/* Categories */}
             <div>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold">Danh mục</h3>
-              <div className="space-y-sm">
+              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold flex items-center gap-xs">
+                <span className="material-symbols-outlined text-[20px] text-primary">category</span>
+                Danh mục
+              </h3>
+              <div className="space-y-sm max-h-48 overflow-y-auto pr-xs">
                 {loading ? (
-                  <p className="text-xs text-on-surface-variant">Đang tải...</p>
-                ) : dbCategories.map((cat) => (
-                  <label key={cat.id} className="flex items-center gap-sm cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.includes(cat.name)}
-                      onChange={() => handleCategoryChange(cat.name)}
-                      className="w-5 h-5 border-outline-variant text-primary rounded focus:ring-primary focus:outline-none"
-                    />
-                    <span className="font-body-md text-on-surface-variant group-hover:text-primary transition-colors">
-                      {cat.name}
-                    </span>
-                  </label>
-                ))}
+                  <p className="text-xs text-on-surface-variant font-bold">Đang tải...</p>
+                ) : (
+                  dbCategories.map((cat) => (
+                    <label key={cat.id} className="flex items-center gap-sm cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(cat.name)}
+                        onChange={() => handleCategoryChange(cat.name)}
+                        className="w-5 h-5 border-outline-variant text-primary rounded focus:ring-primary focus:outline-none"
+                      />
+                      <span className="font-body-md text-on-surface-variant group-hover:text-primary transition-colors">
+                        {cat.name}
+                      </span>
+                    </label>
+                  ))
+                )}
               </div>
             </div>
             
             {/* Prep Time */}
-            <div>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold">Thời gian nấu</h3>
+            <div className="border-t border-outline-variant/15 pt-md">
+              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold flex items-center gap-xs">
+                <span className="material-symbols-outlined text-[20px] text-primary">schedule</span>
+                Thời gian nấu
+              </h3>
               <div className="space-y-sm">
                 {[
                   { label: "Tất cả", value: "all" },
@@ -253,14 +261,17 @@ const SearchPage = () => {
             </div>
             
             {/* Difficulty */}
-            <div>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold">Độ khó</h3>
+            <div className="border-t border-outline-variant/15 pt-md">
+              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md font-bold flex items-center gap-xs">
+                <span className="material-symbols-outlined text-[20px] text-primary">fitness_center</span>
+                Độ khó
+              </h3>
               <div className="flex flex-wrap gap-xs">
                 {["all", "Dễ", "Vừa", "Khó"].map((diff) => (
                   <button
                     key={diff}
                     onClick={() => { setSelectedDifficulty(diff); setCurrentPage(1); }}
-                    className={`px-4 py-2 rounded-full border text-label-md font-label-md transition-all font-bold ${
+                    className={`px-3 py-1.5 rounded-full border text-label-md font-label-md transition-all font-bold ${
                       selectedDifficulty === diff
                         ? "border-primary bg-primary-container/10 text-primary"
                         : "border-outline-variant text-secondary hover:bg-secondary-container hover:text-on-secondary-container"
@@ -272,121 +283,99 @@ const SearchPage = () => {
               </div>
             </div>
 
+            {/* Reset Filter Button */}
             <button
               onClick={resetFilters}
-              className="w-full py-2.5 rounded-xl border border-outline text-secondary font-label-md font-bold hover:bg-surface-container-low transition-all active:scale-95"
+              className="w-full mt-md py-2.5 bg-outline-variant/10 text-secondary hover:bg-primary/5 hover:text-primary font-label-md font-bold rounded-xl transition-all border border-transparent hover:border-primary/25"
             >
-              Đặt lại bộ lọc
+              Xoá bộ lọc
             </button>
           </div>
         </aside>
 
-        {/* Main Recipe Grid / Results */}
+        {/* Results Grid Area */}
         <section className="flex-grow">
-          {loading ? (
-            <div className="text-center py-16">
-              <span className="material-symbols-outlined text-4xl animate-spin text-primary">progress_activity</span>
-              <p className="mt-4 text-on-surface-variant">Đang tải danh sách công thức...</p>
+          {/* Header & Sort */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-sm mb-lg pb-md border-b border-outline-variant/10 select-none">
+            <p className="text-on-surface-variant font-label-md text-label-md font-bold">
+              Tìm thấy <span className="text-primary">{filteredRecipes.length}</span> công thức nấu ăn
+            </p>
+            <div className="flex items-center gap-sm">
+              <span className="text-label-md font-label-md text-secondary font-bold whitespace-nowrap">Sắp xếp:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+                className="bg-surface-container-lowest border border-outline-variant text-on-surface text-label-md rounded-lg p-2 outline-none focus:border-primary font-bold shadow-sm"
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="rating">Đánh giá cao</option>
+              </select>
             </div>
-          ) : filteredRecipes.length > 0 ? (
-            <>
-              {/* Header & Sort */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-md mb-lg">
-                <p className="font-body-md text-on-surface-variant">
-                  Hiển thị <span className="font-bold text-on-surface">{filteredRecipes.length} công thức</span> phù hợp
-                </p>
-                <div className="flex items-center gap-sm select-none">
-                  <span className="font-label-md text-label-md text-on-surface-variant">Sắp xếp:</span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-surface-container-lowest border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface py-2 pr-10 pl-3 focus:ring-primary focus:border-primary focus:outline-none"
-                  >
-                    <option value="newest">Mới nhất</option>
-                    <option value="rating">Đánh giá cao</option>
-                  </select>
+          </div>
+
+          {/* Recipe List */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div key={idx} className="bg-surface-container-lowest rounded-2xl h-96 animate-pulse border border-outline-variant/10 shadow-sm flex flex-col p-4">
+                  <div className="bg-surface-variant w-full h-48 rounded-xl mb-4"></div>
+                  <div className="bg-surface-variant w-1/3 h-4 rounded mb-2"></div>
+                  <div className="bg-surface-variant w-3/4 h-6 rounded mb-2"></div>
+                  <div className="bg-surface-variant w-full h-12 rounded mt-auto"></div>
                 </div>
-              </div>
-              
-              {/* Bento Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
-                {displayedRecipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
-                ))}
-              </div>
-              
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-xl flex justify-center items-center gap-sm select-none">
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => p - 1)}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-variant transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
-                  >
-                    <span className="material-symbols-outlined">chevron_left</span>
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setCurrentPage(p)}
-                      className={`w-10 h-10 flex items-center justify-center rounded-lg font-label-md font-bold ${
-                        currentPage === p
-                          ? "bg-primary text-on-primary"
-                          : "text-on-surface-variant hover:bg-surface-variant"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                  <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => p + 1)}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-variant transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
-                  >
-                    <span className="material-symbols-outlined">chevron_right</span>
-                  </button>
-                </div>
-              )}
-            </>
+              ))}
+            </div>
+          ) : displayedRecipes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+              {displayedRecipes.map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} />
+              ))}
+            </div>
           ) : (
-            /* Empty State Search Section */
-            <div className="w-full flex flex-col items-center text-center select-none py-lg animate-in fade-in duration-300">
-              <div className="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center mb-md">
-                <span className="material-symbols-outlined text-primary text-3xl font-bold">search_off</span>
-              </div>
-              <h2 className="font-headline-md text-headline-md text-on-surface mb-sm leading-tight font-bold">
-                Không tìm thấy công thức nào phù hợp
-              </h2>
-              <p className="font-body-md text-body-md text-on-surface-variant mb-lg max-w-md">
-                Thử điều chỉnh lại từ khóa hoặc sử dụng các gợi ý bên dưới để tìm món ăn khác nhé!
+            <div className="text-center py-20 bg-surface-container-lowest rounded-2xl border border-dashed border-outline-variant/30 select-none">
+              <span className="material-symbols-outlined text-[48px] text-outline-variant animate-bounce mb-md">sentiment_dissatisfied</span>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold mb-xs">Không tìm thấy công thức</h3>
+              <p className="text-on-surface-variant text-body-md max-w-sm mx-auto">
+                Thử tìm kiếm với từ khoá khác hoặc xoá bớt các bộ lọc để có thêm kết quả gợi ý.
               </p>
-              
-              <div className="flex flex-wrap justify-center gap-sm mb-xl">
-                {["Bún chả", "Chay", "Tráng miệng"].map((chip) => (
-                  <span
-                    key={chip}
-                    onClick={() => handleChipClick(chip)}
-                    className="px-md py-2 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full font-label-md text-label-md border border-outline-variant cursor-pointer hover:bg-tertiary-fixed-dim transition-colors font-bold shadow-sm"
-                  >
-                    {chip}
-                  </span>
-                ))}
-              </div>
-              
-              {/* Suggested Recipes Grid */}
-              <div className="w-full border-t border-outline-variant/10 pt-xl">
-                <h3 className="font-headline-sm text-headline-sm text-on-surface mb-lg font-bold">Có thể bạn quan tâm</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-md max-w-3xl mx-auto text-left">
-                  {dbRecipes.slice(0, 2).map((recipe) => (
-                    <RecipeCard key={recipe.id} recipe={recipe} />
-                  ))}
-                </div>
-              </div>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-xs mt-xl select-none">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => prev - 1)}
+                className="p-2 hover:bg-surface-variant rounded-full text-on-surface-variant disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+              >
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-9 h-9 flex items-center justify-center rounded-full text-label-md font-bold transition-all ${
+                    currentPage === i + 1
+                      ? "bg-primary text-on-primary shadow-md"
+                      : "hover:bg-surface-variant text-on-surface-variant"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                className="p-2 hover:bg-surface-variant rounded-full text-on-surface-variant disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
             </div>
           )}
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

@@ -1,8 +1,4 @@
 -- =================================================================
--- DATABASE INITIALIZATION SCRIPT (CulinShare / MâmNgon)
--- =================================================================
-
--- Xóa database cũ nếu tồn tại để reset dữ liệu sạch
 DROP DATABASE IF EXISTS CulinShare;
 
 -- Tạo database mới
