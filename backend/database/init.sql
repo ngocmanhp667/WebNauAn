@@ -214,6 +214,24 @@ CREATE TABLE follows (
     INDEX idx_follows_following_id (following_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 12. Table: notifications
+CREATE TABLE notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    type ENUM('comment', 'review', 'follow') NOT NULL,
+    recipe_id INT DEFAULT NULL,
+    message TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE SET NULL,
+    INDEX idx_notifications_user_id (user_id),
+    INDEX idx_notifications_is_read (user_id, is_read)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =================================================================
 -- SEED DATA
 -- =================================================================
@@ -343,7 +361,8 @@ VALUES
 (7, 'chefquang', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.quang@culinshare.com', 'Chef Quốc Quang', 'chef', 1, 'Yêu thích hải sản, món nướng và bếp hiện đại.', 'https://loremflickr.com/300/300/chef,man?lock=7'),
 (8, 'maihealthy', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'maihealthy@gmail.com', 'Ngọc Mai', 'user', 1, 'Ưu tiên món chay, salad và khẩu phần cân bằng.', 'https://loremflickr.com/300/300/woman,portrait?lock=8'),
 (9, 'foodiephuong', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'foodiephuong@gmail.com', 'Thu Phương', 'user', 1, 'Thích thử món mới và chia sẻ đánh giá thật.', 'https://loremflickr.com/300/300/woman,smile?lock=9'),
-(10, 'anvaobep', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'anvaobep@gmail.com', 'Gia An', 'user', 1, 'Tập nấu bữa cơm ngon mỗi ngày cho gia đình.', 'https://loremflickr.com/300/300/man,portrait?lock=10');
+(10, 'anvaobep', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'anvaobep@gmail.com', 'Gia An', 'user', 1, 'Tập nấu bữa cơm ngon mỗi ngày cho gia đình.', 'https://loremflickr.com/300/300/man,portrait?lock=10'),
+(11, 'dongdong15032005', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'dongdong15032005@gmail.com', 'Dong Dong', 'user', 1, 'Tai khoan test quen mat khau.', 'https://loremflickr.com/300/300/person,portrait?lock=11');
 
 -- Expanded categories covering regions, meal types, ingredients and international dishes.
 INSERT INTO categories (id, name, slug, description, image_url)

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutAccount } from "../store/authSlice";
 import { getImageUrl } from "../services/api";
+import NotificationBell from "./NotificationBell";
 
 const Header = () => {
   const location = useLocation();
@@ -77,9 +78,7 @@ const Header = () => {
           </form>
 
           {/* Notifications */}
-          <button className="material-symbols-outlined text-secondary hover:text-primary transition-all active:scale-95 p-2 rounded-full hover:bg-surface-container-low select-none">
-            notifications
-          </button>
+          <NotificationBell />
 
           {/* User Profile Menu */}
           <div className="relative">

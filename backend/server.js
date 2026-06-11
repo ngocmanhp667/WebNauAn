@@ -8,7 +8,9 @@
 
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
+const { initSocket } = require('./src/config/socket');
 
 // Import Routes
 const authRoutes = require('./src/routes/auth.routes');
@@ -21,6 +23,7 @@ const savedRecipeRoutes = require('./src/routes/savedRecipe.routes');
 const followRoutes = require('./src/routes/follow.routes');
 const aiRoutes = require('./src/routes/ai.routes');
 const adminRoutes = require('./src/routes/admin.routes');
+const notificationRoutes = require('./src/routes/notification.routes');
 
 const pool = require('./src/config/database');
 
@@ -76,6 +79,9 @@ app.use('/api', aiRoutes);
 // Admin routes
 app.use('/api', adminRoutes);
 
+// Notification routes
+app.use('/api', notificationRoutes);
+
 // User routes: /user/profile, /admin/profile, ...
 app.use('/', userRoutes);
 
@@ -108,6 +114,12 @@ app.use((err, req, res, next) => {
 // ========================
 // START SERVER
 // ========================
+// Tạo HTTP server từ Express app
+const server = http.createServer(app);
+
+// Khởi tạo Socket.io trên HTTP server
+initSocket(server);
+
 const startServer = async () => {
     try {
         // Test kết nối database
@@ -115,9 +127,10 @@ const startServer = async () => {
         console.log('✅ Kết nối MySQL thành công!');
         connection.release();
 
-        // Khởi động server
-        app.listen(PORT, () => {
+        // Khởi động server (dùng HTTP server thay vì app.listen)
+        server.listen(PORT, () => {
             console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
+            console.log(`🔌 Socket.io đã sẵn sàng cho kết nối realtime`);
             console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
         });
     } catch (error) {

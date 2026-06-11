@@ -1,4 +1,6 @@
 const followService = require('../services/follow.service');
+const notificationService = require('../services/notification.service');
+const userRepository = require('../repositories/user.repository');
 
 class FollowController {
     async followUser(req, res, next) {
@@ -6,6 +8,23 @@ class FollowController {
             const { id: followingId } = req.params;
             const followerId = req.user.id;
             const result = await followService.followUser(followerId, followingId);
+
+            // Gửi thông báo realtime tới người được follow
+            try {
+                const follower = await userRepository.findById(followerId);
+                if (follower) {
+                    await notificationService.createAndNotify({
+                        userId: parseInt(followingId),
+                        senderId: followerId,
+                        type: 'follow',
+                        recipeId: null,
+                        message: `đã bắt đầu theo dõi bạn`,
+                    });
+                }
+            } catch (notifError) {
+                console.error('Lỗi gửi notification follow:', notifError.message);
+            }
+
             return res.status(200).json({
                 success: true,
                 message: 'Theo dõi thành công',

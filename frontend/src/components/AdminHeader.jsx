@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import NotificationBell from "./NotificationBell";
 
 const AdminHeader = () => {
   return (
@@ -21,9 +22,7 @@ const AdminHeader = () => {
         </div>
         
         {/* Notification */}
-        <button className="text-on-surface-variant hover:text-primary transition-colors p-2 hover:bg-surface-container-low rounded-full">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
+        <NotificationBell />
         
         <div className="h-8 w-[1px] bg-outline-variant/30"></div>
         

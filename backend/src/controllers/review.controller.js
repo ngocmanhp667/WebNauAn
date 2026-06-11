@@ -1,4 +1,6 @@
 const reviewService = require('../services/review.service');
+const notificationService = require('../services/notification.service');
+const recipeRepository = require('../repositories/recipe.repository');
 
 class ReviewController {
     async addReview(req, res, next) {
@@ -8,6 +10,23 @@ class ReviewController {
             const { rating, comment } = req.body;
 
             const review = await reviewService.addReview(userId, recipeId, rating, comment);
+
+            // Gửi thông báo realtime tới chủ recipe
+            try {
+                const recipe = await recipeRepository.findById(recipeId);
+                if (recipe && recipe.author_id !== userId) {
+                    await notificationService.createAndNotify({
+                        userId: recipe.author_id,
+                        senderId: userId,
+                        type: 'review',
+                        recipeId: parseInt(recipeId),
+                        message: `đã đánh giá ${rating} sao cho công thức "${recipe.title}" của bạn`,
+                    });
+                }
+            } catch (notifError) {
+                console.error('Lỗi gửi notification review:', notifError.message);
+            }
+
             return res.status(201).json({
                 success: true,
                 message: 'Đăng đánh giá thành công',
