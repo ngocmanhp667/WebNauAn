@@ -242,7 +242,7 @@ export const getFollowingApi = async (userId) => {
 
 export const updateHealthStatsApi = async (data) => {
   try {
-    const response = await api.put("/api/user/health-stats", data);
+    const response = await api.put("/user/health-stats", data);
     return response.data.data;
   } catch (error) {
     throw error.response?.data || error.message;
