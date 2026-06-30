@@ -12,6 +12,7 @@ USE CulinShare;
 -- DROP TABLES (IN CORRECT ORDER FOR FOREIGN KEYS)
 -- =================================================================
 DROP TABLE IF EXISTS follows;
+DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS saved_recipes;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS reviews;
@@ -49,6 +50,11 @@ CREATE TABLE users (
     
     -- Phân quyền
     role VARCHAR(20) DEFAULT 'user',
+    
+    -- Chỉ số sức khỏe (phục vụ tính BMI & TDEE)
+    height INT DEFAULT NULL,
+    weight INT DEFAULT NULL,
+    activity_level VARCHAR(20) DEFAULT 'sedentary', -- 'sedentary', 'moderate', 'active'
     
     -- Xác thực email
     is_verified TINYINT(1) DEFAULT 0,
