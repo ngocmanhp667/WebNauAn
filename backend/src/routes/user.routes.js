@@ -90,8 +90,19 @@ router.post(
 );
 
 /**
+ * PUT /api/me/health
+ * Cập nhật chỉ số sức khỏe & tính TDEE (Đã đồng bộ)
+ */
+router.put(
+    '/api/me/health',
+    verifyToken,
+    authorize('user', 'admin'),
+    UserController.updateHealthStats
+);
+
+/**
  * PUT /user/health-stats
- * Cập nhật chỉ số sức khỏe & tính TDEE
+ * Giữ nguyên để tương thích ngược
  */
 router.put(
     '/user/health-stats',

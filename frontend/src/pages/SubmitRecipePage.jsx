@@ -10,7 +10,7 @@ const SubmitRecipePage = () => {
   const [categoriesList, setCategoriesList] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [ingredients, setIngredients] = useState([""]);
+  const [ingredients, setIngredients] = useState([{ quantity: "", name: "" }]);
   const [steps, setSteps] = useState([{ instruction: "", image_url: "", image_file: null, image_preview: "" }]);
   const [coverImageUrl, setCoverImageUrl] = useState("");
   const [coverImageFile, setCoverImageFile] = useState(null);
@@ -41,12 +41,12 @@ const SubmitRecipePage = () => {
   }, []);
 
   const handleAddIngredient = () => {
-    setIngredients([...ingredients, ""]);
+    setIngredients([...ingredients, { quantity: "", name: "" }]);
   };
 
-  const handleIngredientChange = (index, value) => {
+  const handleIngredientChange = (index, field, value) => {
     const list = [...ingredients];
-    list[index] = value;
+    list[index][field] = value;
     setIngredients(list);
   };
 
@@ -97,6 +97,26 @@ const SubmitRecipePage = () => {
 
     setLoading(true);
     try {
+      // Map ingredients to backend expected format
+      const formattedIngs = ingredients
+        .filter(ing => ing.name.trim() !== "")
+        .map(ing => {
+          const qtyVal = ing.quantity.trim();
+          const match = qtyVal.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z\u00C0-\u1EF9]+)?$/);
+          if (match) {
+            return {
+              name: ing.name.trim(),
+              quantity: match[1],
+              unit: match[2] || ""
+            };
+          }
+          return {
+            name: ing.name.trim(),
+            quantity: qtyVal,
+            unit: ""
+          };
+        });
+
       const payload = {
         title,
         description,
@@ -107,7 +127,7 @@ const SubmitRecipePage = () => {
         servings,
         calories,
         difficulty,
-        ingredients: ingredients.filter(ing => ing.trim() !== ""),
+        ingredients: formattedIngs,
         steps: steps.filter(s => s.instruction.trim() !== "").map((s, idx) => ({
           step_number: idx + 1,
           instruction: s.instruction,
@@ -195,19 +215,27 @@ const SubmitRecipePage = () => {
               </div>
               <div className="space-y-sm">
                 {ingredients.map((ing, idx) => (
-                  <div key={idx} className="flex gap-sm items-center group animate-in fade-in duration-200">
+                  <div key={idx} className="grid grid-cols-12 gap-sm items-center group animate-in fade-in duration-200">
                     <input
-                      className="flex-grow px-md py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-0 transition-all font-body-md outline-none text-on-surface"
-                      placeholder="Tên nguyên liệu và định lượng (Ví dụ: 500g Thịt bò)"
+                      className="col-span-4 px-md py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-0 transition-all font-body-md outline-none text-on-surface"
+                      placeholder="Định lượng (vd: 500g)"
                       type="text"
-                      value={ing}
-                      onChange={(e) => handleIngredientChange(idx, e.target.value)}
+                      value={ing.quantity}
+                      onChange={(e) => handleIngredientChange(idx, "quantity", e.target.value)}
+                      required
+                    />
+                    <input
+                      className="col-span-7 px-md py-2.5 bg-surface-container-lowest border border-outline-variant/50 rounded-lg focus:border-primary focus:ring-0 transition-all font-body-md outline-none text-on-surface"
+                      placeholder="Tên nguyên liệu (vd: Thịt bò)"
+                      type="text"
+                      value={ing.name}
+                      onChange={(e) => handleIngredientChange(idx, "name", e.target.value)}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveIngredient(idx)}
-                      className="text-on-surface-variant/40 hover:text-error transition-colors p-1"
+                      className="col-span-1 text-on-surface-variant/40 hover:text-error transition-colors p-1 flex justify-center disabled:opacity-30"
                       disabled={ingredients.length <= 1}
                     >
                       <span className="material-symbols-outlined">delete</span>

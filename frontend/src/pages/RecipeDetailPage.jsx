@@ -39,6 +39,31 @@ const RecipeDetailPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  const userHasHealthStats = user?.height && user?.weight;
+  
+  const userTdee = (() => {
+    if (!userHasHealthStats) return null;
+    const weightVal = parseFloat(user.weight);
+    const heightVal = parseFloat(user.height);
+    const ageVal = parseInt(user.age) || 25; 
+    const genderVal = user.gender || "male";
+    const bmr = (10 * weightVal) + (6.25 * heightVal) - (5 * ageVal) + (genderVal === 'female' ? -161 : 5);
+    const multipliers = {
+      sedentary: 1.2,
+      light: 1.375,
+      moderate: 1.55,
+      active: 1.725,
+      very_active: 1.9
+    };
+    const activityLevel = user.activity_level || user.activityLevel || "sedentary";
+    const mult = multipliers[activityLevel] || 1.2;
+    return Math.round(bmr * mult);
+  })();
+
+  const caloriePercentage = (recipe?.calories && userTdee) 
+    ? Math.round((recipe.calories / userTdee) * 100) 
+    : 0;
+
   const token = localStorage.getItem("token");
 
   const handleDeleteRecipe = async () => {
@@ -592,6 +617,53 @@ const RecipeDetailPage = () => {
                 </span>
                 {isSaved ? "Đã lưu công thức" : "Lưu công thức"}
               </button>
+            </div>
+
+            {/* Phân tích Dinh dưỡng & Calo Card */}
+            <div className="bg-surface-container-lowest p-md rounded-xl recipe-shadow border border-outline-variant/10">
+              <h3 className="font-label-md text-primary mb-3 uppercase font-bold flex items-center gap-xs">
+                <span className="material-symbols-outlined text-[18px]">monitoring</span>
+                Dinh dưỡng & Sức khỏe
+              </h3>
+              
+              {userHasHealthStats ? (
+                <div className="space-y-sm">
+                  <div className="flex justify-between text-sm text-on-surface-variant font-medium">
+                    <span>% Calo ngày cần thiết (TDEE):</span>
+                    <span className="font-bold text-on-surface">{caloriePercentage}%</span>
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="w-full bg-surface-container-highest rounded-full h-2.5 overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        caloriePercentage > 50 
+                          ? "bg-error" 
+                          : caloriePercentage > 35 
+                            ? "bg-amber-500" 
+                            : "bg-primary"
+                      }`}
+                      style={{ width: `${Math.min(caloriePercentage, 100)}%` }}
+                    ></div>
+                  </div>
+                  
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    Món ăn này chứa <span className="font-bold text-on-surface">{recipe.calories || 0} kcal</span>, chiếm <span className="font-bold text-on-surface">{caloriePercentage}%</span> trong tổng số nhu cầu năng lượng hàng ngày của bạn (<span className="font-bold text-on-surface">{userTdee} kcal</span>).
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-sm">
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    Cập nhật chiều cao, cân nặng trên trang cá nhân để xem phân tích phần trăm dinh dưỡng món ăn so với nhu cầu hàng ngày của bạn!
+                  </p>
+                  <button
+                    onClick={() => navigate("/profile")}
+                    className="w-full py-2 bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/20 rounded-full font-label-md font-bold transition-all text-center text-xs cursor-pointer"
+                  >
+                    Thiết lập chỉ số sức khỏe
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Author Info */}
