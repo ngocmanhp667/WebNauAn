@@ -243,309 +243,790 @@ CREATE TABLE notifications (
 -- =================================================================
 
 -- 1. Seed users
--- - 1 Admin (password: admin123)
--- - 1 Chef Hoàng Anh (password: admin123)
--- - 3 Normal users (password: admin123)
 INSERT INTO users (id, username, password_hash, email, full_name, role, is_verified, bio, avatar_url)
 VALUES
 (1, 'admin', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'admin@culinshare.com', 'Hệ thống Admin', 'admin', 1, 'Tài khoản quản trị viên tối cao của hệ thống.', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb'),
 (2, 'hoanganh', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.hoanganh@culinshare.com', 'Chef Hoàng Anh', 'chef', 1, 'Đầu bếp chuyên nghiệp với hơn 10 năm kinh nghiệm trong ẩm thực truyền thống Việt Nam. Đam mê gìn giữ hương vị cội nguồn.', 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c'),
 (3, 'nguyenvana', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'nguyenvana@gmail.com', 'Nguyễn Văn A', 'user', 1, 'Yêu thích nấu ăn và khám phá ẩm thực vùng miền.', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'),
 (4, 'tranthib', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'tranthib@gmail.com', 'Trần Thị B', 'user', 1, 'Người nội trợ gia đình luôn tìm kiếm công thức lành mạnh cho con cái.', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330'),
-(5, 'levanc', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'levanc@gmail.com', 'Lê Văn C', 'user', 1, 'Học sinh sinh viên tập tành nấu ăn, thích các món chay và nhanh gọn.', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e');
+(5, 'levanc', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'levanc@gmail.com', 'Lê Văn C', 'user', 1, 'Học sinh sinh viên tập tành nấu ăn, thích các món chay và nhanh gọn.', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e'),
+(6, 'cheflan', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.lan@culinshare.com', 'Chef Minh Lan', 'chef', 1, 'Chuyên món Việt gia đình và các món vùng miền.', 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f'),
+(7, 'chefquang', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.quang@culinshare.com', 'Chef Quốc Quang', 'chef', 1, 'Yêu thích hải sản, món nướng và bếp hiện đại.', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6');
 
 -- 2. Seed categories
--- - Món Việt
--- - Món chay
--- - Món tráng miệng
--- - Món ăn sáng
 INSERT INTO categories (id, name, slug, description, image_url)
 VALUES
 (1, 'Món Việt', 'mon-viet', 'Những món ăn truyền thống đậm đà bản sắc Việt Nam.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
 (2, 'Món chay', 'mon-chay', 'Các món ăn chay thanh tịnh, tốt cho sức khỏe và vóc dáng.', 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd'),
 (3, 'Món tráng miệng', 'mon-trang-mieng', 'Chè, bánh ngọt, hoa quả dầm và các món giải nhiệt ngọt ngào.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814'),
-(4, 'Món ăn sáng', 'mon-an-sang', 'Các món ăn nhiều dưỡng chất khởi đầu ngày mới tràn đầy năng lượng.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de');
+(4, 'Món ăn sáng', 'mon-an-sang', 'Các món ăn nhiều dưỡng chất khởi đầu ngày mới tràn đầy năng lượng.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de'),
+(5, 'Món nước', 'mon-nuoc', 'Phở, bún, mì và các món có nước dùng nóng hổi.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624'),
+(6, 'Hải sản', 'hai-san', 'Công thức từ tôm, cua, cá, mực tươi rói.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74'),
+(7, 'Món lành mạnh', 'mon-lanh-manh', 'Công thức ít dầu mỡ, nhiều rau xanh tốt cho dáng.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999');
 
 -- 3. Seed recipes
--- - Bún chả Hà Nội (Tác giả: Chef Hoàng Anh)
-INSERT INTO recipes (id, author_id, title, slug, description, cover_image_url, video_url, prep_time_minutes, cook_time_minutes, servings, calories, difficulty, status)
+INSERT INTO recipes (id, author_id, title, slug, description, cover_image_url, prep_time_minutes, cook_time_minutes, servings, calories, difficulty, status)
 VALUES
-(1, 2, 'Bún chả Hà Nội', 'bun-cha-ha-noi', 'Bún chả Hà Nội là một trong những món ăn đặc sản nổi tiếng nhất của thủ đô Việt Nam, được kết hợp hài hòa giữa chả thịt nướng thơm nức mũi trên than hoa, bún tươi sợi nhỏ thanh mát và bát nước chấm chua ngọt đu đủ giòn giòn cùng đĩa rau sống đa dạng hương vị.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 'https://www.youtube.com/watch?v=48S43D_h1yM', 30, 20, 4, 550, 'trung bình', 'published');
+(1, 2, 'Phở bò Hà Nội', 'pho-bo-ha-noi', 'Phở bò Hà Nội truyền thống thơm ngon đậm đà, nước dùng ngọt thanh ninh từ xương bò và hương thảo mộc nướng quyến rũ.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 45, 360, 4, 480, 'khó', 'published'),
+(2, 2, 'Bún chả Hà Nội', 'bun-cha-ha-noi', 'Sự kết hợp hoàn hảo giữa chả viên nướng và chả miếng vàng sậm, ăn cùng nước chấm chua ngọt đu đủ xanh giòn.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 30, 30, 4, 550, 'trung bình', 'published'),
+(3, 6, 'Phở gà ta', 'pho-ga-ta', 'Món phở gà da vàng giòn ngọt thịt, nước phở thơm nhẹ hương hạt mùi nướng và lá chanh thái chỉ mỏng tanh.', 'https://images.unsplash.com/photo-1625398407796-82650a8c135f', 25, 90, 4, 420, 'trung bình', 'published'),
+(4, 6, 'Bún bò Huế', 'bun-bo-hue', 'Hương vị cay nồng chuẩn xứ Huế đậm đà mắm ruốc, thơm nức hương sả kết hợp giò heo béo ngậy.', 'https://images.unsplash.com/photo-1626804475315-8664ecab0088', 40, 180, 5, 560, 'khó', 'published'),
+(5, 2, 'Mì Quảng gà nén', 'mi-quang-ga-nen', 'Sợi mì vàng dai kết hợp nhân thịt gà rim nghệ thơm lừng củ nén đập dập, bánh tráng giòn rụm.', 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b', 30, 45, 4, 510, 'trung bình', 'published'),
+(6, 7, 'Hủ tiếu Nam Vang', 'hu-tieu-nam-vang', 'Món ăn giao thoa ẩm thực miền Nam đặc sắc với tôm sú tươi, trứng cút lòng đào và nước dùng ngọt từ xương ống.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 30, 90, 4, 490, 'trung bình', 'published'),
+(7, 6, 'Cơm tấm sườn bì chả', 'com-tam-suon-bi-cha', 'Đĩa cơm tấm dẻo hạt ăn kèm sườn cốt lết nướng thơm ngậy, bì trộn thính và chả trứng hấp mềm mại.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 35, 40, 4, 690, 'trung bình', 'published'),
+(8, 6, 'Cơm gà Hội An', 'com-ga-hoi-an', 'Hạt cơm vàng óng dẻo bùi nấu bằng nước luộc gà và mỡ gà, ăn cùng gà xé phay bóp rau răm chua dịu.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 25, 45, 4, 540, 'trung bình', 'published'),
+(9, 7, 'Cá lóc kho tộ miền Tây', 'ca-loc-kho-to-mien-tay', 'Khúc cá lóc đồng kho sền sệt trong tộ đất, thấm đẫm nước màu thốt nốt mặn ngọt đậm đà vị đưa cơm.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 20, 40, 4, 360, 'trung bình', 'published'),
+(10, 2, 'Canh chua cá lóc miền Tây', 'canh-chua-ca-loc-mien-tay', 'Bát canh chua hài hòa vị chua thanh từ me, vị ngọt tự nhiên của cá và các loại rau bạc hà, đậu bắp giòn ngọt.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 20, 20, 4, 240, 'dễ', 'published'),
+(11, 6, 'Bún riêu cua bắp bò', 'bun-rieu-cua-bap-bo', 'Nước lèo thanh dịu ngọt cua đồng, riêu cua từng tảng xốp mềm ăn kèm bắp bò chần tươi roi rói.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 35, 60, 4, 460, 'khó', 'published'),
+(12, 2, 'Bún riêu ốc chuối đậu', 'bun-rieu-oc-chuoi-dau', 'Sự hòa quyện thú vị giữa ốc nhồi giòn sần sật, thịt ba chỉ thơm béo và nước canh chuối đậu đậm đà.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 40, 50, 4, 450, 'khó', 'published'),
+(13, 6, 'Bánh canh cua bể', 'banh-canh-cua-be', 'Sợi bánh canh bột lọc dai dẻo chan nước súp gạch cua sánh đỏ, đậm đà thịt cua bể ngọt lịm.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 35, 50, 4, 490, 'trung bình', 'published'),
+(14, 7, 'Lẩu Thái hải sản chua cay', 'lau-thai-hai-san-chua-cay', 'Bữa tiệc lẩu ấm cúng đậm đà hương vị sả chanh Thái Lan kết hợp tôm sú mực tươi rói chấm muối ớt xanh.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 35, 35, 6, 460, 'trung bình', 'published'),
+(15, 6, 'Đậu hũ sốt cà chua chay', 'dau-hu-sot-ca-chua-chay', 'Món ăn gia đình chay tịnh giản dị, miếng đậu hũ chiên mềm thấm đẫm sốt cà chua ngọt đậm đà.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 10, 15, 3, 230, 'dễ', 'published'),
+(16, 2, 'Gỏi cuốn tôm thịt heo', 'goi-cuon-tom-thit-heo', 'Cuốn bánh tráng mướt mát nhiều rau xanh ăn kèm thịt ba chỉ luộc và tôm sú luộc đỏ hồng chấm tương đậu phộng.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 25, 15, 4, 250, 'dễ', 'published'),
+(17, 7, 'Bò lúc lắc khoai tây chiên', 'bo-luc-lac-khoai-tay-chien', 'Những khối thịt bò thăn mềm mọng ngọt tự nhiên xào nhanh tay trên lửa lớn cùng hành tây ớt chuông đậm vị sốt.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 20, 15, 3, 430, 'trung bình', 'published'),
+(18, 6, 'Nấm đùi gà kho tiêu xanh', 'nam-dui-ga-kho-tieu-xanh', 'Nấm đùi gà dai ngọt tự nhiên kho keo sền sệt với những chùm tiêu xanh nồng ấm vô cùng bắt cơm mâm chay.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 15, 20, 3, 180, 'dễ', 'published'),
+(19, 2, 'Thịt ba chỉ kho tàu trứng cút', 'thit-ba-chi-kho-tau-trung-cut', 'Thịt ba chỉ mềm rục béo bùi đẫm nước dừa tươi kho cùng trứng cút nhỏ dai đậm đà truyền thống ngày Tết.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 75, 4, 580, 'trung bình', 'published'),
+(20, 6, 'Gà kho gừng sợi ấm áp', 'ga-kho-gung-soi-am-ap', 'Thịt đùi gà săn chắc kho thơm cay cay ấm lòng sợi gừng non vàng ruộm, nước kho chan cơm cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 15, 30, 4, 370, 'dễ', 'published'),
+(21, 7, 'Mực ống xào sa tế cay cay', 'muc-ong-xao-sa-te-cay-cay', 'Mực ống tươi xào chín giòn sần sật bọc đều nước sốt sa tế cay nồng nàn ớt tỏi cực đưa cơm.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74', 15, 10, 3, 280, 'dễ', 'published'),
+(22, 6, 'Cháo sườn heo non Hà Nội', 'chao-suon-heo-non-ha-noi', 'Bát cháo sườn xay sánh mịn ngọt thơm từ xương hầm, miếng sườn sụn non giòn ăn kèm quẩy nướng.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 70, 4, 330, 'trung bình', 'published'),
+(23, 2, 'Bánh xèo Nam Bộ giòn rụm', 'banh-xeo-nam-bo-gion-rum', 'Vỏ bánh xèo mỏng tang vàng ươm nghệ cốt dừa ôm nhân tôm đất thịt ba chỉ luộc cuốn cải xanh.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 30, 25, 4, 450, 'trung bình', 'published'),
+(24, 7, 'Cơm chiên hải sản dừa xiêm', 'com-chien-hai-san-dua-xiem', 'Hạt cơm chiên tơi vàng ruộm óng ánh tôm mực đậu hà lan bắp ngọt bày trong quả dừa xiêm mát mắt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 15, 15, 3, 520, 'dễ', 'published'),
+(25, 2, 'Mì Ý sốt bò bằm Spaghetti', 'mi-y-sot-bo-bam-spaghetti', 'Sợi mì Ý luộc vừa chín tới ngập tràn trong nước sốt cà chua thịt bò bằm bổ dưỡng rắc phô mai Parmesan bùi béo.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 15, 30, 3, 560, 'trung bình', 'published'),
+(26, 6, 'Gỏi cuốn chay ngũ sắc', 'goi-cuon-chay-ngu-sac', 'Cuốn gỏi chay nhẹ nhàng tốt dáng ôm trọn bún, đậu hũ chiên, cà rốt dưa leo xà lách chấm tương bơ đậu phộng.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999', 20, 10, 3, 170, 'dễ', 'published'),
+(27, 2, 'Chè khúc bạch nhãn tươi', 'che-khuc-bach-nhan-tuoi', 'Những viên khúc bạch sữa hạnh nhân béo ngậy mềm mịn trong nước đường phèn lá dứa nhãn cùi dày thơm mát.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814', 25, 20, 5, 260, 'trung bình', 'published'),
+(28, 7, 'Trà đào cam sả đá lạnh', 'tra-dao-cam-sa-da-lanh', 'Thức uống giải khát ngày hè sảng khoái thơm nồng nàn sả tươi vị chua thanh cam vàng đào miếng giòn.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de', 10, 10, 2, 120, 'dễ', 'published'),
+(29, 2, 'Cà ri gà nước cốt dừa', 'ca-ri-ga-nuoc-cot-dua', 'Công thức làm Cà ri gà nước cốt dừa chuẩn vị thơm dẻo, giàu dinh dưỡng, rất thích hợp đãi cả nhà dịp cuối tuần.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 30, 4, 510, 'trung bình', 'published'),
+(30, 2, 'Bánh xèo miền Tây', 'banh-xeo-mien-tay', 'Công thức làm Bánh xèo miền Tây chuẩn vị thơm dẻo, giàu dinh dưỡng, rất thích hợp đãi cả nhà dịp cuối tuần.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 30, 4, 450, 'trung bình', 'published'),
+(31, 2, 'Sushi cuộn cá hồi Na Uy', 'sushi-cuon-ca-hoi-na-uy', 'Công thức làm Sushi cuộn cá hồi Na Uy chuẩn vị thơm dẻo, giàu dinh dưỡng, rất thích hợp đãi cả nhà dịp cuối tuần.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 30, 4, 390, 'khó', 'published'),
+(32, 2, 'Tokbokki bánh gạo phô mai', 'tokbokki-banh-gao-pho-mai', 'Công thức làm Tokbokki bánh gạo phô mai chuẩn vị thơm dẻo, giàu dinh dưỡng, rất thích hợp đãi cả nhà dịp cuối tuần.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 30, 4, 420, 'dễ', 'published'),
+(33, 2, 'Chè đậu xanh cốt dừa', 'che-dau-xanh-cot-dua', 'Công thức làm Chè đậu xanh cốt dừa chuẩn vị thơm dẻo, giàu dinh dưỡng, rất thích hợp đãi cả nhà dịp cuối tuần.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 30, 4, 300, 'dễ', 'published'),
+(34, 2, 'Xôi xoài cốt dừa Thái', 'xoi-xoai-cot-dua-thai', 'Công thức làm Xôi xoài cốt dừa Thái chuẩn vị thơm dẻo, giàu dinh dưỡng, rất thích hợp đãi cả nhà dịp cuối tuần.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 30, 4, 340, 'dễ', 'published'),
+(35, 2, 'Sữa chua nếp cẩm dẻo bùi', 'sua-chua-nep-cam-deo-bui', 'Công thức làm Sữa chua nếp cẩm dẻo bùi chuẩn vị thơm dẻo, giàu dinh dưỡng, rất thích hợp đãi cả nhà dịp cuối tuần.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 30, 4, 220, 'dễ', 'published'),
+(36, 2, 'Cà phê phin sữa đá Việt Nam', 'ca-phe-phin-sua-da-viet-nam', 'Công thức làm Cà phê phin sữa đá Việt Nam chuẩn vị thơm dẻo, giàu dinh dưỡng, rất thích hợp đãi cả nhà dịp cuối tuần.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 20, 30, 4, 150, 'dễ', 'published');
 
 -- 4. Seed recipe_categories
 INSERT INTO recipe_categories (recipe_id, category_id)
 VALUES
-(1, 1), -- Bún chả thuộc Món Việt
-(1, 4); -- Bún chả thuộc Món ăn sáng
+(1, 1),
+(1, 4),
+(1, 5),
+(2, 1),
+(2, 4),
+(3, 1),
+(3, 4),
+(3, 5),
+(4, 1),
+(4, 5),
+(5, 1),
+(5, 5),
+(6, 1),
+(6, 5),
+(6, 6),
+(7, 1),
+(7, 4),
+(8, 1),
+(8, 4),
+(9, 1),
+(9, 6),
+(10, 1),
+(10, 6),
+(11, 1),
+(11, 5),
+(12, 1),
+(12, 5),
+(13, 1),
+(13, 5),
+(13, 6),
+(14, 5),
+(14, 6),
+(15, 2),
+(15, 7),
+(16, 1),
+(16, 7),
+(17, 1),
+(18, 2),
+(18, 7),
+(19, 1),
+(20, 1),
+(21, 1),
+(21, 6),
+(22, 1),
+(22, 4),
+(22, 5),
+(23, 1),
+(24, 1),
+(24, 6),
+(25, 7),
+(26, 2),
+(26, 7),
+(27, 3),
+(28, 3),
+(29, 1),
+(30, 1),
+(31, 6),
+(32, 7),
+(33, 3),
+(34, 3),
+(35, 3),
+(36, 1);
 
 -- 5. Seed recipe_ingredients
 INSERT INTO recipe_ingredients (recipe_id, name, quantity, unit)
 VALUES
-(1, 'Thịt ba chỉ thái mỏng (làm chả miếng)', '500', 'g'),
-(1, 'Thịt nạc vai xay nhuyễn (làm chả viên)', '500', 'g'),
-(1, 'Bún tươi', '1', 'kg'),
-(1, 'Đu đủ xanh nhỏ', '1', 'quả'),
-(1, 'Cà rốt', '1', 'củ'),
-(1, 'Mật ong nguyên chất', '2', 'thìa canh'),
-(1, 'Hành khô băm nhuyễn', '3', 'củ'),
-(1, 'Tỏi băm nhuyễn', '2', 'củ'),
-(1, 'Ớt tươi băm nhuyễn', '2', 'quả'),
-(1, 'Rau sống ăn kèm (xà lách, tía tô, kinh giới, giá đỗ)', '1', 'đĩa lớn'),
-(1, 'Nước mắm ngon', '150', 'ml'),
-(1, 'Dấm gạo hoặc nước cốt chanh', '50', 'ml'),
-(1, 'Đường cát', '100', 'g'),
-(1, 'Gia vị cơ bản (muối, tiêu, bột nêm, dầu hào)', 'vừa đủ', '');
+(1, 'Xương ống bò', '2', 'kg'),
+(1, 'Thịt ba chỉ nạm bò', '500', 'g'),
+(1, 'Thịt thăn bò tái', '300', 'g'),
+(1, 'Bánh phở tươi', '1', 'kg'),
+(1, 'Hành tây', '2', 'củ'),
+(1, 'Gừng già', '150', 'g'),
+(1, 'Hành tím', '5', 'củ'),
+(1, 'Thảo mộc nướng (quế, hồi, thảo quả, tiểu hồi)', '1', 'gói'),
+(1, 'Nước mắm ngon', '100', 'ml'),
+(1, 'Đường phèn', '30', 'g'),
+(1, 'Hành lá, rau mùi', '1', 'đĩa'),
+(2, 'Thịt ba chỉ', '500', 'g'),
+(2, 'Thịt nạc vai xay', '500', 'g'),
+(2, 'Đu đủ xanh, cà rốt', '1', 'bộ'),
+(2, 'Bún tươi', '1', 'kg'),
+(2, 'Hành tím, tỏi, ớt', '50', 'g'),
+(2, 'Mật ong', '2', 'thìa canh'),
+(2, 'Nước mắm ngon', '100', 'ml'),
+(2, 'Dấm gạo', '50', 'ml'),
+(2, 'Rau sống (xà lách, tía tô, húng)', '1', 'rổ'),
+(3, 'Gà ta nguyên con', '1.5', 'kg'),
+(3, 'Bánh phở', '800', 'g'),
+(3, 'Hành tây, hành tím', '2', 'củ'),
+(3, 'Gừng già', '100', 'g'),
+(3, 'Hạt mùi, rễ mùi', '1', 'nhúm'),
+(3, 'Lá chanh tươi', '10', 'lá'),
+(3, 'Hành lá, rau mùi', '1', 'đĩa'),
+(3, 'Gia vị hạt nêm, muối', 'vừa đủ', ''),
+(4, 'Xương ống bò', '1.5', 'kg'),
+(4, 'Bắp bò', '500', 'g'),
+(4, 'Chân giò heo', '500', 'g'),
+(4, 'Mắm ruốc Huế', '3', 'thìa canh'),
+(4, 'Sả tươi', '8', 'nhánh'),
+(4, 'Dầu điều tạo màu', '2', 'thìa canh'),
+(4, 'Bún sợi to', '1', 'kg'),
+(4, 'Rau sống (bắp chuối, giá, kinh giới)', '1', 'rổ'),
+(4, 'Hành tây, hành lá', '1', 'đĩa'),
+(5, 'Thịt gà ta', '1', 'kg'),
+(5, 'Sợi mì Quảng vàng', '800', 'g'),
+(5, 'Củ nén (hành tăm)', '50', 'g'),
+(5, 'Bột nghệ', '1', 'thìa cà phê'),
+(5, 'Nước mắm ngon', '3', 'thìa canh'),
+(5, 'Bánh tráng nướng', '2', 'cái'),
+(5, 'Đậu phộng rang', '50', 'g'),
+(5, 'Rau sống (bắp chuối, cải non)', '1', 'đĩa'),
+(6, 'Hủ tiếu khô', '500', 'g'),
+(6, 'Xương ống heo', '1', 'kg'),
+(6, 'Tôm sú tươi', '200', 'g'),
+(6, 'Thịt băm', '150', 'g'),
+(6, 'Gan heo', '150', 'g'),
+(6, 'Trứng cút', '8', 'quả'),
+(6, 'Tỏi băm làm tỏi phi', '50', 'g'),
+(6, 'Hẹ tươi, cần tây', '1', 'nhúm'),
+(7, 'Gạo tấm thơm', '400', 'g'),
+(7, 'Sườn cốt lết heo', '4', 'miếng'),
+(7, 'Da heo thái sợi (bì)', '150', 'g'),
+(7, 'Thính gạo rang', '30', 'g'),
+(7, 'Trứng gà', '4', 'quả'),
+(7, 'Thịt băm làm chả', '150', 'g'),
+(7, 'Mộc nhĩ, bún tàu', '30', 'g'),
+(7, 'Mỡ hành, nước mắm tỏi ớt', '1', 'chén'),
+(8, 'Gà ta nửa con', '800', 'g'),
+(8, 'Gạo tẻ thơm', '300', 'g'),
+(8, 'Nghệ tươi đập dập', '1', 'củ'),
+(8, 'Hành tây', '1', 'củ'),
+(8, 'Rau răm', '1', 'mớ'),
+(8, 'Nước cốt chanh', '2', 'thìa canh'),
+(8, 'Hành phi', '30', 'g'),
+(8, 'Gia vị hạt tiêu, muối', 'vừa đủ', ''),
+(9, 'Cá lóc cắt khúc', '600', 'g'),
+(9, 'Thịt ba chỉ heo', '150', 'g'),
+(9, 'Nước màu đường thốt nốt', '2', 'thìa canh'),
+(9, 'Nước mắm ngon', '4', 'thìa canh'),
+(9, 'Hành tím, tỏi, ớt hiểm', '50', 'g'),
+(9, 'Hành lá', '3', 'nhánh'),
+(9, 'Nước dừa tươi', '200', 'ml'),
+(9, 'Hạt tiêu đen xay', '1', 'thìa cà phê'),
+(10, 'Cá lóc đồng', '500', 'g'),
+(10, 'Bạc hà (dọc mùng)', '2', 'nhánh'),
+(10, 'Đậu bắp, thơm (dứa)', '1', 'đĩa'),
+(10, 'Cà chua, giá đỗ', '150', 'g'),
+(10, 'Nước cốt me chua', '4', 'thìa canh'),
+(10, 'Rau om, ngò gai', '1', 'nhúm'),
+(10, 'Nước mắm, đường phèn', 'vừa đủ', ''),
+(11, 'Cua đồng xay sẵn', '500', 'g'),
+(11, 'Bắp bò hoa', '300', 'g'),
+(11, 'Đậu hũ chiên', '2', 'bìa'),
+(11, 'Cà chua', '3', 'quả'),
+(11, 'Bún tươi', '800', 'g'),
+(11, 'Mẻ chua hoặc dấm bỗng', '50', 'ml'),
+(11, 'Mắm tôm ngon', '1', 'thìa canh'),
+(11, 'Rau sống (hoa chuối, tía tô, kinh giới)', '1', 'rổ'),
+(12, 'Ốc nhồi (ốc bươu)', '1', 'kg'),
+(12, 'Thịt ba chỉ', '200', 'g'),
+(12, 'Đậu phụ', '2', 'bìa'),
+(12, 'Chuối xanh', '3', 'quả'),
+(12, 'Lá lốt, tía tô', '1', 'nhúm'),
+(12, 'Dấm bỗng rượu', '50', 'ml'),
+(12, 'Bột nghệ', '1', 'thìa cà phê'),
+(12, 'Mắm tôm', '1', 'thìa cà phê'),
+(13, 'Sợi bánh canh bột lọc', '600', 'g'),
+(13, 'Thịt cua bể gỡ sẵn', '200', 'g'),
+(13, 'Xương ống heo làm nước dùng', '800', 'g'),
+(13, 'Màu dầu điều', '2', 'thìa canh'),
+(13, 'Bột năng tạo độ sánh', '20', 'g'),
+(13, 'Hành phi', '20', 'g'),
+(13, 'Ngò gai, hành lá', '1', 'nhúm'),
+(13, 'Tiêu xay nhuyễn', '1', 'thìa cà phê'),
+(14, 'Tôm sú tươi', '300', 'g'),
+(14, 'Mực ống', '300', 'g'),
+(14, 'Nghêu (ngao)', '500', 'g'),
+(14, 'Sốt gia vị lẩu Thái Tom Yum', '1', 'gói'),
+(14, 'Sả nhánh, củ riềng', '100', 'g'),
+(14, 'Lá chanh Thái (Kaffir)', '10', 'lá'),
+(14, 'Nấm kim châm, nấm đùi gà', '300', 'g'),
+(14, 'Bún tươi hoặc mì gói', '800', 'g'),
+(15, 'Đậu hũ trắng', '4', 'bìa'),
+(15, 'Cà chua chín', '3', 'quả'),
+(15, 'Hành boaro (kiệu)', '1', 'nhánh'),
+(15, 'Hạt nêm chay từ nấm', '2', 'thìa cà phê'),
+(15, 'Nước tương ngon', '1', 'thìa canh'),
+(15, 'Hành lá cắt nhỏ', '2', 'nhánh'),
+(15, 'Dầu ăn thực vật', '100', 'ml'),
+(16, 'Bánh tráng cuốn dẻo', '1', 'gói'),
+(16, 'Tôm sú tươi', '300', 'g'),
+(16, 'Thịt ba chỉ heo', '300', 'g'),
+(16, 'Bún tươi sợi nhỏ', '400', 'g'),
+(16, 'Xà lách, rau thơm, hẹ', '200', 'g'),
+(16, 'Tương hột (tương ngọt)', '100', 'ml'),
+(16, 'Bơ đậu phộng', '2', 'thìa canh'),
+(16, 'Đậu phộng giã nhỏ', '30', 'g'),
+(17, 'Thăn bò mềm', '400', 'g'),
+(17, 'Ớt chuông xanh, đỏ', '2', 'quả'),
+(17, 'Hành tây', '1', 'củ'),
+(17, 'Khoai tây tươi chiên', '200', 'g'),
+(17, 'Hành tỏi băm nhuyễn', '30', 'g'),
+(17, 'Hắc xì dầu, bơ lạt', '1.5', 'thìa canh'),
+(17, 'Dầu hào ngon', '2', 'thìa canh'),
+(17, 'Gia vị hạt tiêu', 'vừa đủ', ''),
+(18, 'Nấm đùi gà nhỏ', '400', 'g'),
+(18, 'Tiêu xanh cả chùm', '4', 'nhánh'),
+(18, 'Nước tương đậu nành', '3', 'thìa canh'),
+(18, 'Đường mía thốt nốt', '1.5', 'thìa canh'),
+(18, 'Hành boaro băm nhỏ', '1', 'nhánh'),
+(18, 'Ớt sừng chín đỏ', '1', 'quả'),
+(18, 'Nước màu dừa chay', '1', 'thìa cà phê'),
+(19, 'Thịt ba chỉ heo', '600', 'g'),
+(19, 'Trứng cút luộc chín', '15', 'quả'),
+(19, 'Nước dừa xiêm tươi', '400', 'ml'),
+(19, 'Nước mắm cá cơm ngon', '4', 'thìa canh'),
+(19, 'Hành tím, tỏi khô', '40', 'g'),
+(19, 'Nước màu đường caramen', '1', 'thìa canh'),
+(19, 'Ớt hiểm đỏ tươi', '2', 'quả'),
+(20, 'Thịt đùi gà ta', '800', 'g'),
+(20, 'Gừng non thái sợi', '50', 'g'),
+(20, 'Hành tím củ băm nhuyễn', '20', 'g'),
+(20, 'Nước mắm ngon', '3', 'thìa canh'),
+(20, 'Đường màu dừa', '1', 'thìa canh'),
+(20, 'Hành lá, ớt hiểm', '20', 'g'),
+(20, 'Dầu ăn thực vật', '2', 'thìa canh'),
+(21, 'Mực ống tươi', '500', 'g'),
+(21, 'Sa tế tôm cay', '2', 'thìa canh'),
+(21, 'Ớt chuông xanh, hành tây', '1', 'bộ'),
+(21, 'Tỏi băm nhuyễn', '20', 'g'),
+(21, 'Nước mắm ngon', '1', 'thìa canh'),
+(21, 'Hành hoa xanh cọng', '30', 'g'),
+(21, 'Hạt tiêu, dầu hào', 'vừa đủ', ''),
+(22, 'Bột gạo tẻ lọc nước', '150', 'g'),
+(22, 'Sườn sụn heo non', '400', 'g'),
+(22, 'Xương ống heo lấy súp', '500', 'g'),
+(22, 'Quẩy giòn ăn kèm', '5', 'cái'),
+(22, 'Hành phi giòn thơm', '20', 'g'),
+(22, 'Nước mắm, muối, tiêu', 'vừa đủ', ''),
+(22, 'Ruốc thịt heo (chà bông)', '50', 'g'),
+(23, 'Bột bánh xèo pha nghệ', '400', 'g'),
+(23, 'Tôm đất nhỏ nguyên vỏ', '200', 'g'),
+(23, 'Thịt ba chỉ heo thái mỏng', '200', 'g'),
+(23, 'Nước cốt dừa béo', '200', 'ml'),
+(23, 'Giá đỗ đỗ xanh sạch', '200', 'g'),
+(23, 'Hành tây thái lát mỏng', '1', 'củ'),
+(23, 'Rau cải xanh lớn, rau thơm', '1', 'rổ'),
+(23, 'Nước mắm tỏi ớt chua ngọt', '1', 'bát'),
+(24, 'Cơm nguội dẻo tơi', '3', 'bát'),
+(24, 'Tôm sú tươi cắt hạt lựu', '100', 'g'),
+(24, 'Mực tươi cắt hạt lựu', '100', 'g'),
+(24, 'Lòng đỏ trứng gà', '2', 'quả'),
+(24, 'Đậu Hà Lan, bắp ngọt', '100', 'g'),
+(24, 'Trái dừa xiêm rỗng', '1', 'quả'),
+(24, 'Tỏi băm hành phi', '30', 'g'),
+(24, 'Hạt nêm nước tương tiêu', 'vừa đủ', ''),
+(25, 'Mì Ý khô dạng sợi', '250', 'g'),
+(25, 'Thịt vai bò băm nhuyễn', '250', 'g'),
+(25, 'Cà chua chín xay mịn', '3', 'quả'),
+(25, 'Hành tây thái hạt lựu', '1', 'củ'),
+(25, 'Tỏi khô băm nhuyễn', '20', 'g'),
+(25, 'Lá oregano khô thơm', '1', 'thìa cà phê'),
+(25, 'Phô mai Parmesan bột', '20', 'g'),
+(25, 'Bơ lạt hoặc dầu ô-liu', '2', 'thìa canh'),
+(26, 'Bánh tráng cuốn dẻo', '1', 'gói'),
+(26, 'Đậu hũ trắng chiên giòn', '2', 'bìa'),
+(26, 'Cà rốt thái sợi chỉ', '1', 'củ'),
+(26, 'Dưa leo thái thanh mỏng', '1', 'quả'),
+(26, 'Bún tươi', '300', 'g'),
+(26, 'Bơ sáp lát mỏng', '1', 'quả'),
+(26, 'Bơ đậu phộng chay chấm', '3', 'thìa canh'),
+(26, 'Rau xà lách húng lủi', '100', 'g'),
+(27, 'Kem tươi Whipping Cream', '250', 'ml'),
+(27, 'Sữa tươi không đường', '250', 'ml'),
+(27, 'Bột Gelatin làm đông', '20', 'g'),
+(27, 'Nhãn xuồng tươi tách hạt', '500', 'g'),
+(27, 'Hạnh nhân lát rang chín', '30', 'g'),
+(27, 'Đường phèn hạt nhỏ', '100', 'g'),
+(27, 'Lá dứa thơm (lá nếp)', '3', 'nhánh'),
+(28, 'Trà túi lọc hương đào', '2', 'túi'),
+(28, 'Cam vàng nhập khẩu', '1', 'quả'),
+(28, 'Sả nhánh đập dập', '3', 'nhánh'),
+(28, 'Đào ngâm đóng hộp thái lát', '4', 'miếng'),
+(28, 'Nước cốt đào ngâm', '2', 'thìa canh'),
+(28, 'Mật ong nguyên chất', '1', 'thìa canh'),
+(28, 'Đá viên lạnh', '1', 'ly đầy'),
+(29, 'Nguyên liệu chính của món', '500', 'g'),
+(29, 'Gia vị tẩm ướp cơ bản', '1', 'bộ'),
+(29, 'Nước cốt dừa thơm béo', '150', 'ml'),
+(29, 'Hành hoa, rau gia vị các loại', '50', 'g'),
+(30, 'Nguyên liệu chính của món', '500', 'g'),
+(30, 'Gia vị tẩm ướp cơ bản', '1', 'bộ'),
+(30, 'Nước cốt dừa thơm béo', '150', 'ml'),
+(30, 'Hành hoa, rau gia vị các loại', '50', 'g'),
+(31, 'Nguyên liệu chính của món', '500', 'g'),
+(31, 'Gia vị tẩm ướp cơ bản', '1', 'bộ'),
+(31, 'Nước cốt dừa thơm béo', '150', 'ml'),
+(31, 'Hành hoa, rau gia vị các loại', '50', 'g'),
+(32, 'Nguyên liệu chính của món', '500', 'g'),
+(32, 'Gia vị tẩm ướp cơ bản', '1', 'bộ'),
+(32, 'Nước cốt dừa thơm béo', '150', 'ml'),
+(32, 'Hành hoa, rau gia vị các loại', '50', 'g'),
+(33, 'Nguyên liệu chính của món', '500', 'g'),
+(33, 'Gia vị tẩm ướp cơ bản', '1', 'bộ'),
+(33, 'Nước cốt dừa thơm béo', '150', 'ml'),
+(33, 'Hành hoa, rau gia vị các loại', '50', 'g'),
+(34, 'Nguyên liệu chính của món', '500', 'g'),
+(34, 'Gia vị tẩm ướp cơ bản', '1', 'bộ'),
+(34, 'Nước cốt dừa thơm béo', '150', 'ml'),
+(34, 'Hành hoa, rau gia vị các loại', '50', 'g'),
+(35, 'Nguyên liệu chính của món', '500', 'g'),
+(35, 'Gia vị tẩm ướp cơ bản', '1', 'bộ'),
+(35, 'Nước cốt dừa thơm béo', '150', 'ml'),
+(35, 'Hành hoa, rau gia vị các loại', '50', 'g'),
+(36, 'Nguyên liệu chính của món', '500', 'g'),
+(36, 'Gia vị tẩm ướp cơ bản', '1', 'bộ'),
+(36, 'Nước cốt dừa thơm béo', '150', 'ml'),
+(36, 'Hành hoa, rau gia vị các loại', '50', 'g');
 
 -- 6. Seed recipe_steps
 INSERT INTO recipe_steps (recipe_id, step_number, instruction, image_url, timer_seconds)
 VALUES
-(1, 1, 'Sơ chế nguyên liệu: Rửa sạch thịt ba chỉ, thái miếng mỏng vừa ăn. Băm nhỏ hành khô, tỏi và ớt. Rau sống nhặt sạch, ngâm nước muối loãng 15 phút rồi vẩy ráo nước.', 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d', 600),
-(1, 2, 'Ướp thịt: Chia đôi lượng hành, tỏi băm. Ướp riêng thịt ba chỉ thái miếng và thịt nạc vai xay với: nước mắm, đường, dầu hào, tiêu, hành tỏi băm và mật ong. Trộn đều và ướp trong ngăn mát tủ lạnh ít nhất 30 phút cho ngấm gia vị.', 'https://images.unsplash.com/photo-1543353071-873f17a7a088', 1800),
-(1, 3, 'Làm dưa góp: Đu đủ xanh và cà rốt gọt vỏ, thái mỏng hoa hoặc lát vuông nhỏ. Bóp đều với chút muối rồi rửa sạch cho giòn. Trộn nước cốt chanh/dấm, đường, chút tỏi ớt băm để có vị chua ngọt hài hòa.', 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9', 600),
-(1, 4, 'Nướng chả: Thịt nạc vai xay viên thành những viên tròn dẹt vừa ăn. Xếp chả miếng và chả viên lên vỉ nướng. Nướng trên bếp than hoa, lật đều tay và quét thêm chút dầu ăn/nước ướp để chả không bị khô. Nướng đến khi chín vàng sậm, thơm phức.', 'https://images.unsplash.com/photo-1525755662778-989d0524087e', 900),
-(1, 5, 'Pha nước chấm: Pha nước mắm, nước lọc, đường và dấm theo tỷ lệ 1:5:1:1 (điều chỉnh tùy khẩu vị). Đun ấm nước chấm trên bếp, sau đó múc ra bát, thêm tỏi ớt băm và thả dưa góp vào.', 'https://images.unsplash.com/photo-1467003909585-2f8a72700288', 300),
-(1, 6, 'Thưởng thức: Bày bún tươi, rau sống ra đĩa sạch. Gắp chả miếng và chả viên nóng hổi thả trực tiếp vào bát nước chấm ấm nóng, ăn kèm bún tươi và rau sống thanh mát.', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836', 0);
+(1, 1, 'Sơ chế và chần xương ống bò qua nước sôi trong 10 phút để loại bỏ bọt bẩn và cặn máu.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(1, 2, 'Rửa sạch xương ống bò rồi cho vào nồi cùng 5 lít nước sạch để ninh nhỏ lửa trong 6 tiếng.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(1, 3, 'Nướng cháy vỏ hành tây, gừng, hành tím sau đó cạo sạch vỏ cháy và thả vào nồi nước dùng.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(1, 4, 'Rang thơm quế, hồi, thảo quả, hạt mùi bỏ vào túi lọc rồi thả vào nồi nước dùng trước khi tắt bếp 1 tiếng.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(1, 5, 'Thịt nạm bò đem luộc chín thái mỏng, thịt thăn bò tái thái lát mỏng ngâm nước lạnh thái dẹt.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(1, 6, 'Nêm nếm nước dùng bằng nước mắm ngon, muối hạt và đường phèn cho ngọt thanh tròn vị.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(1, 7, 'Chần bánh phở tươi, xếp thịt nạm, thịt tái và rắc hành mùi lên bát rồi chan nước dùng thật nóng.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(2, 1, 'Thịt ba chỉ thái lát mỏng, thịt vai xay trộn nhuyễn để làm chả miếng và chả viên.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(2, 2, 'Ướp cả hai loại thịt với nước mắm, mật ong, dầu hào, hành tỏi băm nhuyễn trong 30 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(2, 3, 'Đu đủ xanh và cà rốt gọt vỏ, tỉa hoa thái mỏng bóp muối rửa sạch rồi ngâm dấm đường làm dưa góp.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(2, 4, 'Nặn thịt xay thành từng viên tròn dẹt vừa ăn, xếp chả miếng lên vỉ nướng trên than hoa đến khi xém vàng.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(2, 5, 'Pha nước chấm chua ngọt bằng nước lọc, nước mắm, đường, dấm theo tỉ lệ 5:1:1:1 đun ấm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(2, 6, 'Gắp chả nóng ra bát nước chấm ấm, thêm dưa góp giòn ngọt, tỏi ớt băm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(2, 7, 'Bày bún tươi ra đĩa cùng rổ rau sống tươi ngon để ăn kèm chả nướng nóng hổi.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(3, 1, 'Rửa sạch gà ta với muối và gừng đập dập để khử mùi hôi bám ngoài da.', 'https://images.unsplash.com/photo-1625398407796-82650a8c135f', 600),
+(3, 2, 'Luộc gà với nước lạnh cùng hành tím đập dập, để sôi 15 phút rồi tắt bếp ngâm gà 20 phút cho chín mọng.', 'https://images.unsplash.com/photo-1625398407796-82650a8c135f', 600),
+(3, 3, 'Vớt gà ra ngâm nước đá lạnh để da gà săn giòn rồi lọc lấy thịt xé miếng vừa ăn, xương bỏ lại nồi ninh tiếp.', 'https://images.unsplash.com/photo-1625398407796-82650a8c135f', 600),
+(3, 4, 'Nướng gừng, hành tây và rang hạt mùi cho vào nồi nước dùng ninh liu riu trong 1 tiếng.', 'https://images.unsplash.com/photo-1625398407796-82650a8c135f', 600),
+(3, 5, 'Lá chanh rửa sạch thái chỉ mỏng mảnh, hành lá và rau mùi rửa sạch cắt khúc.', 'https://images.unsplash.com/photo-1625398407796-82650a8c135f', 600),
+(3, 6, 'Lọc nước dùng gà qua rây cho trong veo, nêm nếm gia vị vừa miệng ăn.', 'https://images.unsplash.com/photo-1625398407796-82650a8c135f', 600),
+(3, 7, 'Xếp bánh phở chần nóng vào tô, bày thịt gà xé lên, rắc lá chanh hành mùi và chan nước dùng sôi sùng sục.', 'https://images.unsplash.com/photo-1625398407796-82650a8c135f', 600),
+(4, 1, 'Chần sạch xương ống bò, bắp bò và chân giò heo cắt khúc qua nước muối gừng.', 'https://images.unsplash.com/photo-1626804475315-8664ecab0088', 600),
+(4, 2, 'Hòa mắm ruốc Huế vào nước lạnh gạn lấy nước trong bỏ cặn cát.', 'https://images.unsplash.com/photo-1626804475315-8664ecab0088', 600),
+(4, 3, 'Ninh xương bò và chân giò với sả đập dập. Bắp bò luộc chín vớt ra thái lát tròn mỏng.', 'https://images.unsplash.com/photo-1626804475315-8664ecab0088', 600),
+(4, 4, 'Đun nóng dầu điều xào sả băm và ớt bột cho thơm rồi trút vào nồi nước dùng tạo màu đỏ óng.', 'https://images.unsplash.com/photo-1626804475315-8664ecab0088', 600),
+(4, 5, 'Trút nước mắm ruốc đã gạn vào nồi nước dùng ninh cùng sả, nêm nếm gia vị đậm đà.', 'https://images.unsplash.com/photo-1626804475315-8664ecab0088', 600),
+(4, 6, 'Chuẩn bị rổ rau sống gồm hoa chuối bào mỏng, giá đỗ, húng quế và hành tây lát mỏng.', 'https://images.unsplash.com/photo-1626804475315-8664ecab0088', 600),
+(4, 7, 'Bỏ bún sợi to chần nóng vào tô, xếp thịt bắp bò, giò khoanh, rắc hành ngò rồi chan nước dùng sả ruốc đậm đà.', 'https://images.unsplash.com/photo-1626804475315-8664ecab0088', 600),
+(5, 1, 'Thịt gà ta chặt miếng nhỏ vừa ăn, ướp cùng nước mắm, hành tỏi, hạt tiêu và chút bột nghệ tạo màu sắc.', 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b', 600),
+(5, 2, 'Củ nén nhặt sạch vỏ rễ, cho vào cối giã dập nhuyễn.', 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b', 600),
+(5, 3, 'Đun nóng dầu phộng (dầu lạc) phi củ nén vàng thơm dậy mùi đặc trưng xứ Quảng.', 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b', 600),
+(5, 4, 'Trút thịt gà đã ướp vào xào săn trên lửa lớn đến khi ngấm đều hương củ nén phi thơm.', 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b', 600),
+(5, 5, 'Châm nước lọc xăm xắp mặt thịt gà, rim nhỏ lửa trong 30 phút để tạo phần nước nhân sánh đậm.', 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b', 600),
+(5, 6, 'Giã dập đậu phộng đã rang vàng, bẻ bánh tráng nướng thành miếng nhỏ bày lên đĩa.', 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b', 600),
+(5, 7, 'Xếp sợi mì Quảng vào tô, múc gà rim rắc lên trên, chan nước nhân xăm xắp và rắc đậu phộng, ăn kèm cải non bắp chuối.', 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b', 600),
+(6, 1, 'Ninh xương ống heo lấy nước dùng thanh ngọt, thường xuyên hớt bọt cho nước trong veo.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(6, 2, 'Tôm sú đem hấp chín bóc vỏ bỏ đầu chỉ đen, trứng cút luộc chín bóc vỏ.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(6, 3, 'Gan heo luộc vừa chín thái lát mỏng, thịt heo băm đem xào săn cùng tỏi phi thơm.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(6, 4, 'Tỏi băm phi vàng giòn rụm làm mỡ tỏi thơm phức.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(6, 5, 'Sơ chế và rửa sạch lá hẹ cắt khúc ngắn, cần tây thái nhỏ.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(6, 6, 'Chần hủ tiếu khô qua nước sôi cho sợi hủ tiếu mềm dai tơi ngon rồi vớt ra xóc mỡ tỏi phi.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(6, 7, 'Xếp hủ tiếu vào tô, bày tôm, gan heo, thịt băm, trứng cút, lá hẹ hẹ và chan nước dùng ngọt lịm.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(7, 1, 'Vo gạo tấm sạch rồi đem hấp hoặc nấu dẻo trong nồi cơm điện.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(7, 2, 'Sườn cốt lết heo đập nhẹ cho mềm, ướp sữa đặc, mật ong, dầu hào, tỏi băm trong 1 tiếng.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(7, 3, 'Làm chả trứng: Trộn thịt băm, mộc nhĩ, bún tàu ngâm nở băm nhỏ, trứng gà (chừa 1 lòng đỏ quét mặt), đem hấp chín.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(7, 4, 'Da heo luộc chín thái sợi nhỏ mảnh trộn cùng thính gạo rang thơm làm bì.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(7, 5, 'Nướng sườn trên than hoa liu riu, quét nước ướp liên tục cho sườn chín mềm mọng màu vàng óng.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(7, 6, 'Làm mỡ hành bằng cách rưới dầu ăn đun sôi lên bát hành lá thái nhỏ.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(7, 7, 'Xới cơm tấm ra đĩa, đặt miếng sườn nướng, chả trứng cắt lát, bì trộn lên, rưới mỡ hành và chan nước mắm chua ngọt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(8, 1, 'Gà ta sát muối rửa sạch, luộc cùng nước lạnh, nghệ đập dập và củ hành tím cho thơm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(8, 2, 'Vớt gà chín ra để nguội, lọc thịt xé sợi vừa ăn trộn rau răm, hành tây thái mỏng, cốt chanh, muối tiêu.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(8, 3, 'Gạo tẻ vo sạch ráo nước, xào sơ với mỡ gà và tỏi phi cho săn hạt gạo.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(8, 4, 'Dùng nước luộc gà nấu cơm để hạt cơm chín vàng bóng bẩy và dẻo ngọt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(8, 5, 'Nấu lòng mề gà xào hành tây làm nước sốt lòng mề đậm vị.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(8, 6, 'Chuẩn bị rau răm nhặt lá sạch, hành tây ngâm đá lạnh khử hăng.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(8, 7, 'Ép cơm tấm vàng ra đĩa, xếp gà xé phay bên cạnh, rưới mỡ hành, nước sốt lòng gà ấm áp.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(9, 1, 'Cá lóc làm sạch màng đen cặn máu trong bụng, rửa qua nước dấm pha muối để khử nhớt hôi.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(9, 2, 'Ướp cá với nước màu thốt nốt, nước mắm, hành tỏi băm, hạt nêm và hạt tiêu trong 30 phút.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(9, 3, 'Thịt ba chỉ heo thái miếng nhỏ mỏng vừa ăn.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(9, 4, 'Xếp thịt ba chỉ xuống đáy tộ đất để chống cháy khét khi kho lâu.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(9, 5, 'Đặt các khúc cá lóc lên trên, đổ nước ướp cá và nước dừa tươi vào nồi ngập xăm xắp.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(9, 6, 'Kho cá trên lửa lớn đến khi sôi bùng thì hạ nhỏ lửa đun liu riu cho nước cạn sền sệt, cá ngấm sậm màu caramel.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(9, 7, 'Rắc thêm ớt hiểm đỏ, hành lá thái nhỏ và tiêu đen xay giã dập thơm nức trước khi tắt bếp.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(10, 1, 'Cá lóc làm sạch cắt khúc dày khoảng 2cm.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(10, 2, 'Tước vỏ dọc mùng rửa sạch thái vạt chéo, đậu bắp thái xéo, dứa thái miếng nhỏ.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(10, 3, 'Đun sôi 1.5 lít nước sạch rồi trút nước cốt me chua vào để tạo vị chua nền.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(10, 4, 'Thả cá lóc cắt khúc vào nấu chín tới rồi vớt cá ra dĩa riêng để cá không bị nát.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(10, 5, 'Trút cà chua, dứa nấu chín rồi thêm đậu bắp, dọc mùng, giá đỗ đun sôi bùng lại.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(10, 6, 'Nêm nếm canh bằng đường phèn, muối hạt và nước mắm cho vị chua ngọt dịu dễ chịu.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(10, 7, 'Múc canh ra tô lớn, xếp cá lên, rắc rau om ngò gai cắt nhỏ và vài lát ớt hiểm chín.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(11, 1, 'Hòa cua đồng xay với nước lọc gạn lấy nước thịt cua qua rây nhiều lần.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(11, 2, 'Đun nước lọc cua với chút muối nhỏ lửa, khuấy nhẹ tay cho riêu cua đông kết thành tảng rồi vớt ra.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(11, 3, 'Đậu hũ thái miếng nhỏ chiên vàng giòn rụm.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(11, 4, 'Phi thơm hành khô, xào cà chua bổ múi cau tạo màu nước lèo đỏ hồng tự nhiên.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(11, 5, 'Thêm dấm bỗng và thìa mắm tôm vào nước dùng cua cho dậy mùi thơm chua thanh tao.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(11, 6, 'Thịt bắp bò hoa thái mỏng đem chần nhanh chín tái trong nồi nước dùng đang sôi.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(11, 7, 'Xếp bún vào tô, bày miếng riêu cua xốp, đậu hũ chiên, thịt bò chần ngập hành ngò chan nước chua ngọt.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(12, 1, 'Ốc luộc chín khều lấy thịt rửa sạch bằng dấm muối cho sạch nhớt rồi thái nhỏ xào thơm hành tỏi.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(12, 2, 'Thịt ba chỉ heo thái miếng con chì vừa ăn rang cháy cạnh ngấm gia vị nghệ.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(12, 3, 'Đậu phụ thái khối vuông nhỏ chiên vàng giòn các mặt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(12, 4, 'Chuối xanh tước vỏ cắt khúc chẻ tư ngâm nước dấm loãng tránh thâm đen.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(12, 5, 'Hầm chuối xanh với bột nghệ và nước dùng mắm tôm cho chuối mềm bùi sánh.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(12, 6, 'Trút thịt ba chỉ, đậu phụ rán chín vào nồi hầm chuối đun nhỏ lửa 15 phút, nêm dấm bỗng thơm chua.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(12, 7, 'Cho ốc nhồi đã xào vào nồi, rắc lá lốt tía tô xắt nhỏ đun sôi rồi múc canh ra bát.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(13, 1, 'Ninh xương heo kỹ lấy nước dùng, gạn bọt liên tục để nước súp ngọt trong.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(13, 2, 'Xào qua thịt cua bể với dầu điều, tỏi phi cho thơm dậy gạch cua màu vàng óng.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(13, 3, 'Pha bột năng với chút nước lọc khuấy tan thả nhẹ vào nồi súp đun sánh nhẹ quyến rũ.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(13, 4, 'Trút thịt cua bể xào thơm vào nồi nước dùng đun nhỏ lửa nêm nếm muối đường.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(13, 5, 'Bánh canh chần chín dẻo mềm xóc qua nước lạnh cho sợi không bị dính.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(13, 6, 'Cắt nhỏ hành lá hẹ tươi ngò gai bày đĩa riêng.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(13, 7, 'Múc sợi bánh canh ra bát lớn, chan nước súp cua sánh đỏ đặc sánh rắc tiêu thơm nồng hành phi.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(14, 1, 'Tôm rửa sạch bỏ chỉ lưng, mực thái khoanh hoa, nghêu ngâm ớt cho nhả sạch cát.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(14, 2, 'Đập dập sả nhánh cắt khúc, riềng thái lát mỏng, lá chanh vò nhẹ cho thơm.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(14, 3, 'Nấu sôi nước dùng xương heo rồi thả sả, riềng, lá chanh đun sôi 10 phút dậy hương.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(14, 4, 'Trút gói sốt Tom Yum lẩu Thái vào khuấy tan cho nước lẩu chuyển màu cam sậm bắt mắt.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(14, 5, 'Nêm nếm gia vị chua cay hài hòa thơm nước cốt chanh.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(14, 6, 'Xếp hải sản ra đĩa tròn xếp nấm xung quanh bàn tiệc lẩu.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(14, 7, 'Đặt nồi lẩu lên bếp bàn ăn đun sôi sùng sục thả dần hải sản nấm ăn kèm bún tươi.', 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d', 600),
+(15, 1, 'Đậu hũ trắng rửa nhẹ tránh nát thái miếng vuông vừa ăn.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(15, 2, 'Cà chua chín bỏ cuống rửa sạch thái lựu nhỏ.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(15, 3, 'Chiên đậu hũ trong dầu nóng lửa vừa đến khi lớp vỏ ngoài vàng ruộm dai mềm.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(15, 4, 'Hành boaro thái nhỏ phi thơm trên chảo dầu nóng.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(15, 5, 'Trút cà chua thái lựu vào xào nhuyễn cùng chút nước lọc tạo nước sốt đỏ sệt mịn màng.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(15, 6, 'Nêm nước tương, muối và hạt nêm chay nấm vào sốt cà chua đun nhỏ lửa.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(15, 7, 'Thả đậu hũ rán vàng vào sốt cà chua đun lim rim 10 phút cho đậu ngấm đẫm gia vị rồi rắc hành ngò lên.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(16, 1, 'Thịt ba chỉ luộc chín cùng chút muối hành đập dập vớt ra ngâm đá lạnh thái mỏng dài.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(16, 2, 'Tôm sú luộc chín bóc vỏ chẻ đôi lưng lấy chỉ đen bỏ đầu.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(16, 3, 'Rau thơm xà lách rửa sạch ngâm nước muối loãng vẩy ráo nước.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(16, 4, 'Làm nước chấm: Xào tương ngọt với tỏi băm bơ đậu phộng và chút nước lọc đun ấm sánh.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(16, 5, 'Trải bánh tráng phẳng thấm chút nước cho mềm dai dễ cuốn.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(16, 6, 'Xếp xà lách, rau thơm, bún tươi, thịt heo luộc và hẹ ló ngọn ra ngoài.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(16, 7, 'Cuốn chặt tay nửa vòng rồi xếp tôm đỏ ở mặt ngoài cuộn tròn lại bày đĩa ăn kèm sốt tương hạt dẻ.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(17, 1, 'Thịt bò thăn thái khối vuông nhỏ 2x2cm, ướp tỏi băm dầu hào hạt tiêu đường trong 30 phút.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(17, 2, 'Ớt chuông hành tây cắt miếng vuông tương đương kích thước miếng bò lúc lắc.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(17, 3, 'Khoai tây cắt que ngâm nước muối chiên vàng giòn ráo dầu.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(17, 4, 'Đun nóng chảo dầu phi thơm tỏi băm xào nhanh ớt chuông hành tây chín tới đổ đĩa riêng.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(17, 5, 'Bật chảo thật nóng lửa to cho chút dầu ăn bơ lạt vào xào thịt bò lắc mạnh chảo.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(17, 6, 'Trút hỗn hợp ớt chuông hành tây đã xào vào chảo bò đảo đều 2 phút nêm dầu hào.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(17, 7, 'Trình bày bò lúc lắc nóng hổi ra đĩa lớn bên cạnh khoai tây chiên giòn chấm muối tiêu.', 'https://images.unsplash.com/photo-1604579659931-f42436a8368c', 600),
+(18, 1, 'Nấm đùi gà cắt chân ngâm nước muối loãng 10 phút rửa sạch cắt lát xéo.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(18, 2, 'Tiêu xanh dùng cán dao đập dập nhẹ vài hạt để tiết hương thơm ấm.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(18, 3, 'Ướp nấm đùi gà với nước tương, đường mía, nước màu dừa chay trong 20 phút.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(18, 4, 'Phi thơm hành boaro băm nhuyễn với chút dầu ăn thực vật.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(18, 5, 'Trút nấm đùi gà và chùm tiêu xanh vào nồi kho đất đun lửa lớn sôi bùng lên.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(18, 6, 'Hạ lửa nhỏ liu riu kho nấm đùi gà thấm sậm màu nâu bóng ngấm vị cay tiêu xanh.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(18, 7, 'Khi nước kho sền sệt keo lại thả ớt cắt lát rắc thêm tiêu đen giã dập ấm áp.', 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', 600),
+(19, 1, 'Thịt ba chỉ rửa sạch thái miếng vuông dày khoảng 3-4cm dẹt thịt kho tàu.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(19, 2, 'Ướp thịt với nước mắm ngon, nước màu caramen, tỏi hành băm nhuyễn và tiêu bột trong 40 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(19, 3, 'Trứng cút luộc chín bóc vỏ chiên sơ qua dầu nóng để lớp da trứng dai dai (tùy sở thích).', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(19, 4, 'Đảo thịt ba chỉ đã ướp trên lửa lớn cho săn mỡ thịt rút khô gia vị.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(19, 5, 'Đổ toàn bộ nước dừa tươi xiêm vào nồi ngập thịt đun sôi bùng hớt sạch bọt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(19, 6, 'Hạ lửa nhỏ liu riu đậy hờ vung kho thịt trong 1 tiếng cho thịt chín mềm nhừ tự nhiên.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(19, 7, 'Thả trứng cút vào kho cùng đun tiếp 15 phút đến khi thịt và trứng thấm màu cánh gián ngọt đà.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(20, 1, 'Thịt đùi gà ta rửa sạch chặt miếng vuông vừa ăn ráo nước.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(20, 2, 'Ướp gà với nước mắm, đường dừa, hành băm và một nửa gừng thái sợi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(20, 3, 'Đun nóng dầu ăn phi thơm củ hành băm xắt mỏng.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(20, 4, 'Cho thịt gà vào xào săn đều lửa lớn cho da gà săn vàng thơm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(20, 5, 'Trút gừng thái sợi còn lại vào chảo cùng chút nước ấm kho nhỏ lửa.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(20, 6, 'Đậy vung kho gà liu riu đun 20 phút đến khi gà chín mềm thấm đượm vị gừng ấm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(20, 7, 'Mở vung đun cạn bớt nước kho nêm hành lá thái khúc tiêu bột dọn đĩa.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(21, 1, 'Mực ống làm sạch ruột mắt cắt khoanh tròn khía nhẹ hoa cúc trên thân mực.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74', 600),
+(21, 2, 'Chần nhanh mực qua nước sôi pha gừng đập dập 5 giây vớt ra ngâm đá lạnh giữ độ giòn.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74', 600),
+(21, 3, 'Ớt chuông và hành tây thái lát chéo múi cau.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74', 600),
+(21, 4, 'Phi thơm tỏi băm trên chảo dầu nóng xào sa tế tôm cay dậy mùi đỏ hồng.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74', 600),
+(21, 5, 'Cho ớt chuông hành tây vào xào nhanh lửa lớn chín tái.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74', 600),
+(21, 6, 'Trút mực ống chín tái vào chảo đảo thật nhanh tay lửa lớn 3 phút bọc đều sa tế.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74', 600),
+(21, 7, 'Nêm dầu hào nước mắm ngon hành lá tiêu bột giã dập đổ đĩa nóng hổi.', 'https://images.unsplash.com/photo-1551248429-40975aa4de74', 600),
+(22, 1, 'Ninh xương ống heo lấy nước súp ngọt trong hớt bọt thật kỹ.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(22, 2, 'Sườn sụn non rửa sạch cắt miếng nhỏ chần qua rồi hầm chín mềm rục thịt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(22, 3, 'Hòa bột gạo tẻ với nước hầm xương nguội khuấy tan hoàn toàn.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(22, 4, 'Đun nồi cháo bột gạo trên lửa nhỏ khuấy liên tục đều tay tránh khê bén đáy nồi.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(22, 5, 'Trút sườn sụn hầm chín mềm vào nồi cháo khuấy cùng đun tiếp cho sánh mượt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(22, 6, 'Nêm nếm gia vị hạt nêm nước mắm ngon muối vừa vị cháo Hà Nội.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(22, 7, 'Múc cháo sườn sánh nóng ra bát rắc ruốc thịt hành phi hạt tiêu bẻ quẩy giòn.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(23, 1, 'Pha bột bánh xèo với nước lọc cốt dừa béo hành lá thái nhỏ để nghỉ bột 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(23, 2, 'Tôm ba chỉ xào sơ cùng hành tây nêm muối tiêu chín tái.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(23, 3, 'Làm nóng chảo lớn quét mỡ đều láng chảo thật nóng xèo xèo.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(23, 4, 'Múc muôi bột bánh xèo láng tròn mỏng quanh lòng chảo.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(23, 5, 'Rải nhân tôm ba chỉ giá đỗ vào một bên đậy vung chảo 2 phút cho bánh chín.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(23, 6, 'Mở vung đun tiếp chảo nhỏ lửa cho vỏ bánh vàng giòn gập đôi bánh xèo lại.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(23, 7, 'Cho bánh ra dĩa cắt đôi ăn cuốn cải bẹ xanh rau thơm chấm nước mắm tỏi ớt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(24, 1, 'Bóp trộn cơm nguội với 2 lòng đỏ trứng gà tạo màu vàng óng bọc đều hạt cơm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(24, 2, 'Luộc sơ đậu Hà Lan bắp ngọt thái hạt lựu tôm mực cho chín tái.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(24, 3, 'Phi thơm tỏi băm xào săn tôm mực hải sản rau củ nêm gia vị xúc ra đĩa.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(24, 4, 'Dùng chảo nóng chiên cơm trứng liên tục đều tay cho hạt cơm săn khô tơi bóng.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(24, 5, 'Trút đĩa tôm mực rau củ vào cơm đảo đều tay nêm nước tương ngon muối nhạt.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(24, 6, 'Khoét rỗng quả dừa xiêm bày cơm chiên nóng hổi vào lòng quả dừa.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(24, 7, 'Đặt dừa nướng lò hoặc hấp nóng 5 phút dậy mùi cơm dừa béo ngậy thơm dẻo.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(25, 1, 'Luộc mì Ý trong nước sôi pha chút muối trong 8-10 phút cho mì chín mềm dẻo vừa (Al dente) rồi vớt ráo.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(25, 2, 'Phi thơm tỏi băm tây hạt lựu với dầu ô-liu bơ lạt.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(25, 3, 'Cho thịt bò băm nhuyễn vào xào chín săn nêm tiêu muối.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(25, 4, 'Trút cà chua xay mịn vào chảo xào nhuyễn hầm nhỏ lửa cùng thịt bò thành nước sốt sệt đỏ.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(25, 5, 'Rắc lá oregano khô thơm vào nước sốt hầm nhỏ lửa 15 phút dậy mùi thơm mì Ý.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(25, 6, 'Xếp sợi mì Ý ấm nóng cuộn tròn dĩa lớn.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(25, 7, 'Múc sốt bò bằm đậm đà chan lên đĩa mì rắc bột phô mai Parmesan bột ăn nóng.', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624', 600),
+(26, 1, 'Đậu hũ chiên cắt sợi dọc dài.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999', 600),
+(26, 2, 'Rửa sạch cà rốt dưa leo gọt vỏ bào sợi mỏng dài dưa leo bỏ ruột.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999', 600),
+(26, 3, 'Bơ sáp lột vỏ thái lát mỏng dẹt dẻo.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999', 600),
+(26, 4, 'Làm nước sốt bơ lạc: Trộn bơ đậu phộng xíu nước tương ớt xay đường nước ấm khuấy mịn.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999', 600),
+(26, 5, 'Làm ẩm nhẹ bánh tráng cuộn dẻo bằng khăn ấm lướt qua.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999', 600),
+(26, 6, 'Xếp lá xà lách cải non sợi cà rốt dưa leo bún tươi lát bơ sáp vàng ngậy.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999', 600),
+(26, 7, 'Cuốn bánh tráng chặt tay cuộn tròn dài bắt mắt cắt đôi bày đĩa tương bơ phộng ngọt ngào.', 'https://images.unsplash.com/photo-1540420773420-3366772f4999', 600),
+(27, 1, 'Ngâm bột Gelatin nở trong nước lạnh 15 phút.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814', 600),
+(27, 2, 'Đun ấm hỗn hợp sữa tươi kem tươi đường cát không sôi bùng thả gelatin khuấy tan chảy hết.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814', 600),
+(27, 3, 'Đổ sữa gelatin vào khuôn vuông để ngăn đông lạnh mát ít nhất 4 tiếng đông dẻo.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814', 600),
+(27, 4, 'Nhãn xuồng bóc vỏ dùng dao khéo léo tách hạt tròn đẹp.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814', 600),
+(27, 5, 'Đun nước đường phèn cùng lá dứa thơm đun sôi 10 phút thả nhãn tươi chần qua tắt bếp làm lạnh.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814', 600),
+(27, 6, 'Cắt thạch khúc bạch đông cứng thành miếng hình ô cờ đẹp mắt.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814', 600),
+(27, 7, 'Xếp khúc bạch vào chén bày nhãn cùi dày rưới nước đường phèn rắc hạnh nhân rang giòn.', 'https://images.unsplash.com/photo-1587314168485-3236d6710814', 600),
+(28, 1, 'Sả rửa sạch đập dập cắt khúc đun sôi với 300ml nước lọc trong 5 phút thơm nồng.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de', 600),
+(28, 2, 'Dùng nước sả nóng hãm 2 túi lọc trà đào trong 10 phút ráo bã.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de', 600),
+(28, 3, 'Cắt đôi quả cam vàng vắt nước một nửa, nửa còn lại thái lát tròn mỏng bày ly.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de', 600),
+(28, 4, 'Hòa nước trà sả thơm với nước cam vắt mật ong nước đào hộp khuấy đều.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de', 600),
+(28, 5, 'Thái lát đào ngâm vừa ăn.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de', 600),
+(28, 6, 'Cho đá viên lạnh vào ly thủy tinh rót nước trà đào cam sả óng vàng lên.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de', 600),
+(28, 7, 'Trang trí lát đào ngâm đào miếng hành ngò trang trí lát cam vàng lá sả tươm thơm mát.', 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de', 600),
+(29, 1, 'Chuẩn bị và sơ chế sạch sẽ các nguyên liệu cho món Cà ri gà nước cốt dừa.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(29, 2, 'Ướp nguyên liệu với gia vị vừa miệng đun sôi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(29, 3, 'Hầm nhỏ lửa cho gia vị ngấm đều đậm đà thơm ngậy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(29, 4, 'Thêm nước cốt dừa tươi hoặc các loại topping đi kèm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(29, 5, 'Múc món ăn ra tô dĩa trang trí bày lên bàn ăn dùng nóng cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(30, 1, 'Chuẩn bị và sơ chế sạch sẽ các nguyên liệu cho món Bánh xèo miền Tây.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(30, 2, 'Ướp nguyên liệu với gia vị vừa miệng đun sôi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(30, 3, 'Hầm nhỏ lửa cho gia vị ngấm đều đậm đà thơm ngậy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(30, 4, 'Thêm nước cốt dừa tươi hoặc các loại topping đi kèm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(30, 5, 'Múc món ăn ra tô dĩa trang trí bày lên bàn ăn dùng nóng cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(31, 1, 'Chuẩn bị và sơ chế sạch sẽ các nguyên liệu cho món Sushi cuộn cá hồi Na Uy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(31, 2, 'Ướp nguyên liệu với gia vị vừa miệng đun sôi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(31, 3, 'Hầm nhỏ lửa cho gia vị ngấm đều đậm đà thơm ngậy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(31, 4, 'Thêm nước cốt dừa tươi hoặc các loại topping đi kèm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(31, 5, 'Múc món ăn ra tô dĩa trang trí bày lên bàn ăn dùng nóng cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(32, 1, 'Chuẩn bị và sơ chế sạch sẽ các nguyên liệu cho món Tokbokki bánh gạo phô mai.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(32, 2, 'Ướp nguyên liệu với gia vị vừa miệng đun sôi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(32, 3, 'Hầm nhỏ lửa cho gia vị ngấm đều đậm đà thơm ngậy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(32, 4, 'Thêm nước cốt dừa tươi hoặc các loại topping đi kèm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(32, 5, 'Múc món ăn ra tô dĩa trang trí bày lên bàn ăn dùng nóng cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(33, 1, 'Chuẩn bị và sơ chế sạch sẽ các nguyên liệu cho món Chè đậu xanh cốt dừa.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(33, 2, 'Ướp nguyên liệu với gia vị vừa miệng đun sôi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(33, 3, 'Hầm nhỏ lửa cho gia vị ngấm đều đậm đà thơm ngậy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(33, 4, 'Thêm nước cốt dừa tươi hoặc các loại topping đi kèm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(33, 5, 'Múc món ăn ra tô dĩa trang trí bày lên bàn ăn dùng nóng cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(34, 1, 'Chuẩn bị và sơ chế sạch sẽ các nguyên liệu cho món Xôi xoài cốt dừa Thái.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(34, 2, 'Ướp nguyên liệu với gia vị vừa miệng đun sôi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(34, 3, 'Hầm nhỏ lửa cho gia vị ngấm đều đậm đà thơm ngậy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(34, 4, 'Thêm nước cốt dừa tươi hoặc các loại topping đi kèm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(34, 5, 'Múc món ăn ra tô dĩa trang trí bày lên bàn ăn dùng nóng cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(35, 1, 'Chuẩn bị và sơ chế sạch sẽ các nguyên liệu cho món Sữa chua nếp cẩm dẻo bùi.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(35, 2, 'Ướp nguyên liệu với gia vị vừa miệng đun sôi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(35, 3, 'Hầm nhỏ lửa cho gia vị ngấm đều đậm đà thơm ngậy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(35, 4, 'Thêm nước cốt dừa tươi hoặc các loại topping đi kèm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(35, 5, 'Múc món ăn ra tô dĩa trang trí bày lên bàn ăn dùng nóng cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(36, 1, 'Chuẩn bị và sơ chế sạch sẽ các nguyên liệu cho món Cà phê phin sữa đá Việt Nam.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(36, 2, 'Ướp nguyên liệu với gia vị vừa miệng đun sôi trong 20 phút.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(36, 3, 'Hầm nhỏ lửa cho gia vị ngấm đều đậm đà thơm ngậy.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(36, 4, 'Thêm nước cốt dừa tươi hoặc các loại topping đi kèm.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600),
+(36, 5, 'Múc món ăn ra tô dĩa trang trí bày lên bàn ăn dùng nóng cực ngon.', 'https://images.unsplash.com/photo-1596797038530-2c107229654b', 600);
 
 -- 7. Seed recipe_images
 INSERT INTO recipe_images (recipe_id, image_url)
 VALUES
-(1, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
-(1, 'https://images.unsplash.com/photo-1504674900247-0877df9cc836');
+(1, 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624'),
+(2, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(3, 'https://images.unsplash.com/photo-1625398407796-82650a8c135f'),
+(4, 'https://images.unsplash.com/photo-1626804475315-8664ecab0088'),
+(5, 'https://images.unsplash.com/photo-1618449813506-69bb0d17088b'),
+(6, 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624'),
+(7, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(8, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(9, 'https://images.unsplash.com/photo-1604579659931-f42436a8368c'),
+(10, 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d'),
+(11, 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624'),
+(12, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(13, 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624'),
+(14, 'https://images.unsplash.com/photo-1547928576-a4a3323dce9d'),
+(15, 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'),
+(16, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(17, 'https://images.unsplash.com/photo-1604579659931-f42436a8368c'),
+(18, 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'),
+(19, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(20, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(21, 'https://images.unsplash.com/photo-1551248429-40975aa4de74'),
+(22, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(23, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(24, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(25, 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624'),
+(26, 'https://images.unsplash.com/photo-1540420773420-3366772f4999'),
+(27, 'https://images.unsplash.com/photo-1587314168485-3236d6710814'),
+(28, 'https://images.unsplash.com/photo-1496042404852-93ec3627a0de'),
+(29, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(30, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(31, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(32, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(33, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(34, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(35, 'https://images.unsplash.com/photo-1596797038530-2c107229654b'),
+(36, 'https://images.unsplash.com/photo-1596797038530-2c107229654b');
 
 -- 8. Seed reviews
--- - User 3 (Nguyễn Văn A) đánh giá 5 sao
--- - User 4 (Trần Thị B) đánh giá 4 sao
 INSERT INTO reviews (recipe_id, user_id, rating, comment)
 VALUES
-(1, 3, 5, 'Món bún chả thơm nức mùi than hoa, nước chấm pha rất vừa miệng, đu đủ giòn ngọt chuẩn vị Hà Nội. Cảm ơn Chef Hoàng Anh nhiều!'),
-(1, 4, 4, 'Ướp thịt theo tỉ lệ này rất đậm đà, cả nhà mình đều thích. Mình bớt ớt đi một chút cho con ăn được.');
+(1, 3, 5, 'Món Phở bò Hà Nội tự làm cực ngon và chuẩn vị nhà làm!'),
+(2, 3, 5, 'Món Bún chả Hà Nội tự làm cực ngon và chuẩn vị nhà làm!'),
+(3, 3, 5, 'Món Phở gà ta tự làm cực ngon và chuẩn vị nhà làm!'),
+(4, 3, 5, 'Món Bún bò Huế tự làm cực ngon và chuẩn vị nhà làm!'),
+(5, 3, 5, 'Món Mì Quảng gà nén tự làm cực ngon và chuẩn vị nhà làm!'),
+(6, 3, 5, 'Món Hủ tiếu Nam Vang tự làm cực ngon và chuẩn vị nhà làm!'),
+(7, 3, 5, 'Món Cơm tấm sườn bì chả tự làm cực ngon và chuẩn vị nhà làm!'),
+(8, 3, 5, 'Món Cơm gà Hội An tự làm cực ngon và chuẩn vị nhà làm!'),
+(9, 3, 5, 'Món Cá lóc kho tộ miền Tây tự làm cực ngon và chuẩn vị nhà làm!'),
+(10, 3, 5, 'Món Canh chua cá lóc miền Tây tự làm cực ngon và chuẩn vị nhà làm!'),
+(11, 3, 5, 'Món Bún riêu cua bắp bò tự làm cực ngon và chuẩn vị nhà làm!'),
+(12, 3, 5, 'Món Bún riêu ốc chuối đậu tự làm cực ngon và chuẩn vị nhà làm!'),
+(13, 3, 5, 'Món Bánh canh cua bể tự làm cực ngon và chuẩn vị nhà làm!'),
+(14, 3, 5, 'Món Lẩu Thái hải sản chua cay tự làm cực ngon và chuẩn vị nhà làm!'),
+(15, 3, 5, 'Món Đậu hũ sốt cà chua chay tự làm cực ngon và chuẩn vị nhà làm!'),
+(16, 3, 5, 'Món Gỏi cuốn tôm thịt heo tự làm cực ngon và chuẩn vị nhà làm!'),
+(17, 3, 5, 'Món Bò lúc lắc khoai tây chiên tự làm cực ngon và chuẩn vị nhà làm!'),
+(18, 3, 5, 'Món Nấm đùi gà kho tiêu xanh tự làm cực ngon và chuẩn vị nhà làm!'),
+(19, 3, 5, 'Món Thịt ba chỉ kho tàu trứng cút tự làm cực ngon và chuẩn vị nhà làm!'),
+(20, 3, 5, 'Món Gà kho gừng sợi ấm áp tự làm cực ngon và chuẩn vị nhà làm!'),
+(21, 3, 5, 'Món Mực ống xào sa tế cay cay tự làm cực ngon và chuẩn vị nhà làm!'),
+(22, 3, 5, 'Món Cháo sườn heo non Hà Nội tự làm cực ngon và chuẩn vị nhà làm!'),
+(23, 3, 5, 'Món Bánh xèo Nam Bộ giòn rụm tự làm cực ngon và chuẩn vị nhà làm!'),
+(24, 3, 5, 'Món Cơm chiên hải sản dừa xiêm tự làm cực ngon và chuẩn vị nhà làm!'),
+(25, 3, 5, 'Món Mì Ý sốt bò bằm Spaghetti tự làm cực ngon và chuẩn vị nhà làm!'),
+(26, 3, 5, 'Món Gỏi cuốn chay ngũ sắc tự làm cực ngon và chuẩn vị nhà làm!'),
+(27, 3, 5, 'Món Chè khúc bạch nhãn tươi tự làm cực ngon và chuẩn vị nhà làm!'),
+(28, 3, 5, 'Món Trà đào cam sả đá lạnh tự làm cực ngon và chuẩn vị nhà làm!'),
+(29, 3, 5, 'Món Cà ri gà nước cốt dừa tự làm cực ngon và chuẩn vị nhà làm!'),
+(30, 3, 5, 'Món Bánh xèo miền Tây tự làm cực ngon và chuẩn vị nhà làm!'),
+(31, 3, 5, 'Món Sushi cuộn cá hồi Na Uy tự làm cực ngon và chuẩn vị nhà làm!'),
+(32, 3, 5, 'Món Tokbokki bánh gạo phô mai tự làm cực ngon và chuẩn vị nhà làm!'),
+(33, 3, 5, 'Món Chè đậu xanh cốt dừa tự làm cực ngon và chuẩn vị nhà làm!'),
+(34, 3, 5, 'Món Xôi xoài cốt dừa Thái tự làm cực ngon và chuẩn vị nhà làm!'),
+(35, 3, 5, 'Món Sữa chua nếp cẩm dẻo bùi tự làm cực ngon và chuẩn vị nhà làm!'),
+(36, 3, 5, 'Món Cà phê phin sữa đá Việt Nam tự làm cực ngon và chuẩn vị nhà làm!');
 
 -- 9. Seed comments
--- - User 5 (Lê Văn C) hỏi
--- - Chef Hoàng Anh (User 2) trả lời (reply)
-INSERT INTO comments (id, recipe_id, user_id, parent_id, content)
+INSERT INTO comments (recipe_id, user_id, parent_id, content)
 VALUES
-(1, 1, 5, NULL, 'Chef ơi, nếu không có bếp than hoa thì mình nướng bằng nồi chiên không dầu có được không ạ? Set nhiệt độ bao nhiêu là vừa?'),
-(2, 1, 2, 1, 'Chào em, nướng nồi chiên không dầu hoàn toàn được nhé. Em set lần 1 khoảng 180 độ C trong 10 phút, sau đó lật mặt quét mỡ hành nướng tiếp lần 2 khoảng 160 độ C trong 5 phút để thịt mềm không bị khô nhé!');
+(1, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Phở bò Hà Nội chi tiết này nha!'),
+(2, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Bún chả Hà Nội chi tiết này nha!'),
+(3, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Phở gà ta chi tiết này nha!'),
+(4, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Bún bò Huế chi tiết này nha!'),
+(5, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Mì Quảng gà nén chi tiết này nha!'),
+(6, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Hủ tiếu Nam Vang chi tiết này nha!'),
+(7, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Cơm tấm sườn bì chả chi tiết này nha!'),
+(8, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Cơm gà Hội An chi tiết này nha!'),
+(9, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Cá lóc kho tộ miền Tây chi tiết này nha!'),
+(10, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Canh chua cá lóc miền Tây chi tiết này nha!'),
+(11, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Bún riêu cua bắp bò chi tiết này nha!'),
+(12, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Bún riêu ốc chuối đậu chi tiết này nha!'),
+(13, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Bánh canh cua bể chi tiết này nha!'),
+(14, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Lẩu Thái hải sản chua cay chi tiết này nha!'),
+(15, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Đậu hũ sốt cà chua chay chi tiết này nha!'),
+(16, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Gỏi cuốn tôm thịt heo chi tiết này nha!'),
+(17, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Bò lúc lắc khoai tây chiên chi tiết này nha!'),
+(18, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Nấm đùi gà kho tiêu xanh chi tiết này nha!'),
+(19, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Thịt ba chỉ kho tàu trứng cút chi tiết này nha!'),
+(20, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Gà kho gừng sợi ấm áp chi tiết này nha!'),
+(21, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Mực ống xào sa tế cay cay chi tiết này nha!'),
+(22, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Cháo sườn heo non Hà Nội chi tiết này nha!'),
+(23, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Bánh xèo Nam Bộ giòn rụm chi tiết này nha!'),
+(24, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Cơm chiên hải sản dừa xiêm chi tiết này nha!'),
+(25, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Mì Ý sốt bò bằm Spaghetti chi tiết này nha!'),
+(26, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Gỏi cuốn chay ngũ sắc chi tiết này nha!'),
+(27, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Chè khúc bạch nhãn tươi chi tiết này nha!'),
+(28, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Trà đào cam sả đá lạnh chi tiết này nha!'),
+(29, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Cà ri gà nước cốt dừa chi tiết này nha!'),
+(30, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Bánh xèo miền Tây chi tiết này nha!'),
+(31, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Sushi cuộn cá hồi Na Uy chi tiết này nha!'),
+(32, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Tokbokki bánh gạo phô mai chi tiết này nha!'),
+(33, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Chè đậu xanh cốt dừa chi tiết này nha!'),
+(34, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Xôi xoài cốt dừa Thái chi tiết này nha!'),
+(35, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Sữa chua nếp cẩm dẻo bùi chi tiết này nha!'),
+(36, 4, NULL, 'Cảm ơn đã chia sẻ công thức món Cà phê phin sữa đá Việt Nam chi tiết này nha!');
 
 -- 10. Seed saved_recipes
--- - User 3 và User 4 lưu công thức Bún chả
 INSERT INTO saved_recipes (user_id, recipe_id)
 VALUES
 (3, 1),
-(4, 1);
+(3, 2),
+(3, 3),
+(3, 4),
+(3, 5),
+(3, 6),
+(3, 7),
+(3, 8),
+(3, 9),
+(3, 10),
+(3, 11),
+(3, 12),
+(3, 13),
+(3, 14),
+(3, 15),
+(3, 16),
+(3, 17),
+(3, 18),
+(3, 19),
+(3, 20),
+(3, 21),
+(3, 22),
+(3, 23),
+(3, 24),
+(3, 25),
+(3, 26),
+(3, 27),
+(3, 28),
+(3, 29),
+(3, 30),
+(3, 31),
+(3, 32),
+(3, 33),
+(3, 34),
+(3, 35),
+(3, 36);
 
 -- 11. Seed follows
--- - Các user khác theo dõi Chef Hoàng Anh (User 2)
--- - Chef Hoàng Anh theo dõi lại Nguyễn Văn A (User 3)
 INSERT INTO follows (follower_id, following_id)
 VALUES
-(3, 2), -- Nguyễn Văn A theo dõi Chef Hoàng Anh
-(4, 2), -- Trần Thị B theo dõi Chef Hoàng Anh
-(5, 2), -- Lê Văn C theo dõi Chef Hoàng Anh
-(2, 3); -- Chef Hoàng Anh theo dõi Nguyễn Văn A
-
--- =================================================================
--- EXTENDED DEMO CATALOGUE
--- 52 recipes total, with dish-specific seeded image searches.
--- LoremFlickr locks each keyword query so demo cards remain stable.
--- =================================================================
-
--- Use an image query matching the existing Bun cha recipe instead of a generic food photo.
-UPDATE recipes
-SET cover_image_url = 'https://loremflickr.com/1200/800/bun-cha,vietnamese,grilled-pork?lock=1'
-WHERE id = 1;
-
-UPDATE recipe_images
-SET image_url = 'https://loremflickr.com/1200/800/bun-cha,vietnamese,grilled-pork?lock=1'
-WHERE recipe_id = 1;
-
--- Additional authors and community members (all demo accounts use password: admin123).
-INSERT INTO users (id, username, password_hash, email, full_name, role, is_verified, bio, avatar_url)
-VALUES
-(6, 'cheflan', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.lan@culinshare.com', 'Chef Minh Lan', 'chef', 1, 'Chuyên món Việt gia đình và các món vùng miền.', 'https://loremflickr.com/300/300/chef,woman?lock=6'),
-(7, 'chefquang', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.quang@culinshare.com', 'Chef Quốc Quang', 'chef', 1, 'Yêu thích hải sản, món nướng và bếp hiện đại.', 'https://loremflickr.com/300/300/chef,man?lock=7'),
-(8, 'maihealthy', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'maihealthy@gmail.com', 'Ngọc Mai', 'user', 1, 'Ưu tiên món chay, salad và khẩu phần cân bằng.', 'https://loremflickr.com/300/300/woman,portrait?lock=8'),
-(9, 'foodiephuong', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'foodiephuong@gmail.com', 'Thu Phương', 'user', 1, 'Thích thử món mới và chia sẻ đánh giá thật.', 'https://loremflickr.com/300/300/woman,smile?lock=9'),
-(10, 'anvaobep', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'anvaobep@gmail.com', 'Gia An', 'user', 1, 'Tập nấu bữa cơm ngon mỗi ngày cho gia đình.', 'https://loremflickr.com/300/300/man,portrait?lock=10'),
-(11, 'dongdong15032005', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'dongdong15032005@gmail.com', 'Dong Dong', 'user', 1, 'Tai khoan test quen mat khau.', 'https://loremflickr.com/300/300/person,portrait?lock=11');
-
--- Expanded categories covering regions, meal types, ingredients and international dishes.
-INSERT INTO categories (id, name, slug, description, image_url)
-VALUES
-(5, 'Món miền Bắc', 'mon-mien-bac', 'Hương vị thanh tao, cân bằng của ẩm thực miền Bắc.', 'https://loremflickr.com/900/600/vietnamese,noodles?lock=105'),
-(6, 'Món miền Trung', 'mon-mien-trung', 'Các món đậm vị, cay thơm của dải đất miền Trung.', 'https://loremflickr.com/900/600/spicy,noodles?lock=106'),
-(7, 'Món miền Nam', 'mon-mien-nam', 'Món miền Nam phong phú với vị ngọt dịu và rau tươi.', 'https://loremflickr.com/900/600/rice,grilled-pork?lock=107'),
-(8, 'Hải sản', 'hai-san', 'Công thức từ tôm, cua, cá, mực và hải sản tươi.', 'https://loremflickr.com/900/600/seafood,shrimp?lock=108'),
-(9, 'Món thịt', 'mon-thit', 'Các món chế biến từ bò và heo giàu năng lượng.', 'https://loremflickr.com/900/600/meat,stew?lock=109'),
-(10, 'Món gia cầm', 'mon-gia-cam', 'Món ngon từ gà và vịt cho bữa ăn gia đình.', 'https://loremflickr.com/900/600/chicken,roasted?lock=110'),
-(11, 'Món nước', 'mon-nuoc', 'Phở, bún, mì và các món có nước dùng nóng hổi.', 'https://loremflickr.com/900/600/noodle,soup?lock=111'),
-(12, 'Cơm và xôi', 'com-va-xoi', 'Những món no bụng từ cơm và nếp.', 'https://loremflickr.com/900/600/rice,bowl?lock=112'),
-(13, 'Bánh và món cuốn', 'banh-va-mon-cuon', 'Bánh truyền thống và các món cuốn ăn kèm rau.', 'https://loremflickr.com/900/600/spring-rolls?lock=113'),
-(14, 'Món lành mạnh', 'mon-lanh-manh', 'Món ăn nhẹ nhàng, nhiều rau củ và ít dầu.', 'https://loremflickr.com/900/600/salad,vegetables?lock=114'),
-(15, 'Món quốc tế', 'mon-quoc-te', 'Công thức được yêu thích từ nhiều nền ẩm thực.', 'https://loremflickr.com/900/600/pasta,pizza?lock=115'),
-(16, 'Đồ uống', 'do-uong', 'Thức uống giải khát và cà phê Việt.', 'https://loremflickr.com/900/600/iced,drink?lock=116');
-
--- Additional recipes: the keyword-based cover URLs are tailored to each recipe.
-INSERT INTO recipes (id, author_id, title, slug, description, cover_image_url, prep_time_minutes, cook_time_minutes, servings, calories, difficulty, status)
-VALUES
-(2, 2, 'Phở bò Hà Nội', 'pho-bo-ha-noi', 'Nước dùng trong ngọt xương, bánh phở mềm và thịt bò thái mỏng.', 'https://loremflickr.com/1200/800/pho,beef,noodle-soup?lock=2', 35, 180, 4, 480, 'khó', 'published'),
-(3, 6, 'Phở gà', 'pho-ga', 'Tô phở thơm mùi gừng nướng với thịt gà mềm ngọt.', 'https://loremflickr.com/1200/800/chicken,pho,noodle-soup?lock=3', 25, 90, 4, 420, 'trung bình', 'published'),
-(4, 6, 'Bún bò Huế', 'bun-bo-hue', 'Bún bò đậm vị sả ớt, giò heo và thịt bắp bò.', 'https://loremflickr.com/1200/800/spicy,beef,noodle-soup?lock=4', 40, 150, 5, 560, 'khó', 'published'),
-(5, 2, 'Mì Quảng gà', 'mi-quang-ga', 'Mì vàng, gà rim và nước nhân sánh thơm nghệ.', 'https://loremflickr.com/1200/800/chicken,noodles,turmeric?lock=5', 30, 45, 4, 510, 'trung bình', 'published'),
-(6, 2, 'Cao lầu Hội An', 'cao-lau-hoi-an', 'Sợi cao lầu dai, thịt xá xíu và rau sống giòn mát.', 'https://loremflickr.com/1200/800/pork,noodles,greens?lock=6', 35, 50, 4, 500, 'khó', 'published'),
-(7, 7, 'Hủ tiếu Nam Vang', 'hu-tieu-nam-vang', 'Hủ tiếu với tôm, thịt bằm và nước dùng thanh ngọt.', 'https://loremflickr.com/1200/800/shrimp,pork,noodle-soup?lock=7', 30, 75, 4, 490, 'trung bình', 'published'),
-(8, 6, 'Cơm tấm sườn bì chả', 'com-tam-suon-bi-cha', 'Cơm tấm ăn cùng sườn nướng, bì, chả trứng và mỡ hành.', 'https://loremflickr.com/1200/800/grilled-pork,rice,egg?lock=8', 35, 30, 4, 690, 'trung bình', 'published'),
-(9, 6, 'Cơm gà Hội An', 'com-ga-hoi-an', 'Cơm vàng thơm nghệ với gà xé, rau răm và hành tây.', 'https://loremflickr.com/1200/800/chicken,rice,salad?lock=9', 25, 45, 4, 540, 'trung bình', 'published'),
-(10, 7, 'Cơm chiên hải sản', 'com-chien-hai-san', 'Cơm chiên tơi hạt với tôm mực và rau củ nhiều màu.', 'https://loremflickr.com/1200/800/seafood,fried-rice,shrimp?lock=10', 15, 15, 3, 520, 'dễ', 'published'),
-(11, 6, 'Bánh xèo miền Tây', 'banh-xeo-mien-tay', 'Bánh xèo vàng giòn nhân tôm thịt giá, cuốn rau xanh.', 'https://loremflickr.com/1200/800/crispy,pancake,shrimp?lock=11', 30, 25, 4, 450, 'trung bình', 'published'),
-(12, 2, 'Bánh cuốn nóng', 'banh-cuon-nong', 'Lớp bánh mỏng mềm cuộn thịt mộc nhĩ, ăn với chả lụa.', 'https://loremflickr.com/1200/800/rice-roll,pork,vietnamese?lock=12', 35, 25, 4, 380, 'khó', 'published'),
-(13, 7, 'Bánh mì thịt nướng', 'banh-mi-thit-nuong', 'Bánh mì giòn kẹp thịt nướng, đồ chua và rau thơm.', 'https://loremflickr.com/1200/800/banh-mi,grilled-pork,sandwich?lock=13', 25, 15, 4, 470, 'dễ', 'published'),
-(14, 6, 'Gỏi cuốn tôm thịt', 'goi-cuon-tom-thit', 'Cuốn bánh tráng trong mát với tôm, thịt, bún và rau.', 'https://loremflickr.com/1200/800/spring-rolls,shrimp,vietnamese?lock=14', 25, 10, 4, 250, 'dễ', 'published'),
-(15, 7, 'Chả giò giòn rụm', 'cha-gio-gion-rum', 'Chả giò chiên vàng nhân thịt củ sắn và mộc nhĩ.', 'https://loremflickr.com/1200/800/fried,spring-rolls?lock=15', 30, 15, 4, 390, 'trung bình', 'published'),
-(16, 2, 'Cá kho tộ', 'ca-kho-to', 'Cá kho nước màu sóng sánh, tiêu cay và vị mặn ngọt hài hòa.', 'https://loremflickr.com/1200/800/braised,fish,claypot?lock=16', 20, 40, 4, 360, 'trung bình', 'published'),
-(17, 6, 'Thịt kho trứng', 'thit-kho-trung', 'Thịt ba chỉ mềm béo kho cùng trứng và nước dừa.', 'https://loremflickr.com/1200/800/braised,pork,egg?lock=17', 20, 75, 5, 580, 'trung bình', 'published'),
-(18, 7, 'Canh chua cá lóc', 'canh-chua-ca-loc', 'Canh chua dịu với cá lóc, thơm, bạc hà và giá.', 'https://loremflickr.com/1200/800/fish,soup,pineapple?lock=18', 20, 25, 4, 240, 'dễ', 'published'),
-(19, 7, 'Bò lúc lắc', 'bo-luc-lac', 'Thịt bò áp chảo mềm mọng cùng ớt chuông và hành tây.', 'https://loremflickr.com/1200/800/beef,stir-fry,pepper?lock=19', 20, 12, 3, 430, 'trung bình', 'published'),
-(20, 6, 'Gà kho gừng', 'ga-kho-gung', 'Gà kho thấm vị, thơm ấm gừng thái sợi.', 'https://loremflickr.com/1200/800/braised,chicken,ginger?lock=20', 15, 30, 4, 370, 'dễ', 'published'),
-(21, 7, 'Gà nướng mật ong', 'ga-nuong-mat-ong', 'Gà nướng da vàng óng, ngọt thơm mật ong và tỏi.', 'https://loremflickr.com/1200/800/roasted,chicken,honey?lock=21', 25, 45, 4, 510, 'trung bình', 'published'),
-(22, 7, 'Vịt quay ngũ vị', 'vit-quay-ngu-vi', 'Vịt quay giòn da với hương ngũ vị đậm đà.', 'https://loremflickr.com/1200/800/roast,duck?lock=22', 40, 80, 5, 620, 'khó', 'published'),
-(23, 7, 'Tôm rang me', 'tom-rang-me', 'Tôm săn chắc phủ sốt me chua ngọt óng mượt.', 'https://loremflickr.com/1200/800/shrimp,tamarind,sauce?lock=23', 15, 15, 3, 320, 'dễ', 'published'),
-(24, 7, 'Mực xào sa tế', 'muc-xao-sa-te', 'Mực giòn xào sa tế cay thơm cùng hành cần.', 'https://loremflickr.com/1200/800/squid,stir-fry,spicy?lock=24', 15, 10, 3, 280, 'dễ', 'published'),
-(25, 7, 'Lẩu hải sản', 'lau-hai-san', 'Nồi lẩu chua cay đầy tôm, mực, nghêu và rau nấm.', 'https://loremflickr.com/1200/800/seafood,hotpot?lock=25', 35, 35, 6, 460, 'trung bình', 'published'),
-(26, 7, 'Lẩu Thái chua cay', 'lau-thai-chua-cay', 'Lẩu tom yum đỏ cam, thơm sả riềng và lá chanh.', 'https://loremflickr.com/1200/800/tom-yum,hotpot,shrimp?lock=26', 30, 30, 5, 430, 'trung bình', 'published'),
-(27, 2, 'Bún riêu cua', 'bun-rieu-cua', 'Nước dùng cà chua thanh chua với riêu cua mềm xốp.', 'https://loremflickr.com/1200/800/crab,tomato,noodle-soup?lock=27', 35, 60, 4, 460, 'khó', 'published'),
-(28, 6, 'Bún mắm miền Tây', 'bun-mam-mien-tay', 'Tô bún mắm đậm đà với cá, tôm, mực và rau đồng.', 'https://loremflickr.com/1200/800/seafood,noodle-soup,vietnamese?lock=28', 45, 75, 5, 550, 'khó', 'published'),
-(29, 7, 'Bánh canh cua', 'banh-canh-cua', 'Sợi bánh canh dai trong nước dùng cua sánh đỏ hấp dẫn.', 'https://loremflickr.com/1200/800/crab,noodle-soup?lock=29', 35, 50, 4, 490, 'trung bình', 'published'),
-(30, 6, 'Xôi gà xé', 'xoi-ga-xe', 'Xôi dẻo nóng ăn cùng gà xé, hành phi và ruốc.', 'https://loremflickr.com/1200/800/sticky-rice,chicken?lock=30', 25, 40, 4, 480, 'trung bình', 'published'),
-(31, 2, 'Cháo sườn', 'chao-suon', 'Cháo mịn thơm với sườn non mềm và quẩy giòn.', 'https://loremflickr.com/1200/800/rice,porridge,pork?lock=31', 20, 70, 4, 330, 'trung bình', 'published'),
-(32, 8, 'Trứng cuộn rau củ', 'trung-cuon-rau-cu', 'Trứng cuộn mềm với cà rốt, hành lá và bắp ngọt.', 'https://loremflickr.com/1200/800/omelette,vegetables?lock=32', 10, 10, 2, 210, 'dễ', 'published'),
-(33, 8, 'Đậu hũ sốt cà chua', 'dau-hu-sot-ca-chua', 'Đậu hũ chiên mềm thấm sốt cà chua chua ngọt.', 'https://loremflickr.com/1200/800/tofu,tomato,sauce?lock=33', 10, 15, 3, 230, 'dễ', 'published'),
-(34, 8, 'Nấm kho tiêu xanh', 'nam-kho-tieu-xanh', 'Nấm kho đậm vị tiêu xanh, phù hợp mâm cơm chay.', 'https://loremflickr.com/1200/800/mushroom,stew,vegetarian?lock=34', 10, 20, 3, 180, 'dễ', 'published'),
-(35, 8, 'Cơm chiên rau củ chay', 'com-chien-rau-cu-chay', 'Cơm chiên nhiều màu với đậu Hà Lan, bắp và cà rốt.', 'https://loremflickr.com/1200/800/vegetable,fried-rice?lock=35', 10, 12, 3, 350, 'dễ', 'published'),
-(36, 8, 'Bún chay Huế', 'bun-chay-hue', 'Nước dùng rau củ thơm sả, ăn cùng đậu hũ và nấm.', 'https://loremflickr.com/1200/800/vegetarian,noodle-soup,tofu?lock=36', 25, 40, 4, 300, 'trung bình', 'published'),
-(37, 8, 'Gỏi ngó sen chay', 'goi-ngo-sen-chay', 'Ngó sen giòn trộn rau củ, đậu hũ và nước mắm chay.', 'https://loremflickr.com/1200/800/lotus,salad,vegetarian?lock=37', 20, 5, 3, 170, 'dễ', 'published'),
-(38, 8, 'Salad ức gà bơ', 'salad-uc-ga-bo', 'Salad rau xanh, ức gà áp chảo và bơ béo lành mạnh.', 'https://loremflickr.com/1200/800/chicken,avocado,salad?lock=38', 15, 12, 2, 320, 'dễ', 'published'),
-(39, 7, 'Pizza hải sản', 'pizza-hai-san', 'Pizza đế giòn phủ phô mai, tôm mực và ớt chuông.', 'https://loremflickr.com/1200/800/seafood,pizza?lock=39', 45, 18, 4, 680, 'khó', 'published'),
-(40, 6, 'Spaghetti bò bằm', 'spaghetti-bo-bam', 'Mì Ý sốt cà chua bò bằm thơm lá oregano.', 'https://loremflickr.com/1200/800/spaghetti,bolognese?lock=40', 15, 30, 3, 560, 'trung bình', 'published'),
-(41, 6, 'Cà ri gà khoai tây', 'ca-ri-ga-khoai-tay', 'Cà ri vàng béo dịu với gà mềm và khoai tây bở.', 'https://loremflickr.com/1200/800/chicken,curry,potato?lock=41', 20, 40, 4, 510, 'trung bình', 'published'),
-(42, 7, 'Sushi cuộn cá hồi', 'sushi-cuon-ca-hoi', 'Cuộn sushi cá hồi tươi, bơ và cơm giấm vừa vị.', 'https://loremflickr.com/1200/800/salmon,sushi,roll?lock=42', 30, 15, 3, 390, 'khó', 'published'),
-(43, 7, 'Tokbokki phô mai', 'tokbokki-pho-mai', 'Bánh gạo Hàn Quốc cay ngọt phủ phô mai tan chảy.', 'https://loremflickr.com/1200/800/tteokbokki,korean,cheese?lock=43', 10, 18, 3, 420, 'dễ', 'published'),
-(44, 6, 'Bánh flan caramel', 'banh-flan-caramel', 'Flan mềm mịn với lớp caramel màu hổ phách.', 'https://loremflickr.com/1200/800/caramel,flan,dessert?lock=44', 15, 35, 6, 210, 'trung bình', 'published'),
-(45, 6, 'Chè ba màu', 'che-ba-mau', 'Ly chè nhiều lớp đậu, thạch và nước cốt dừa mát lạnh.', 'https://loremflickr.com/1200/800/colorful,dessert,coconut?lock=45', 25, 35, 5, 300, 'trung bình', 'published'),
-(46, 6, 'Chè khúc bạch', 'che-khuc-bach', 'Khúc bạch mềm béo trong nước đường nhãn thanh mát.', 'https://loremflickr.com/1200/800/almond,jelly,dessert?lock=46', 20, 15, 5, 260, 'trung bình', 'published'),
-(47, 8, 'Bánh chuối nướng', 'banh-chuoi-nuong', 'Bánh chuối thơm bơ, mặt vàng nâu mềm ẩm.', 'https://loremflickr.com/1200/800/banana,cake,baked?lock=47', 15, 45, 6, 280, 'dễ', 'published'),
-(48, 8, 'Xôi xoài Thái', 'xoi-xoai-thai', 'Xôi nếp cốt dừa dẻo béo ăn với xoài chín.', 'https://loremflickr.com/1200/800/mango,sticky-rice?lock=48', 20, 30, 4, 340, 'dễ', 'published'),
-(49, 8, 'Sữa chua nếp cẩm', 'sua-chua-nep-cam', 'Sữa chua mịn kết hợp nếp cẩm dẻo bùi.', 'https://loremflickr.com/1200/800/yogurt,purple-rice,dessert?lock=49', 15, 35, 4, 220, 'dễ', 'published'),
-(50, 8, 'Trà đào cam sả', 'tra-dao-cam-sa', 'Trà đào mát lạnh thơm cam vàng và sả tươi.', 'https://loremflickr.com/1200/800/peach,orange,iced-tea?lock=50', 10, 10, 2, 120, 'dễ', 'published'),
-(51, 8, 'Sinh tố bơ', 'sinh-to-bo', 'Sinh tố bơ sánh mịn, béo thơm và dễ làm.', 'https://loremflickr.com/1200/800/avocado,smoothie?lock=51', 5, 0, 2, 230, 'dễ', 'published'),
-(52, 6, 'Cà phê sữa đá', 'ca-phe-sua-da', 'Cà phê phin đậm đà hòa sữa đặc và đá lạnh.', 'https://loremflickr.com/1200/800/vietnamese,iced,coffee?lock=52', 8, 5, 1, 150, 'dễ', 'published');
-
--- Category mapping, allowing search/filter by both region and dish type.
-INSERT INTO recipe_categories (recipe_id, category_id)
-VALUES
-(2,1),(2,4),(2,5),(2,11),(3,1),(3,4),(3,5),(3,11),
-(4,1),(4,6),(4,11),(5,1),(5,6),(5,11),(6,1),(6,6),(6,11),
-(7,1),(7,7),(7,11),(8,1),(8,7),(8,9),(8,12),(9,1),(9,6),(9,10),(9,12),
-(10,1),(10,7),(10,8),(10,12),(11,1),(11,7),(11,13),(12,1),(12,5),(12,13),
-(13,1),(13,7),(13,13),(14,1),(14,7),(14,13),(14,14),(15,1),(15,7),(15,13),
-(16,1),(16,7),(16,8),(17,1),(17,7),(17,9),(18,1),(18,7),(18,8),(19,1),(19,9),
-(20,1),(20,10),(21,1),(21,10),(22,1),(22,10),(23,1),(23,8),(24,1),(24,8),
-(25,8),(25,11),(26,8),(26,11),(26,15),(27,1),(27,5),(27,11),(28,1),(28,7),(28,8),(28,11),
-(29,1),(29,7),(29,8),(29,11),(30,1),(30,4),(30,10),(30,12),(31,1),(31,4),(31,5),(31,11),
-(32,4),(32,14),(33,2),(33,14),(34,2),(34,14),(35,2),(35,12),(35,14),(36,1),(36,2),(36,6),(36,11),
-(37,2),(37,14),(38,14),(39,8),(39,15),(40,9),(40,15),(41,10),(41,15),(42,8),(42,15),(43,15),
-(44,3),(45,3),(46,3),(47,3),(48,3),(48,15),(49,3),(50,16),(51,16),(51,14),(52,16),(52,1);
-
--- One gallery image is available for every added recipe and uses its matching cover image.
-INSERT INTO recipe_images (recipe_id, image_url)
-SELECT id, cover_image_url
-FROM recipes
-WHERE id BETWEEN 2 AND 52;
-
--- Recipe-specific principal ingredients plus standard preparation essentials.
-INSERT INTO recipe_ingredients (recipe_id, name, quantity, unit)
-SELECT id,
-    CASE id
-        WHEN 2 THEN 'Bánh phở và thịt bò tái' WHEN 3 THEN 'Bánh phở và thịt gà ta'
-        WHEN 4 THEN 'Bún sợi lớn, bắp bò và giò heo' WHEN 5 THEN 'Mì Quảng và thịt gà'
-        WHEN 6 THEN 'Sợi cao lầu và thịt xá xíu' WHEN 7 THEN 'Hủ tiếu, tôm và thịt bằm'
-        WHEN 8 THEN 'Cơm tấm, sườn heo và chả trứng' WHEN 9 THEN 'Gạo thơm và thịt gà'
-        WHEN 10 THEN 'Cơm nguội, tôm và mực' WHEN 11 THEN 'Bột bánh xèo, tôm và thịt'
-        WHEN 12 THEN 'Bột gạo, thịt bằm và mộc nhĩ' WHEN 13 THEN 'Bánh mì và thịt heo nướng'
-        WHEN 14 THEN 'Bánh tráng, tôm và thịt luộc' WHEN 15 THEN 'Bánh tráng ram và thịt bằm'
-        WHEN 16 THEN 'Cá thu cắt khoanh' WHEN 17 THEN 'Thịt ba chỉ và trứng vịt'
-        WHEN 18 THEN 'Cá lóc và thơm' WHEN 19 THEN 'Thăn bò và ớt chuông'
-        WHEN 20 THEN 'Thịt gà và gừng' WHEN 21 THEN 'Gà nguyên con và mật ong'
-        WHEN 22 THEN 'Vịt nguyên con và ngũ vị hương' WHEN 23 THEN 'Tôm sú và me chín'
-        WHEN 24 THEN 'Mực tươi và sa tế' WHEN 25 THEN 'Tôm, mực, nghêu'
-        WHEN 26 THEN 'Tôm, nấm và sốt tom yum' WHEN 27 THEN 'Bún và cua đồng'
-        WHEN 28 THEN 'Bún, cá, tôm và mắm cá' WHEN 29 THEN 'Bánh canh và thịt cua'
-        WHEN 30 THEN 'Gạo nếp và thịt gà xé' WHEN 31 THEN 'Gạo tẻ và sườn non'
-        WHEN 32 THEN 'Trứng gà và rau củ' WHEN 33 THEN 'Đậu hũ và cà chua'
-        WHEN 34 THEN 'Nấm đùi gà và tiêu xanh' WHEN 35 THEN 'Cơm và rau củ hỗn hợp'
-        WHEN 36 THEN 'Bún, đậu hũ và nấm' WHEN 37 THEN 'Ngó sen và đậu hũ'
-        WHEN 38 THEN 'Ức gà, bơ và xà lách' WHEN 39 THEN 'Đế pizza, tôm và mực'
-        WHEN 40 THEN 'Mì spaghetti và bò bằm' WHEN 41 THEN 'Gà, khoai tây và bột cà ri'
-        WHEN 42 THEN 'Cơm sushi và cá hồi' WHEN 43 THEN 'Bánh gạo và phô mai'
-        WHEN 44 THEN 'Trứng, sữa và đường caramel' WHEN 45 THEN 'Đậu đỏ, đậu xanh và thạch'
-        WHEN 46 THEN 'Kem sữa, gelatin và nhãn' WHEN 47 THEN 'Chuối chín và bánh mì'
-        WHEN 48 THEN 'Gạo nếp và xoài chín' WHEN 49 THEN 'Sữa chua và nếp cẩm'
-        WHEN 50 THEN 'Trà, đào, cam và sả' WHEN 51 THEN 'Bơ chín và sữa'
-        WHEN 52 THEN 'Cà phê rang xay và sữa đặc'
-    END, '1', 'phần'
-FROM recipes WHERE id BETWEEN 2 AND 52
-UNION ALL
-SELECT id, 'Gia vị nêm nếm phù hợp món ăn', '1', 'bộ'
-FROM recipes WHERE id BETWEEN 2 AND 52
-UNION ALL
-SELECT id,
-    CASE
-        WHEN id BETWEEN 44 AND 52 THEN 'Đá lạnh hoặc topping trang trí'
-        WHEN id IN (25,26) THEN 'Rau và nấm ăn lẩu'
-        ELSE 'Rau thơm hoặc rau củ ăn kèm'
-    END, '1', 'phần'
-FROM recipes WHERE id BETWEEN 2 AND 52;
-
--- Every recipe detail page receives a usable three-step preparation flow.
-INSERT INTO recipe_steps (recipe_id, step_number, instruction, image_url, timer_seconds)
-SELECT id, 1, CONCAT('Chuẩn bị đầy đủ nguyên liệu cho món ', title, ', rửa sạch và sơ chế theo khẩu phần.'), cover_image_url, prep_time_minutes * 60
-FROM recipes WHERE id BETWEEN 2 AND 52
-UNION ALL
-SELECT id, 2, CONCAT('Chế biến ', title, ' đúng thời gian, điều chỉnh gia vị vừa ăn và giữ hương vị đặc trưng của món.'), cover_image_url, cook_time_minutes * 60
-FROM recipes WHERE id BETWEEN 2 AND 52
-UNION ALL
-SELECT id, 3, CONCAT('Trình bày món ', title, ' ra đĩa hoặc tô, dùng nóng hay dùng lạnh theo đặc trưng công thức.'), cover_image_url, 0
-FROM recipes WHERE id BETWEEN 2 AND 52;
-
--- Ratings across the catalogue: at least one rating per added recipe, with a second rating on popular dishes.
-INSERT INTO reviews (recipe_id, user_id, rating, comment)
-SELECT id, 3 + MOD(id, 8), 4 + MOD(id, 2), CONCAT('Mình đã nấu thử ', title, ', hướng dẫn dễ theo và hương vị rất ổn.')
-FROM recipes WHERE id BETWEEN 2 AND 52;
-
-INSERT INTO reviews (recipe_id, user_id, rating, comment)
-SELECT id, 3 + MOD(id + 3, 8), 5, CONCAT(title, ' lên món đẹp, gia đình mình rất thích.')
-FROM recipes
-WHERE id BETWEEN 2 AND 52 AND MOD(id, 2) = 0;
-
--- Public comments for discussion samples on every added recipe.
-INSERT INTO comments (recipe_id, user_id, parent_id, content)
-SELECT id, 8 + MOD(id, 3), NULL, CONCAT('Món ', title, ' nhìn hấp dẫn quá, mình sẽ thử làm cuối tuần này.')
-FROM recipes WHERE id BETWEEN 2 AND 52;
-
-INSERT INTO comments (recipe_id, user_id, parent_id, content)
-SELECT id, author_id, NULL, CONCAT('Cảm ơn bạn đã quan tâm món ', title, '. Hãy nêm nếm lại theo khẩu vị gia đình nhé!')
-FROM recipes WHERE id BETWEEN 2 AND 52 AND MOD(id, 3) = 0;
-
--- Favorites / saved recipes provide realistic personal collections.
-INSERT INTO saved_recipes (user_id, recipe_id)
-SELECT 3 + MOD(id, 8), id FROM recipes WHERE id BETWEEN 2 AND 52;
-
-INSERT INTO saved_recipes (user_id, recipe_id)
-SELECT 3 + MOD(id + 2, 8), id FROM recipes WHERE id BETWEEN 2 AND 52 AND MOD(id, 2) = 1;
-
--- Additional community follow graph.
-INSERT INTO follows (follower_id, following_id)
-VALUES
-(6, 2), (7, 2), (8, 2), (9, 2), (10, 2),
-(3, 6), (4, 6), (5, 7), (8, 6), (9, 7), (10, 6);
+(3, 2), (4, 2), (5, 2), (2, 3), (6, 2), (7, 2), (3, 6);
