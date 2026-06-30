@@ -224,6 +224,15 @@ export const getChefProfileApi = async (userId) => {
   }
 };
 
+export const getChefsRankingApi = async () => {
+  try {
+    const response = await api.get('/api/chefs/ranking');
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
 export const getFollowersApi = async (userId) => {
   try {
     const response = await api.get(`/api/users/${userId}/followers`);
@@ -246,6 +255,91 @@ export const updateHealthStatsApi = async (data) => {
   try {
     const response = await api.put("/api/me/health", data);
     return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const changePasswordApi = async (data) => {
+  try {
+    const response = await api.put("/user/password", data);
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// ========================
+// ADMIN MANAGEMENT APIs
+// ========================
+
+export const getAdminUsersApi = async () => {
+  try {
+    const response = await api.get('/api/admin/users');
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const deleteAdminUserApi = async (id) => {
+  try {
+    const response = await api.delete(`/api/admin/users/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const updateAdminUserRoleApi = async (id, role) => {
+  try {
+    const response = await api.put(`/api/admin/users/${id}/role`, { role });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const getAdminRecipesApi = async (status) => {
+  try {
+    const response = await api.get('/api/admin/recipes', { params: { status } });
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const updateAdminRecipeStatusApi = async (id, status) => {
+  try {
+    const response = await api.put(`/api/admin/recipes/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const deleteAdminRecipeApi = async (id) => {
+  try {
+    const response = await api.delete(`/api/admin/recipes/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const createAdminCategoryApi = async (data) => {
+  try {
+    const response = await api.post('/api/admin/categories', data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const deleteAdminCategoryApi = async (id) => {
+  try {
+    const response = await api.delete(`/api/admin/categories/${id}`);
+    return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
   }

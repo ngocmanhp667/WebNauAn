@@ -72,6 +72,167 @@ class AdminController {
             next(error);
         }
     }
+
+    // ========================
+    // USER MANAGEMENT
+    // ========================
+    async getUsers(req, res, next) {
+        try {
+            const users = await adminRepository.getAllUsers();
+            return res.status(200).json({
+                success: true,
+                data: users
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteUser(req, res, next) {
+        try {
+            const { id } = req.params;
+            if (parseInt(id) === req.user.id) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Bạn không thể tự xóa tài khoản của chính mình!'
+                });
+            }
+            await adminRepository.deleteUser(id);
+            return res.status(200).json({
+                success: true,
+                message: 'Xóa người dùng thành công'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async updateUserRole(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { role } = req.body;
+            if (!['user', 'admin'].includes(role)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Vai trò không hợp lệ'
+                });
+            }
+            if (parseInt(id) === req.user.id) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Bạn không thể tự thay đổi vai trò của chính mình!'
+                });
+            }
+            await adminRepository.updateUserRole(id, role);
+            return res.status(200).json({
+                success: true,
+                message: 'Cập nhật vai trò người dùng thành công'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // ========================
+    // RECIPE MANAGEMENT & APPROVAL
+    // ========================
+    async getRecipes(req, res, next) {
+        try {
+            const { status } = req.query;
+            const recipes = await adminRepository.getAllRecipes(status);
+            return res.status(200).json({
+                success: true,
+                data: recipes
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async updateRecipeStatus(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+            if (!['draft', 'pending', 'published'].includes(status)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Trạng thái không hợp lệ'
+                });
+            }
+            await adminRepository.updateRecipeStatus(id, status);
+            return res.status(200).json({
+                success: true,
+                message: `Đã cập nhật trạng thái công thức thành: ${status}`
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteRecipe(req, res, next) {
+        try {
+            const { id } = req.params;
+            await adminRepository.deleteRecipe(id);
+            return res.status(200).json({
+                success: true,
+                message: 'Xóa công thức thành công'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // ========================
+    // CATEGORY MANAGEMENT
+    // ========================
+    async createCategory(req, res, next) {
+        try {
+            const { name, description, imageUrl } = req.body;
+            if (!name || !name.trim()) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Tên danh mục là bắt buộc'
+                });
+            }
+
+            // Tạo slug tự động từ tên
+            let slug = name.toLowerCase()
+                .replace(/[áàảãạăắằẳẵặâấầẩẫậ]/g, 'a')
+                .replace(/[éèẻẽẹêếềểễệ]/g, 'e')
+                .replace(/[íìỉĩị]/g, 'i')
+                .replace(/[óòỏõọôốồổỗộơớờởỡợ]/g, 'o')
+                .replace(/[úùủũụưứừửữự]/g, 'u')
+                .replace(/[ýỳỷỹỵ]/g, 'y')
+                .replace(/đ/g, 'd')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-');
+            slug = `${slug}-${Date.now().toString().slice(-4)}`;
+
+            const categoryId = await adminRepository.createCategory(name.trim(), slug, description, imageUrl);
+            return res.status(201).json({
+                success: true,
+                message: 'Thêm danh mục mới thành công',
+                data: { id: categoryId, name, slug, description, imageUrl }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteCategory(req, res, next) {
+        try {
+            const { id } = req.params;
+            await adminRepository.deleteCategory(id);
+            return res.status(200).json({
+                success: true,
+                message: 'Xóa danh mục thành công'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new AdminController();

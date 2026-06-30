@@ -56,8 +56,7 @@ const Header = () => {
           <Link to="/" className={linkClass("/")}>Trang chủ</Link>
           <Link to="/search" className={linkClass("/search")}>Khám phá</Link>
           <Link to="/fridge" className={linkClass("/fridge")}>Tủ lạnh ảo</Link>
-          <Link to={chefProfileUrl} className={linkClass("/chef")}>Đầu bếp nổi bật</Link>
-          {user && <Link to="/saved-recipes" className={linkClass("/saved-recipes")}>Yêu thích</Link>}
+          <Link to="/chefs" className={linkClass("/chefs")}>Đầu bếp nổi bật</Link>
           <Link to="/submit-recipe" className={linkClass("/submit-recipe")}>Đăng công thức</Link>
         </div>
 
@@ -208,18 +207,11 @@ const Header = () => {
             Tủ lạnh ảo
           </Link>
           <Link
-            to={chefProfileUrl}
+            to="/chefs"
             onClick={() => setMobileMenuOpen(false)}
-            className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/chef") ? "text-primary font-bold" : "text-secondary"}`}
+            className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/chefs") ? "text-primary font-bold" : "text-secondary"}`}
           >
             Đầu bếp nổi bật
-          </Link>
-          <Link
-            to="/saved-recipes"
-            onClick={() => setMobileMenuOpen(false)}
-            className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/saved-recipes") ? "text-primary font-bold" : "text-secondary"}`}
-          >
-            Yêu thích
           </Link>
           <Link
             to="/submit-recipe"

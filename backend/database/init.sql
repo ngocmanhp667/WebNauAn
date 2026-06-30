@@ -85,7 +85,7 @@ CREATE TABLE recipes (
     servings INT DEFAULT 0,
     calories INT DEFAULT 0,
     difficulty ENUM('dễ', 'trung bình', 'khó') DEFAULT 'dễ',
-    status ENUM('draft', 'published') DEFAULT 'published',
+    status ENUM('draft', 'pending', 'published') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -246,12 +246,12 @@ CREATE TABLE notifications (
 INSERT INTO users (id, username, password_hash, email, full_name, avatar_url, phone, address, bio, facebook_url, instagram_username, cuisine_preferences, daily_budget, role, height, weight, activity_level, is_verified)
 VALUES
 (1, 'admin', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'admin@culinshare.com', 'Hệ thống Admin', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb', NULL, NULL, 'Tài khoản quản trị viên tối cao của hệ thống.', NULL, NULL, NULL, NULL, 'admin', NULL, NULL, 'sedentary', 1),
-(2, 'hoanganh', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.hoanganh@culinshare.com', 'Chef Hoàng Anh', 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c', NULL, NULL, 'Đầu bếp chuyên nghiệp với hơn 10 năm kinh nghiệm trong ẩm thực truyền thống Việt Nam. Đam mê gìn giữ hương vị cội nguồn.', NULL, NULL, NULL, NULL, 'chef', NULL, NULL, 'sedentary', 1),
+(2, 'hoanganh', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.hoanganh@culinshare.com', 'Chef Hoàng Anh', 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c', NULL, NULL, 'Đầu bếp chuyên nghiệp với hơn 10 năm kinh nghiệm trong ẩm thực truyền thống Việt Nam. Đam mê gìn giữ hương vị cội nguồn.', NULL, NULL, NULL, NULL, 'user', NULL, NULL, 'sedentary', 1),
 (3, 'nguyenvana', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'nguyenvana@gmail.com', 'Nguyễn Văn A', 'https://res.cloudinary.com/dofssbkbd/image/upload/v1782815952/mamngon/avatars/avatar-1782815952905.jpg', NULL, NULL, 'Yêu thích nấu ăn và khám phá ẩm thực vùng miền.', NULL, NULL, NULL, NULL, 'user', NULL, NULL, 'sedentary', 1),
 (4, 'tranthib', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'tranthib@gmail.com', 'Trần Thị B', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330', NULL, NULL, 'Người nội trợ gia đình luôn tìm kiếm công thức lành mạnh cho con cái.', NULL, NULL, NULL, NULL, 'user', NULL, NULL, 'sedentary', 1),
 (5, 'levanc', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'levanc@gmail.com', 'Lê Văn C', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e', NULL, NULL, 'Học sinh sinh viên tập tành nấu ăn, thích các món chay và nhanh gọn.', NULL, NULL, NULL, NULL, 'user', NULL, NULL, 'sedentary', 1),
-(6, 'cheflan', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.lan@culinshare.com', 'Chef Minh Lan', 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f', NULL, NULL, 'Chuyên món Việt gia đình và các món vùng miền.', NULL, NULL, NULL, NULL, 'chef', NULL, NULL, 'sedentary', 1),
-(7, 'chefquang', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.quang@culinshare.com', 'Chef Quốc Quang', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6', NULL, NULL, 'Yêu thích hải sản, món nướng và bếp hiện đại.', NULL, NULL, NULL, NULL, 'chef', NULL, NULL, 'sedentary', 1);
+(6, 'cheflan', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.lan@culinshare.com', 'Chef Minh Lan', 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f', NULL, NULL, 'Chuyên món Việt gia đình và các món vùng miền.', NULL, NULL, NULL, NULL, 'user', NULL, NULL, 'sedentary', 1),
+(7, 'chefquang', '$2a$10$0FGPq/9.5sY6AiO3SkFLFuvguPCR1kFyZld/kWxkwzhSv3010KFru', 'chef.quang@culinshare.com', 'Chef Quốc Quang', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6', NULL, NULL, 'Yêu thích hải sản, món nướng và bếp hiện đại.', NULL, NULL, NULL, NULL, 'user', NULL, NULL, 'sedentary', 1);
 
 -- 2. Seed categories
 INSERT INTO categories (id, name, slug, description, image_url)

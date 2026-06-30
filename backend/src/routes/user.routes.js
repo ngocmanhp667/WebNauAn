@@ -52,6 +52,15 @@ router.get(
 );
 
 /**
+ * GET /api/chefs/ranking
+ * Lấy bảng xếp hạng đầu bếp nổi bật (public)
+ */
+router.get(
+    '/api/chefs/ranking',
+    UserController.getChefsRanking
+);
+
+/**
  * PUT /user/profile
  * Cập nhật thông tin profile
  * Middlewares: verifyToken -> authorize('user', 'admin') -> Validation -> Controller
@@ -64,6 +73,17 @@ router.put(
     authorize('user', 'admin'),
     validateUpdateProfile,
     UserController.updateProfile
+);
+
+/**
+ * PUT /user/password
+ * Đổi mật khẩu của user đang đăng nhập
+ */
+router.put(
+    '/user/password',
+    verifyToken,
+    authorize('user', 'admin'),
+    UserController.changePassword
 );
 
 /**

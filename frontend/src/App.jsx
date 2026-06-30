@@ -10,6 +10,7 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import RecipeDetailPage from "./pages/RecipeDetailPage.jsx";
 import EditRecipePage from "./pages/EditRecipePage.jsx";
 import ChefProfilePage from "./pages/ChefProfilePage.jsx";
+import TopChefsPage from "./pages/TopChefsPage.jsx";
 import SubmitRecipePage from "./pages/SubmitRecipePage.jsx";
 import SavedRecipesPage from "./pages/SavedRecipesPage.jsx";
 import AdminDashboardPage from "./pages/AdminDashboardPage.jsx";
@@ -29,6 +30,7 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/chef/:id" element={<ChefProfilePage />} />
+      <Route path="/chefs" element={<TopChefsPage />} />
       <Route path="/submit-recipe" element={<SubmitRecipePage />} />
       <Route path="/saved-recipes" element={<SavedRecipesPage />} />
       <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />

@@ -32,14 +32,16 @@ const ResetPasswordPage = () => {
       <main className="w-full max-w-max-width bg-surface-container-lowest rounded-xl overflow-hidden shadow-soft flex flex-col md:flex-row min-h-[700px] border border-outline-variant/10">
         {/* Left Side: Image Content */}
         <section
-          className="hidden md:flex md:w-1/2 relative overflow-hidden items-end p-lg bg-cover bg-center"
+          className="hidden md:flex md:w-1/2 relative overflow-hidden items-stretch p-lg bg-cover bg-center"
           style={{
             backgroundImage: "url('https://res.cloudinary.com/dofssbkbd/image/upload/v1782819020/mamngon/assets/ruqetfu0x7b3gtjemwjx.jpg')",
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
-          <div className="relative z-10 text-white select-none">
-            <h1 className="font-display-lg text-display-lg mb-sm font-bold">CulinShare</h1>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70"></div>
+          <div className="relative z-10 text-white select-none w-full flex flex-col justify-between">
+            <Link to="/" className="hover:opacity-90 transition-opacity inline-block self-start">
+              <h1 className="font-display-lg text-display-lg font-bold">CulinShare</h1>
+            </Link>
             <p className="font-body-lg text-body-lg opacity-90 max-w-md leading-relaxed">
               Tham gia cộng đồng những người yêu ẩm thực, chia sẻ công thức nấu ăn tinh tế và tìm thấy nguồn cảm hứng mỗi ngày trong căn bếp của bạn.
             </p>
@@ -51,6 +53,11 @@ const ResetPasswordPage = () => {
           <div className="max-w-md mx-auto w-full">
             {/* Header */}
             <div className="mb-lg">
+              <div className="mb-4 block md:hidden">
+                <Link to="/" className="inline-block hover:opacity-85 transition-opacity">
+                  <span className="font-display-md text-primary font-bold text-3xl tracking-tight">CulinShare</span>
+                </Link>
+              </div>
               <h2 className="font-headline-md text-headline-md text-primary mb-xs font-bold">Đặt lại mật khẩu</h2>
               <p className="font-body-md text-body-md text-on-surface-variant">Tạo mật khẩu mới cho tài khoản của bạn.</p>
             </div>

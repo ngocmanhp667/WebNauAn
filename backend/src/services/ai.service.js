@@ -101,10 +101,10 @@ Hãy chỉ trả về dữ liệu JSON thô. Không bọc trong cặp dấu nhá
                 console.warn(`⚠️ Lỗi ở lần thử ${attempt}:`, error.message);
                 
                 if (attempt < maxAttempts) {
-                    // Nếu gặp lỗi quá tải hoặc hết hạn, đổi sang model dự phòng gemini-1.5-flash ổn định hơn
-                    if (activeModel !== 'gemini-1.5-flash') {
-                        console.log('🔄 Đang tự động đổi sang model dự phòng: gemini-1.5-flash...');
-                        activeModel = 'gemini-1.5-flash';
+                    // Nếu gặp lỗi quá tải hoặc hết hạn, đổi sang model dự phòng gemini-2.5-flash ổn định hơn
+                    if (activeModel !== 'gemini-2.5-flash') {
+                        console.log('🔄 Đang tự động đổi sang model dự phòng: gemini-2.5-flash...');
+                        activeModel = 'gemini-2.5-flash';
                     }
                     // Chờ 2 giây trước khi thử lại
                     await new Promise(resolve => setTimeout(resolve, 2000));

@@ -54,6 +54,14 @@ class RecipeRepository {
             params.push(filters.author_id);
         }
 
+        // 5. Status Filter
+        if (filters.status) {
+            whereClauses.push('r.status = ?');
+            params.push(filters.status);
+        } else if (!filters.includeAllStatus) {
+            whereClauses.push("r.status = 'published'");
+        }
+
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
         let orderSql = 'ORDER BY r.created_at DESC';

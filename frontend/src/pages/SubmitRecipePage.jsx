@@ -24,8 +24,15 @@ const SubmitRecipePage = () => {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || token === "null" || token === "undefined") {
+      setShowAuthModal(true);
+      return;
+    }
+
     const fetchCats = async () => {
       try {
         const cats = await getCategoriesApi();
@@ -38,7 +45,7 @@ const SubmitRecipePage = () => {
       }
     };
     fetchCats();
-  }, []);
+  }, [navigate]);
 
   const handleAddIngredient = () => {
     setIngredients([...ingredients, { quantity: "", name: "" }]);
@@ -149,6 +156,62 @@ const SubmitRecipePage = () => {
       setLoading(false);
     }
   };
+
+  if (showAuthModal) {
+    return (
+      <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+        <Header />
+        
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div 
+            className="bg-white border border-outline-variant/10 rounded-2xl p-6 md:p-8 max-w-md w-full text-center shadow-2xl"
+            style={{
+              animation: 'fadeSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}
+          >
+            <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-5">
+              <span className="material-symbols-outlined text-3xl font-bold">lock</span>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-on-surface mb-3">Yêu cầu Đăng nhập</h2>
+            <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
+              Bạn cần đăng nhập tài khoản CulinShare để có thể tạo và chia sẻ các công thức nấu ăn của riêng mình với cộng đồng.
+            </p>
+            
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => navigate("/login")}
+                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-full transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-sm font-bold">login</span>
+                Đăng nhập ngay
+              </button>
+              
+              <button
+                onClick={() => navigate("/")}
+                className="w-full bg-transparent hover:bg-surface-container-low text-secondary font-semibold py-2.5 rounded-full transition-all active:scale-95 border border-outline-variant/30"
+              >
+                Quay lại trang chủ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes fadeSlideIn {
+            from {
+              opacity: 0;
+              transform: translateY(-20px) scale(0.95);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">

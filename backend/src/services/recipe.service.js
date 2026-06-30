@@ -1,5 +1,8 @@
 const recipeRepository = require('../repositories/recipe.repository');
 const commentRepository = require('../repositories/comment.repository');
+const followService = require('./follow.service');
+const notificationService = require('./notification.service');
+const userRepository = require('../repositories/user.repository');
 
 class RecipeService {
     generateSlug(title) {
@@ -100,7 +103,7 @@ class RecipeService {
             servings: parseInt(data.servings) || 0,
             calories: parseInt(data.calories) || 0,
             difficulty: data.difficulty || 'dễ',
-            status: data.status || 'published'
+            status: data.status || 'pending'
         };
 
         const recipeId = await recipeRepository.create(recipeData);
@@ -132,7 +135,28 @@ class RecipeService {
             await recipeRepository.linkCategories(recipeId, categoryIds);
         }
 
-        return await this.getRecipeById(recipeId);
+        const newRecipe = await this.getRecipeById(recipeId);
+
+        // Phát thông báo cho followers của đầu bếp
+        try {
+            const author = await userRepository.findById(authorId);
+            const authorName = author?.full_name || author?.username || 'Đầu bếp';
+            const followers = await followService.getFollowers(authorId);
+
+            for (const follower of followers) {
+                await notificationService.createAndNotify({
+                    userId: follower.id,
+                    senderId: authorId,
+                    type: 'new_recipe',
+                    recipeId: recipeId,
+                    message: `đã đăng công thức mới: "${data.title}"`
+                });
+            }
+        } catch (error) {
+            console.error('❌ Lỗi gửi thông báo cho followers khi đăng công thức mới:', error.message);
+        }
+
+        return newRecipe;
     }
 
     async updateRecipe(id, authorId, userRole, data) {

@@ -147,6 +147,33 @@ class UserRepository {
         );
         return result;
     }
+
+    async getChefsRanking() {
+        const sql = `
+            SELECT 
+                u.id, 
+                u.username, 
+                u.full_name, 
+                u.avatar_url, 
+                u.bio,
+                u.role,
+                (SELECT COUNT(*) FROM follows WHERE following_id = u.id) AS followers_count,
+                (SELECT COUNT(*) FROM recipes r JOIN saved_recipes sr ON r.id = sr.recipe_id WHERE r.author_id = u.id) AS likes_count,
+                (SELECT COUNT(*) FROM recipes WHERE author_id = u.id) AS recipes_count
+            FROM users u
+            WHERE u.id IN (SELECT DISTINCT author_id FROM recipes)
+        `;
+        const [rows] = await pool.query(sql);
+        return rows;
+    }
+
+    async updatePassword(id, passwordHash) {
+        const [result] = await pool.execute(
+            'UPDATE users SET password_hash = ? WHERE id = ?',
+            [passwordHash, id]
+        );
+        return result;
+    }
 }
 
 // Export singleton instance

@@ -8,6 +8,7 @@
  */
 
 const bcrypt = require('bcryptjs');
+const pool = require('../config/database');
 const userRepository = require('../repositories/user.repository');
 const JWTService = require('./jwt.service');
 const EmailService = require('./email.service');
@@ -83,20 +84,30 @@ class UserService {
 
         const otpTtlMinutes = Number(process.env.OTP_TTL_MINUTES) || 10;
 
-        // Bước 1: Kiểm tra username đã tồn tại chưa — báo lỗi rõ ràng thay vì tự đổi tên
+        // Bước 1: Kiểm tra username đã tồn tại chưa
         const existingUser = await userRepository.findByUsername(username);
         if (existingUser) {
-            const error = new Error('Tên đăng nhập đã được sử dụng. Vui lòng chọn tên khác.');
-            error.statusCode = 409;
-            throw error;
+            if (existingUser.is_verified === 0) {
+                // Xóa tài khoản chưa xác thực cũ để đăng ký mới
+                await pool.query('DELETE FROM users WHERE id = ?', [existingUser.id]);
+            } else {
+                const error = new Error('Tên đăng nhập đã được sử dụng. Vui lòng chọn tên khác.');
+                error.statusCode = 409;
+                throw error;
+            }
         }
 
         // Bước 2: Kiểm tra email đã tồn tại chưa
         const existingEmail = await userRepository.findByEmail(email);
         if (existingEmail) {
-            const error = new Error('Email đã được sử dụng');
-            error.statusCode = 409;
-            throw error;
+            if (existingEmail.is_verified === 0) {
+                // Xóa tài khoản chưa xác thực cũ để đăng ký mới
+                await pool.query('DELETE FROM users WHERE id = ?', [existingEmail.id]);
+            } else {
+                const error = new Error('Email đã được sử dụng');
+                error.statusCode = 409;
+                throw error;
+            }
         }
 
         // Bước 3: Hash password bằng bcrypt (salt rounds = 10)
@@ -424,6 +435,34 @@ class UserService {
                 tdee
             }
         };
+    }
+
+    async getChefsRanking() {
+        return await userRepository.getChefsRanking();
+    }
+
+    async changePassword(userId, currentPassword, newPassword) {
+        const user = await userRepository.findById(userId);
+        if (!user) {
+            const error = new Error('Không tìm thấy người dùng');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Kiểm tra mật khẩu cũ
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isPasswordValid) {
+            const error = new Error('Mật khẩu hiện tại không chính xác');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        // Hash mật khẩu mới
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(newPassword, salt);
+
+        // Cập nhật database
+        await userRepository.updatePassword(userId, passwordHash);
     }
 }
 

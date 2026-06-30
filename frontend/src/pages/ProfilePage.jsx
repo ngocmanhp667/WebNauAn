@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 import { logoutAccount, uploadUserAvatar } from "../store/authSlice";
 import { getProfileApi, updateProfileApi } from "../services/authApi";
 import { getImageUrl } from "../services/api";
-import { updateHealthStatsApi } from "../services/recipeApi";
+import { updateHealthStatsApi, changePasswordApi } from "../services/recipeApi";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -30,6 +30,13 @@ const ProfilePage = () => {
   const [gender, setGender] = useState("male");
   const [age, setAge] = useState("25");
   const [healthResult, setHealthResult] = useState(null);
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -164,6 +171,39 @@ const ProfilePage = () => {
     }
   };
 
+  const handlePasswordSave = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Mật khẩu xác nhận không khớp");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("Mật khẩu mới phải từ 6 ký tự trở lên");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await changePasswordApi({
+        currentPassword,
+        newPassword
+      });
+      setPasswordSuccess(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setPasswordSuccess(false), 3000);
+    } catch (err) {
+      setPasswordError(err.message || "Lỗi khi đổi mật khẩu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
       <Header />
@@ -191,14 +231,15 @@ const ProfilePage = () => {
                 <span className="material-symbols-outlined text-sm font-bold">monitoring</span>
                 <span className="font-label-md text-label-md">Chỉ số sức khỏe & TDEE</span>
               </button>
-              <a className="flex items-center gap-sm px-md py-3 rounded-lg text-secondary hover:bg-surface-container-low transition-colors" href="#">
-                <span className="material-symbols-outlined text-sm">lock</span>
+              <button
+                onClick={() => setSection("security")}
+                className={`w-full flex items-center gap-sm px-md py-3 rounded-lg font-bold transition-all shadow-sm text-left ${
+                  section === "security" ? "bg-primary-container/10 text-primary" : "text-secondary hover:bg-surface-container-low"
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm font-bold">lock</span>
                 <span className="font-label-md text-label-md">Mật khẩu & Bảo mật</span>
-              </a>
-              <a className="flex items-center gap-sm px-md py-3 rounded-lg text-secondary hover:bg-surface-container-low transition-colors" href="#">
-                <span className="material-symbols-outlined text-sm">notifications</span>
-                <span className="font-label-md text-label-md">Thông báo</span>
-              </a>
+              </button>
               <Link to="/saved-recipes" className="flex items-center gap-sm px-md py-3 rounded-lg text-secondary hover:bg-surface-container-low transition-colors">
                 <span className="material-symbols-outlined text-sm">bookmark</span>
                 <span className="font-label-md text-label-md">Công thức đã lưu</span>
@@ -398,7 +439,7 @@ const ProfilePage = () => {
                   </form>
                 </div>
               </>
-            ) : (
+            ) : section === "health" ? (
               <>
                 <div className="mb-lg select-none">
                   <h1 className="font-headline-md text-headline-md text-on-surface mb-xs font-bold">Chỉ số sức khỏe & TDEE</h1>
@@ -565,7 +606,76 @@ const ProfilePage = () => {
                   )}
                 </div>
               </>
-            )}
+            ) : section === "security" ? (
+              <>
+                <div className="mb-lg select-none">
+                  <h1 className="font-headline-md text-headline-md text-on-surface mb-xs font-bold">Mật khẩu & Bảo mật</h1>
+                  <p className="text-on-surface-variant font-body-md">Đổi mật khẩu tài khoản của bạn để đảm bảo an toàn.</p>
+                </div>
+                
+                <div className="bg-surface-container-lowest rounded-xl p-md md:p-lg shadow-soft border border-outline-variant/10">
+                  <form onSubmit={handlePasswordSave} className="space-y-md">
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-label-md text-label-md text-on-surface-variant px-xs font-bold">Mật khẩu hiện tại</label>
+                      <input
+                        className="w-full bg-white border border-outline-variant/30 rounded-lg px-md py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="Nhập mật khẩu hiện tại"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-label-md text-label-md text-on-surface-variant px-xs font-bold">Mật khẩu mới</label>
+                      <input
+                        className="w-full bg-white border border-outline-variant/30 rounded-lg px-md py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Tối thiểu 6 ký tự"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-label-md text-label-md text-on-surface-variant px-xs font-bold">Xác nhận mật khẩu mới</label>
+                      <input
+                        className="w-full bg-white border border-outline-variant/30 rounded-lg px-md py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Nhập lại mật khẩu mới"
+                        required
+                      />
+                    </div>
+
+                    {passwordError && (
+                      <p className="text-error text-xs px-xs font-bold">{passwordError}</p>
+                    )}
+
+                    {passwordSuccess && (
+                      <p className="text-tertiary text-xs px-xs font-bold">Đổi mật khẩu thành công!</p>
+                    )}
+
+                    <div className="pt-lg flex items-center justify-end gap-md select-none border-t border-outline-variant/10">
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className={`px-6 py-2.5 rounded-full font-label-md text-label-md font-bold transition-all shadow-sm flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90 active:scale-95`}
+                      >
+                        {loading ? (
+                          <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                        ) : (
+                          "Đổi mật khẩu"
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </>
+            ) : null}
           </section>
         </div>
       </main>

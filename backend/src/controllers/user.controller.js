@@ -212,6 +212,55 @@ class UserController {
             });
         }
     }
+
+    async getChefsRanking(req, res, next) {
+        try {
+            const ranking = await UserService.getChefsRanking();
+            return res.status(200).json({
+                success: true,
+                message: 'Lấy bảng xếp hạng đầu bếp thành công',
+                data: ranking
+            });
+        } catch (error) {
+            return res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Lỗi server'
+            });
+        }
+    }
+
+    async changePassword(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const { currentPassword, newPassword } = req.body;
+
+            if (!currentPassword || !newPassword) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Vui lòng nhập đầy đủ mật khẩu cũ và mới'
+                });
+            }
+
+            if (newPassword.length < 6) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Mật khẩu mới phải từ 6 ký tự trở lên'
+                });
+            }
+
+            await UserService.changePassword(userId, currentPassword, newPassword);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Đổi mật khẩu thành công'
+            });
+        } catch (error) {
+            return res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Lỗi server'
+            });
+        }
+    }
 }
 
 module.exports = new UserController();
