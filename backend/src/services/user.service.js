@@ -83,20 +83,12 @@ class UserService {
 
         const otpTtlMinutes = Number(process.env.OTP_TTL_MINUTES) || 10;
 
-        // Bước 1: Kiểm tra username đã tồn tại chưa và tự động sinh suffix nếu trùng lặp
-        let existingUser = await userRepository.findByUsername(username);
+        // Bước 1: Kiểm tra username đã tồn tại chưa — báo lỗi rõ ràng thay vì tự đổi tên
+        const existingUser = await userRepository.findByUsername(username);
         if (existingUser) {
-            let suffix = 1;
-            let candidate = username;
-            while (existingUser) {
-                candidate = `${username}${suffix}`;
-                existingUser = await userRepository.findByUsername(candidate);
-                if (!existingUser) {
-                    username = candidate;
-                    break;
-                }
-                suffix++;
-            }
+            const error = new Error('Tên đăng nhập đã được sử dụng. Vui lòng chọn tên khác.');
+            error.statusCode = 409;
+            throw error;
         }
 
         // Bước 2: Kiểm tra email đã tồn tại chưa

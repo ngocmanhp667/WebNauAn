@@ -37,7 +37,7 @@ const RecipeDetailPage = () => {
   const [isDeleteSuccessOpen, setIsDeleteSuccessOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || localStorage.getItem("authToken");
+  const token = localStorage.getItem("token");
 
   const handleDeleteRecipe = async () => {
     try {

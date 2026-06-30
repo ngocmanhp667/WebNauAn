@@ -10,10 +10,8 @@ const api = axios.create({
 // Tự động thêm Token JWT vào header nếu có trong localStorage
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token =
-      window.localStorage.getItem('accessToken') ||
-      window.localStorage.getItem('authToken') ||
-      window.localStorage.getItem('token')
+    // Dùng key 'token' thống nhất với authSlice.js
+    const token = window.localStorage.getItem('token')
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`

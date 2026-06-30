@@ -18,12 +18,19 @@ class ReviewRepository {
         return rows[0] || null;
     }
 
+    async findByUserAndRecipe(userId, recipeId) {
+        const [rows] = await pool.query(
+            'SELECT id FROM reviews WHERE user_id = ? AND recipe_id = ?',
+            [userId, recipeId]
+        );
+        return rows[0] || null;
+    }
+
     async create(reviewData) {
         const { recipe_id, user_id, rating, comment } = reviewData;
         const [result] = await pool.query(
             `INSERT INTO reviews (recipe_id, user_id, rating, comment)
-             VALUES (?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE rating = VALUES(rating), comment = VALUES(comment)`,
+             VALUES (?, ?, ?, ?)`,
             [recipe_id, user_id, rating, comment || null]
         );
         return result.insertId;

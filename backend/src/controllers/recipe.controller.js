@@ -28,11 +28,12 @@ const attachUploadedImages = (body, files = {}) => {
 class RecipeController {
     async getAllRecipes(req, res, next) {
         try {
-            const { category, q, difficulty, sort, author_id } = req.query;
-            const recipes = await recipeService.getAllRecipes({ category, query: q, difficulty, sort, author_id });
+            const { category, q, difficulty, sort, author_id, page, limit } = req.query;
+            const result = await recipeService.getAllRecipes({ category, query: q, difficulty, sort, author_id, page, limit });
             return res.status(200).json({
                 success: true,
-                data: recipes
+                data: result.data,
+                meta: result.meta,
             });
         } catch (error) {
             next(error);

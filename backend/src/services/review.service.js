@@ -9,6 +9,14 @@ class ReviewService {
             throw error;
         }
 
+        // Kiểm tra user đã review công thức này chưa
+        const existing = await reviewRepository.findByUserAndRecipe(userId, recipeId);
+        if (existing) {
+            const error = new Error('Bạn đã đánh giá công thức này rồi. Hãy chỉnh sửa đánh giá cũ thay vì tạo mới.');
+            error.statusCode = 409;
+            throw error;
+        }
+
         const reviewId = await reviewRepository.create({
             recipe_id: recipeId,
             user_id: userId,

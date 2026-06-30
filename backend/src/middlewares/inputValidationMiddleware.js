@@ -166,8 +166,10 @@ const validateResetPassword = [
   body("newPassword")
     .notEmpty()
     .withMessage("Mật khẩu mới không được để trống")
-    .isLength({ min: 6 })
-    .withMessage("Mật khẩu mới phải có ít nhất 6 ký tự"),
+    .isLength({ min: 8 })
+    .withMessage("Mật khẩu mới phải có ít nhất 8 ký tự")
+    .matches(/^(?=.*[A-Za-z])(?=.*\d).+$/)
+    .withMessage("Mật khẩu mới phải chứa ít nhất 1 chữ cái và 1 số"),
 
   body("confirmPassword")
     .notEmpty()

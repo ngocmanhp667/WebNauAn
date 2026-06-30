@@ -34,6 +34,13 @@ class CommentRepository {
             [id, userId]
         );
     }
+
+    async deleteById(id) {
+        await pool.query(
+            'DELETE FROM comments WHERE id = ?',
+            [id]
+        );
+    }
 }
 
 module.exports = new CommentRepository();

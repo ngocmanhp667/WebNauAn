@@ -55,7 +55,7 @@ class RecipeRepository {
         }
 
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
-        
+
         let orderSql = 'ORDER BY r.created_at DESC';
         if (filters.sort === 'rating') {
             orderSql = 'ORDER BY average_rating DESC';
@@ -63,19 +63,42 @@ class RecipeRepository {
             orderSql = 'ORDER BY r.created_at DESC';
         }
 
+        // Pagination — mặc định 12 công thức/trang, tối đa 50
+        const page  = Math.max(1, parseInt(filters.page)  || 1);
+        const limit = Math.min(50, Math.max(1, parseInt(filters.limit) || 12));
+        const offset = (page - 1) * limit;
+
+        // Đếm tổng số kết quả (không LIMIT) để frontend tính số trang
+        const countSql = `
+            SELECT COUNT(DISTINCT r.id) AS total
+            FROM recipes r
+            LEFT JOIN users u ON r.author_id = u.id
+            LEFT JOIN recipe_categories rc ON r.id = rc.recipe_id
+            LEFT JOIN categories c ON rc.category_id = c.id
+            ${whereSql}
+        `;
+        const [countRows] = await pool.query(countSql, params);
+        const total = countRows[0]?.total || 0;
+
         const querySql = `
             ${selectSql}
             ${whereSql}
             GROUP BY r.id
             ${orderSql}
+            LIMIT ? OFFSET ?
         `;
 
-        const [rows] = await pool.query(querySql, params);
-        return rows.map(row => {
+        const [rows] = await pool.query(querySql, [...params, limit, offset]);
+        const recipes = rows.map(row => {
             row.categories = row.category_list ? row.category_list.split(',') : [];
             delete row.category_list;
             return row;
         });
+
+        return {
+            data: recipes,
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+        };
     }
 
     async findById(id) {

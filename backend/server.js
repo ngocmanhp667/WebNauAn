@@ -34,8 +34,22 @@ const PORT = process.env.PORT || 3000;
 // GLOBAL MIDDLEWARES
 // ========================
 
-// Cho phép Cross-Origin requests
-app.use(cors());
+// Cho phép Cross-Origin requests từ frontend (cấu hình qua env)
+const corsOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : ['http://localhost:5173', 'http://localhost:3001'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Cho phép request không có origin (ví dụ: Postman, curl)
+        if (!origin) return callback(null, true);
+        if (corsOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error(`CORS: Origin '${origin}' không được phép`), false);
+    },
+    credentials: true,
+}));
 
 // Parse JSON body
 app.use(express.json());
@@ -43,9 +57,7 @@ app.use(express.json());
 // Parse URL-encoded body
 app.use(express.urlencoded({ extended: true }));
 
-// Phục vụ thư mục static chứa ảnh upload
-const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// Ảnh được lưu trên Cloudinary — không cần serve static /uploads nữa
 
 
 // ========================
