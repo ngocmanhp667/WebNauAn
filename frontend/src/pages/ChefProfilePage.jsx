@@ -56,7 +56,7 @@ const ChefProfilePage = () => {
             .then((status) => setIsFollowed(status.followed))
             .catch((err) => console.error("Error checking follow status:", err));
 
-          getSavedRecipesApi()
+          getSavedRecipesApi(id)
             .then((saved) => setSavedRecipes(saved || []))
             .catch((err) => console.error("Error getting saved recipes:", err));
         }

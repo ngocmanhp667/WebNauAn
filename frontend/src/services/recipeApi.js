@@ -148,9 +148,10 @@ export const deleteCommentApi = async (commentId) => {
 };
 
 // Saved Recipes
-export const getSavedRecipesApi = async () => {
+export const getSavedRecipesApi = async (userId) => {
   try {
-    const response = await api.get("/api/me/saved-recipes");
+    const url = userId ? `/api/me/saved-recipes?userId=${userId}` : "/api/me/saved-recipes";
+    const response = await api.get(url);
     return response.data.data;
   } catch (error) {
     throw error.response?.data || error.message;
