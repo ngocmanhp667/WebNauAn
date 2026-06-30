@@ -186,6 +186,32 @@ class UserController {
             });
         }
     }
+
+    async updateHealthStats(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const { height, weight, activity_level, gender, age } = req.body;
+
+            const result = await UserService.updateHealthStats(userId, {
+                height,
+                weight,
+                activity_level,
+                gender,
+                age
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: 'Cập nhật chỉ số sức khỏe & tính TDEE thành công',
+                data: result
+            });
+        } catch (error) {
+            return res.status(error.statusCode || 500).json({
+                success: false,
+                message: error.message || 'Lỗi server'
+            });
+        }
+    }
 }
 
 module.exports = new UserController();

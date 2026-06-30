@@ -58,6 +58,9 @@ const toUserDTO = (user) => {
         daily_budget: dailyBudget,
         role: user.role,
         is_verified: user.is_verified === 1 || user.is_verified === true,
+        height: user.height || null,
+        weight: user.weight || null,
+        activity_level: user.activity_level || 'sedentary',
         created_at: user.created_at,
         updated_at: user.updated_at
     };
@@ -69,6 +72,7 @@ const toUserDTO = (user) => {
     dto.instagramUsername = dto.instagram_username;
     dto.cuisinePreferences = dto.cuisine_preferences;
     dto.dailyBudget = dto.daily_budget;
+    dto.activityLevel = dto.activity_level;
 
     return dto;
 };

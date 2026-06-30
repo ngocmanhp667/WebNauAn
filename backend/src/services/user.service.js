@@ -359,6 +359,72 @@ class UserService {
         const updatedUser = await userRepository.findById(userId);
         return toUserDTO(updatedUser);
     }
+
+    async updateHealthStats(userId, data) {
+        const { height, weight, activity_level, gender = 'male', age = 25 } = data;
+
+        const heightVal = parseInt(height);
+        const weightVal = parseInt(weight);
+
+        if (isNaN(heightVal) || heightVal <= 0) {
+            const error = new Error('Chiều cao không hợp lệ');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if (isNaN(weightVal) || weightVal <= 0) {
+            const error = new Error('Cân nặng không hợp lệ');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const validActivityLevels = ['sedentary', 'light', 'moderate', 'active', 'very_active'];
+        const activityLevel = validActivityLevels.includes(activity_level) ? activity_level : 'sedentary';
+
+        // Update database
+        await userRepository.updateHealthStats(userId, heightVal, weightVal, activityLevel);
+
+        // Fetch updated user profile
+        const user = await userRepository.findById(userId);
+        const userDTO = toUserDTO(user);
+
+        // Calculate BMI
+        const heightMeters = heightVal / 100;
+        const bmi = parseFloat((weightVal / (heightMeters * heightMeters)).toFixed(2));
+        
+        let bmiStatus = 'Bình thường';
+        if (bmi < 18.5) bmiStatus = 'Thiếu cân';
+        else if (bmi >= 25 && bmi < 29.9) bmiStatus = 'Thừa cân';
+        else if (bmi >= 29.9) bmiStatus = 'Béo phì';
+
+        // Calculate BMR (Mifflin-St Jeor Equation)
+        const ageVal = parseInt(age) || 25;
+        const bmr = (10 * weightVal) + (6.25 * heightVal) - (5 * ageVal) + (gender === 'female' ? -161 : 5);
+
+        // Map activity level to multiplier
+        const multipliers = {
+            sedentary: 1.2,
+            light: 1.375,
+            moderate: 1.55,
+            active: 1.725,
+            very_active: 1.9
+        };
+        const multiplier = multipliers[activityLevel] || 1.2;
+        const tdee = Math.round(bmr * multiplier);
+
+        return {
+            user: userDTO,
+            health_stats: {
+                height: heightVal,
+                weight: weightVal,
+                activity_level: activityLevel,
+                bmi,
+                bmi_status: bmiStatus,
+                bmr: Math.round(bmr),
+                tdee
+            }
+        };
+    }
 }
 
 module.exports = new UserService();

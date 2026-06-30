@@ -139,6 +139,14 @@ class UserRepository {
 
         return result;
     }
+
+    async updateHealthStats(id, height, weight, activityLevel) {
+        const [result] = await pool.execute(
+            'UPDATE users SET height = ?, weight = ?, activity_level = ? WHERE id = ?',
+            [height, weight, activityLevel, id]
+        );
+        return result;
+    }
 }
 
 // Export singleton instance

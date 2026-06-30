@@ -89,6 +89,17 @@ router.post(
     UserController.updateAvatar
 );
 
+/**
+ * PUT /user/health-stats
+ * Cập nhật chỉ số sức khỏe & tính TDEE
+ */
+router.put(
+    '/user/health-stats',
+    verifyToken,
+    authorize('user', 'admin'),
+    UserController.updateHealthStats
+);
+
 
 // ========================
 // ADMIN PROFILE ROUTES
