@@ -16,7 +16,8 @@ import {
   followUserApi,
   unfollowUserApi,
   checkFollowStatusApi,
-  deleteRecipeApi
+  deleteRecipeApi,
+  deleteCommentApi
 } from "../services/recipeApi";
 
 const RecipeDetailPage = () => {
@@ -107,6 +108,18 @@ const RecipeDetailPage = () => {
       setRecipe(updatedData);
     } catch (err) {
       alert(err.message || "Không thể gửi bình luận");
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bình luận này không?")) return;
+    try {
+      await deleteCommentApi(commentId);
+      // Reload comments
+      const updatedData = await getRecipeByIdApi(id);
+      setRecipe(updatedData);
+    } catch (err) {
+      alert(err.message || "Không thể xóa bình luận");
     }
   };
 
@@ -416,6 +429,17 @@ const RecipeDetailPage = () => {
                           >
                             Phản hồi
                           </button>
+                          {user && (user.id === comment.user_id || user.role === 'admin') && (
+                            <>
+                              <span className="text-xs text-on-surface-variant/40 mx-2 select-none">•</span>
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                className="text-xs text-error font-bold mt-1 hover:underline focus:outline-none"
+                              >
+                                Xóa
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
 
@@ -435,6 +459,14 @@ const RecipeDetailPage = () => {
                               </span>
                             </div>
                             <p className="text-on-surface-variant text-body-md leading-relaxed">{reply.content}</p>
+                            {user && (user.id === reply.user_id || user.role === 'admin') && (
+                              <button
+                                onClick={() => handleDeleteComment(reply.id)}
+                                className="text-xs text-error font-bold mt-1 hover:underline focus:outline-none"
+                              >
+                                Xóa
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}

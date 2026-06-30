@@ -53,7 +53,7 @@ class CommentService {
             throw error;
         }
 
-        // Admin xóa trực tiếp theo id, user thường chỉ xóa được comment của mình
+        await commentRepository.deleteByParentId(commentId);
         if (userRole === 'admin') {
             await commentRepository.deleteById(commentId);
         } else {
