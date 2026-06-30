@@ -28,14 +28,7 @@ class AIController {
 
             // Ghi nhận log sử dụng AI (giúp thống kê ở Admin Dashboard)
             try {
-                let userId = null;
-                const authHeader = req.headers.authorization;
-                if (authHeader && authHeader.startsWith('Bearer ')) {
-                    const token = authHeader.split(' ')[1];
-                    const jwt = require('jsonwebtoken');
-                    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
-                    userId = decoded.id;
-                }
+                const userId = req.user?.id || null;
                 await adminRepository.logAiUsage(userId, 'fridge_suggest');
             } catch (logError) {
                 console.error('⚠️ Lỗi ghi log sử dụng AI:', logError.message);

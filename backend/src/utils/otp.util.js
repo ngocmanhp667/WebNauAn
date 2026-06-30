@@ -10,9 +10,11 @@
  * Sinh mã OTP ngẫu nhiên 6 chữ số
  * @returns {string} Mã OTP 6 chữ số (VD: "482917")
  */
+const crypto = require('crypto');
+
 const generateOtp = () => {
-    // Sinh số ngẫu nhiên từ 100000 đến 999999
-    const otp = Math.floor(100000 + Math.random() * 900000);
+    // Sinh số ngẫu nhiên từ 100000 đến 999999 bằng crypto cho an toàn
+    const otp = crypto.randomInt(100000, 1000000);
     return otp.toString();
 };
 

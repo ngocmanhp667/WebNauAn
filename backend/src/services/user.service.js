@@ -103,20 +103,20 @@ class UserService {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
-        // Bước 4: Lưu user vào DB với is_verified = 1 (không cần OTP xác thực)
+        // Bước 4: Lưu user vào DB với is_verified = 0 (cần OTP xác thực)
         const result = await userRepository.create({
             username,
             password_hash,
             email,
             full_name,
-            is_verified: 1
+            is_verified: 0
         });
 
-        // Tạm tắt các bước sinh và gửi OTP
-        // const otp = generateOtp();
-        // const otpExpiry = getOtpExpiry(otpTtlMinutes);
-        // await userRepository.updateOtp(email, otp, otpExpiry);
-        // await EmailService.sendOtpEmail(email, otp, otpTtlMinutes);
+        // Thực hiện sinh và gửi OTP
+        const otp = generateOtp();
+        const otpExpiry = getOtpExpiry(otpTtlMinutes);
+        await userRepository.updateOtp(email, otp, otpExpiry);
+        await EmailService.sendOtpEmail(email, otp, otpTtlMinutes);
 
         return {
             message: 'Đăng ký thành công!',
