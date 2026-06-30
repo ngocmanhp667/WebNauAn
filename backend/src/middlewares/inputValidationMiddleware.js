@@ -220,7 +220,7 @@ const validateUpdateProfile = [
   }),
 
   body("phone")
-    .optional({ nullable: true })
+    .optional({ checkFalsy: true })
     .trim()
     .matches(/^[0-9]{10,11}$/)
     .withMessage("Số điện thoại phải có 10-11 chữ số"),
@@ -239,11 +239,11 @@ const validateUpdateProfile = [
     .trim(),
 
   body("facebookUrl")
-    .optional({ nullable: true })
+    .optional({ checkFalsy: true })
     .trim(),
 
   body("instagramUsername")
-    .optional({ nullable: true })
+    .optional({ checkFalsy: true })
     .trim(),
 
   body("cuisinePreferences").custom((value, { req }) => {

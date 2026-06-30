@@ -166,8 +166,8 @@ class UserController {
                 });
             }
 
-            // Lưu đường dẫn tương đối
-            const avatarUrl = `/uploads/${req.file.filename}`;
+            // Lưu đường dẫn ảnh đầy đủ từ Cloudinary
+            const avatarUrl = req.file.path;
 
             // Cập nhật trường avatar_url thông qua UserService
             const updatedUserDTO = await UserService.updateProfile(userId, {

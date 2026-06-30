@@ -4,7 +4,7 @@ const attachUploadedImages = (body, files = {}) => {
     const data = { ...body };
     const coverFile = files.coverImage?.[0];
     if (coverFile) {
-        data.cover_image_url = `/uploads/${coverFile.filename}`;
+        data.cover_image_url = coverFile.path;
     }
 
     if (data.steps) {
@@ -16,7 +16,7 @@ const attachUploadedImages = (body, files = {}) => {
         (files.stepImages || []).forEach((file, fileIndex) => {
             const stepIndex = indexes[fileIndex];
             if (steps[stepIndex]) {
-                steps[stepIndex].image_url = `/uploads/${file.filename}`;
+                steps[stepIndex].image_url = file.path;
             }
         });
         data.steps = steps;
