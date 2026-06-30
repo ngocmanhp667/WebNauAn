@@ -434,9 +434,11 @@ const RecipeDetailPage = () => {
                               <span className="text-xs text-on-surface-variant/40 mx-2 select-none">•</span>
                               <button
                                 onClick={() => handleDeleteComment(comment.id)}
-                                className="text-xs text-error font-bold mt-1 hover:underline focus:outline-none"
+                                className="text-xs text-error font-bold mt-1 hover:underline focus:outline-none inline-flex items-center gap-1"
+                                title="Xóa bình luận"
                               >
-                                Xóa
+                                <span className="material-symbols-outlined !text-sm">delete</span>
+                                <span>Xóa</span>
                               </button>
                             </>
                           )}
@@ -462,9 +464,11 @@ const RecipeDetailPage = () => {
                             {user && (user.id === reply.user_id || user.role === 'admin') && (
                               <button
                                 onClick={() => handleDeleteComment(reply.id)}
-                                className="text-xs text-error font-bold mt-1 hover:underline focus:outline-none"
+                                className="text-xs text-error font-bold mt-1 hover:underline focus:outline-none inline-flex items-center gap-1"
+                                title="Xóa bình luận"
                               >
-                                Xóa
+                                <span className="material-symbols-outlined !text-sm">delete</span>
+                                <span>Xóa</span>
                               </button>
                             )}
                           </div>
