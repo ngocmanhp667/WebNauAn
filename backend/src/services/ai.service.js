@@ -52,51 +52,69 @@ Mỗi bước nên dài từ 2-4 câu. Tổng cộng mỗi món nên có từ 4-
 
 Hãy chỉ trả về dữ liệu JSON thô. Không bọc trong cặp dấu nháy hay khối code \`\`\`json ... \`\`\`, không viết thêm bất kỳ lời thoại, văn bản giải thích nào khác ngoài chuỗi JSON hợp lệ.`;
 
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                {
-                                    text: prompt
-                                }
-                            ]
+        let attempt = 0;
+        const maxAttempts = 3;
+        let activeModel = modelName;
+
+        while (attempt < maxAttempts) {
+            attempt++;
+            try {
+                console.log(`🤖 Đang kết nối Gemini API (Lần thử ${attempt}/${maxAttempts}) sử dụng model: ${activeModel}...`);
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${apiKey}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: prompt
+                                    }
+                                ]
+                            }
+                        ],
+                        generationConfig: {
+                            responseMimeType: 'application/json'
                         }
-                    ],
-                    generationConfig: {
-                        responseMimeType: 'application/json'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`Gemini API Error: ${response.status} - ${errText}`);
+                }
+
+                const data = await response.json();
+                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!aiText) {
+                    throw new Error('Không nhận được phản hồi từ mô hình AI');
+                }
+
+                const parsedSuggestions = JSON.parse(aiText.trim());
+                console.log('✅ AI gợi ý thành công!');
+                return parsedSuggestions;
+
+            } catch (error) {
+                console.warn(`⚠️ Lỗi ở lần thử ${attempt}:`, error.message);
+                
+                if (attempt < maxAttempts) {
+                    // Nếu gặp lỗi quá tải hoặc hết hạn, đổi sang model dự phòng gemini-1.5-flash ổn định hơn
+                    if (activeModel !== 'gemini-1.5-flash') {
+                        console.log('🔄 Đang tự động đổi sang model dự phòng: gemini-1.5-flash...');
+                        activeModel = 'gemini-1.5-flash';
                     }
-                })
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(`Gemini API Error: ${response.status} - ${errText}`);
+                    // Chờ 2 giây trước khi thử lại
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                } else {
+                    console.error('❌ Đã thử lại tối đa nhưng vẫn thất bại.');
+                    const err = new Error(error.message || 'Lỗi khi kết nối với dịch vụ gợi ý AI');
+                    err.statusCode = 500;
+                    throw err;
+                }
             }
-
-            const data = await response.json();
-            
-            // Lấy text phản hồi từ Gemini
-            const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!aiText) {
-                throw new Error('Không nhận được phản hồi từ mô hình AI');
-            }
-
-            // Parse kết quả JSON
-            const parsedSuggestions = JSON.parse(aiText.trim());
-            return parsedSuggestions;
-
-        } catch (error) {
-            console.error('❌ Error in AIService:', error);
-            const err = new Error(error.message || 'Lỗi khi kết nối với dịch vụ gợi ý AI');
-            err.statusCode = 500;
-            throw err;
         }
     }
 }

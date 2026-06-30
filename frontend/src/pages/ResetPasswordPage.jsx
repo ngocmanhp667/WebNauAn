@@ -34,7 +34,7 @@ const ResetPasswordPage = () => {
         <section
           className="hidden md:flex md:w-1/2 relative overflow-hidden items-end p-lg bg-cover bg-center"
           style={{
-            backgroundImage: "url('https://lh3.googleusercontent.com/aida/ADBb0ujSJCjN5rjcVNsvELodQ-YXgqxcz1-kC7sa7V-0_WpcQyjCmXvZHKuvTN1XqysPK2MYQzhBBLTrKXq_bolH4w9GZcccVP6Thz_8LgHtI5elOGtRTgNX78ff34v5G91cVW7aToAqK2AbtQux9fpR497jnUHaWR6C2sHdKJmDytb4ve8Z0yP-9Q3YFhglxHRL9cR9oY4nhmCID15NNqyjP4PO-qOAhBKr4g4ANuouuF9xMyWFJKrLyfkt')",
+            backgroundImage: "url('https://res.cloudinary.com/dofssbkbd/image/upload/v1782819020/mamngon/assets/ruqetfu0x7b3gtjemwjx.jpg')",
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>

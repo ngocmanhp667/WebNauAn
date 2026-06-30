@@ -36,8 +36,8 @@ const Header = () => {
 
   const linkClass = (path) => {
     return isActive(path)
-      ? "font-label-md text-label-md text-primary font-bold relative after:content-[''] after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full"
-      : "font-label-md text-label-md text-secondary hover:text-primary transition-colors";
+      ? "font-label-md text-label-md text-primary font-bold relative after:content-[''] after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full whitespace-nowrap"
+      : "font-label-md text-label-md text-secondary hover:text-primary transition-colors whitespace-nowrap";
   };
 
   // Mock Chef profile URL
@@ -47,20 +47,18 @@ const Header = () => {
     <nav className="sticky top-0 z-50 bg-surface/95 backdrop-blur-md border-b border-outline-variant/10 shadow-sm transition-all duration-200">
       <div className="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-4 max-w-max-width mx-auto w-full">
         {/* Brand Logo */}
-        <div className="flex items-center gap-gutter">
-          <Link to="/" className="font-display-lg text-display-lg-mobile md:text-display-lg text-primary select-none hover:opacity-90">
-            CulinShare
-          </Link>
-          
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex gap-6 items-center">
-            <Link to="/" className={linkClass("/")}>Home</Link>
-            <Link to="/search" className={linkClass("/search")}>Browse</Link>
-            <Link to="/fridge" className={linkClass("/fridge")}>Tủ lạnh ảo</Link>
-            <Link to={chefProfileUrl} className={linkClass("/chef")}>Top Chefs</Link>
-            {user && <Link to="/saved-recipes" className={linkClass("/saved-recipes")}>Yêu thích</Link>}
-            <Link to="/submit-recipe" className={linkClass("/submit-recipe")}>Submit Recipe</Link>
-          </div>
+        <Link to="/" className="font-display-lg text-display-lg-mobile md:text-display-lg text-primary select-none hover:opacity-90 flex-shrink-0">
+          CulinShare
+        </Link>
+        
+        {/* Desktop Navigation Links (Centered and spaced out nicely) */}
+        <div className="hidden md:flex gap-4 lg:gap-6 items-center mx-4 flex-grow justify-center">
+          <Link to="/" className={linkClass("/")}>Trang chủ</Link>
+          <Link to="/search" className={linkClass("/search")}>Khám phá</Link>
+          <Link to="/fridge" className={linkClass("/fridge")}>Tủ lạnh ảo</Link>
+          <Link to={chefProfileUrl} className={linkClass("/chef")}>Đầu bếp nổi bật</Link>
+          {user && <Link to="/saved-recipes" className={linkClass("/saved-recipes")}>Yêu thích</Link>}
+          <Link to="/submit-recipe" className={linkClass("/submit-recipe")}>Đăng công thức</Link>
         </div>
 
         {/* Right Actions */}
@@ -193,14 +191,14 @@ const Header = () => {
             onClick={() => setMobileMenuOpen(false)}
             className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/") ? "text-primary font-bold" : "text-secondary"}`}
           >
-            Home
+            Trang chủ
           </Link>
           <Link
             to="/search"
             onClick={() => setMobileMenuOpen(false)}
             className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/search") ? "text-primary font-bold" : "text-secondary"}`}
           >
-            Browse
+            Khám phá
           </Link>
           <Link
             to="/fridge"
@@ -214,7 +212,7 @@ const Header = () => {
             onClick={() => setMobileMenuOpen(false)}
             className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/chef") ? "text-primary font-bold" : "text-secondary"}`}
           >
-            Top Chefs
+            Đầu bếp nổi bật
           </Link>
           <Link
             to="/saved-recipes"
@@ -228,7 +226,7 @@ const Header = () => {
             onClick={() => setMobileMenuOpen(false)}
             className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/submit-recipe") ? "text-primary font-bold" : "text-secondary"}`}
           >
-            Submit Recipe
+            Đăng công thức
           </Link>
 
           {/* Mobile search bar */}

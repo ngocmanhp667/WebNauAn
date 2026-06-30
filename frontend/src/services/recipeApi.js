@@ -11,6 +11,8 @@ const buildParams = (filters) => {
   }
   if (filters.sort) params.sort = filters.sort;
   if (filters.author_id) params.author_id = filters.author_id;
+  if (filters.limit) params.limit = filters.limit;
+  if (filters.page) params.page = filters.page;
   return params;
 };
 

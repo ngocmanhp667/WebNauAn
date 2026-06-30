@@ -314,7 +314,6 @@ const SmartFridgePage = () => {
               <div style={{ textAlign: "center", marginTop: 24 }}>
                 <span className="material-symbols-outlined animate-spin text-primary" style={{ fontSize: 30 }}>restaurant</span>
                 <p className="text-primary font-bold" style={{ fontSize: 14, marginTop: 8 }}>AI MâmNgon đang phân tích tủ lạnh của bạn...</p>
-                <p style={{ fontSize: 11, color: "rgba(102,94,73,0.5)", marginTop: 4 }}>Sử dụng Gemini 2.5 Flash Lite</p>
               </div>
             </div>
           ) : suggestions.length > 0 ? (

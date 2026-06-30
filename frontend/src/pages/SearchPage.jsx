@@ -28,7 +28,7 @@ const SearchPage = () => {
         setLoading(true);
         const [cats, recs] = await Promise.all([
           getCategoriesApi(),
-          searchRecipesApi({ q })
+          searchRecipesApi({ q, limit: 100 })
         ]);
         setDbCategories(cats);
         setDbRecipes(recs);

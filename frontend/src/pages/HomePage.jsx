@@ -127,37 +127,32 @@ const HomePage = () => {
           </Link>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-gutter h-[400px] md:h-[320px]">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {loading ? (
-            <div className="col-span-4 text-center py-8 text-on-surface-variant">Đang tải danh mục...</div>
+            <div className="col-span-full text-center py-8 text-on-surface-variant font-bold">Đang tải danh mục...</div>
           ) : categories.length > 0 ? (
-            categories.slice(0, 4).map((cat, idx) => {
-              let gridClass = "group relative overflow-hidden rounded-2xl block ";
-              if (idx === 0) gridClass += "col-span-1 row-span-2 md:row-span-1 bg-secondary-container";
-              else if (idx === 1) gridClass += "col-span-1 bg-tertiary-container";
-              else if (idx === 2) gridClass += "col-span-1 md:col-span-2 row-span-1 bg-primary-container";
-              else gridClass += "col-span-1 md:col-span-1 bg-secondary";
-
+            categories.map((cat) => {
               return (
                 <Link
                   key={cat.id}
                   to={`/search?category=${encodeURIComponent(cat.name)}`}
-                  className={gridClass}
+                  className="group relative h-40 overflow-hidden rounded-2xl block bg-surface-container shadow-sm border border-outline-variant/10 hover:shadow-md transition-all duration-300"
                 >
                   <img
                     alt={cat.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     src={getImageUrl(cat.image_url) || "https://images.unsplash.com/photo-1596797038530-2c107229654b"}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                   <div className="absolute bottom-4 left-4 text-white">
-                    <p className="font-headline-sm text-headline-sm font-bold">{cat.name}</p>
+                    <p className="font-headline-sm text-headline-sm font-bold leading-tight">{cat.name}</p>
+                    <p className="text-white/70 text-xs font-label-sm mt-0.5 line-clamp-1 pr-4">{cat.description}</p>
                   </div>
                 </Link>
               );
             })
           ) : (
-            <div className="col-span-4 text-center py-8 text-on-surface-variant">Không có danh mục nào.</div>
+            <div className="col-span-full text-center py-8 text-on-surface-variant font-bold">Không có danh mục nào.</div>
           )}
         </div>
       </section>
