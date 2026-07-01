@@ -234,6 +234,10 @@ class RecipeService {
 
         await recipeRepository.delete(id);
     }
+
+    async getRecipesRanking() {
+        return await recipeRepository.getRecipesRanking();
+    }
 }
 
 module.exports = new RecipeService();

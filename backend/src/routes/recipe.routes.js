@@ -21,6 +21,7 @@ const uploadRecipeImages = (req, res, next) => {
 };
 
 router.get('/recipes', recipeController.getAllRecipes);
+router.get('/recipes/ranking', recipeController.getRecipesRanking);
 router.get('/recipes/:id', recipeController.getRecipeById);
 router.get('/recipes/slug/:slug', recipeController.getRecipeBySlug);
 router.post('/recipes', verifyToken, uploadRecipeImages, validateRecipe, recipeController.createRecipe);

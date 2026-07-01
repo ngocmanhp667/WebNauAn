@@ -110,6 +110,19 @@ class RecipeController {
             next(error);
         }
     }
+
+    async getRecipesRanking(req, res, next) {
+        try {
+            const ranking = await recipeService.getRecipesRanking();
+            return res.status(200).json({
+                success: true,
+                message: 'Lấy bảng xếp hạng công thức thành công',
+                data: ranking
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new RecipeController();

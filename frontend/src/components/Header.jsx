@@ -56,7 +56,7 @@ const Header = () => {
           <Link to="/" className={linkClass("/")}>Trang chủ</Link>
           <Link to="/search" className={linkClass("/search")}>Khám phá</Link>
           <Link to="/fridge" className={linkClass("/fridge")}>Tủ lạnh ảo</Link>
-          <Link to="/chefs" className={linkClass("/chefs")}>Đầu bếp nổi bật</Link>
+          <Link to="/chefs" className={linkClass("/chefs")}>Bảng xếp hạng</Link>
           <Link to="/submit-recipe" className={linkClass("/submit-recipe")}>Đăng công thức</Link>
         </div>
 
@@ -211,7 +211,7 @@ const Header = () => {
             onClick={() => setMobileMenuOpen(false)}
             className={`py-2 border-b border-outline-variant/5 text-label-md ${isActive("/chefs") ? "text-primary font-bold" : "text-secondary"}`}
           >
-            Đầu bếp nổi bật
+            Bảng xếp hạng
           </Link>
           <Link
             to="/submit-recipe"

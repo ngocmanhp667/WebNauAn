@@ -344,3 +344,12 @@ export const deleteAdminCategoryApi = async (id) => {
     throw error.response?.data || error.message;
   }
 };
+
+export const getRecipesRankingApi = async () => {
+  try {
+    const response = await api.get("/api/recipes/ranking");
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};

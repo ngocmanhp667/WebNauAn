@@ -242,6 +242,45 @@ class RecipeRepository {
             await pool.query('INSERT INTO recipe_categories (recipe_id, category_id) VALUES ?', [values]);
         }
     }
+
+    async getRecipesRanking() {
+        // 1. Top recipes by likes/saves (Được yêu thích nhất)
+        const mostSavedSql = `
+            SELECT r.id, r.title, r.slug, r.cover_image_url, r.description,
+                   r.prep_time_minutes, r.cook_time_minutes, r.difficulty,
+                   u.full_name AS author_name,
+                   (SELECT COUNT(*) FROM saved_recipes WHERE recipe_id = r.id) AS likes_count,
+                   (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE recipe_id = r.id) AS avg_rating,
+                   (SELECT COUNT(*) FROM reviews WHERE recipe_id = r.id) AS reviews_count
+            FROM recipes r
+            LEFT JOIN users u ON r.author_id = u.id
+            WHERE r.status = 'published'
+            ORDER BY likes_count DESC, r.created_at DESC
+            LIMIT 10
+        `;
+        const [mostSaved] = await pool.query(mostSavedSql);
+
+        // 2. Top recipes by average rating (Được đánh giá cao nhất)
+        const highestRatedSql = `
+            SELECT r.id, r.title, r.slug, r.cover_image_url, r.description,
+                   r.prep_time_minutes, r.cook_time_minutes, r.difficulty,
+                   u.full_name AS author_name,
+                   (SELECT COUNT(*) FROM saved_recipes WHERE recipe_id = r.id) AS likes_count,
+                   (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE recipe_id = r.id) AS avg_rating,
+                   (SELECT COUNT(*) FROM reviews WHERE recipe_id = r.id) AS reviews_count
+            FROM recipes r
+            LEFT JOIN users u ON r.author_id = u.id
+            WHERE r.status = 'published'
+            ORDER BY avg_rating DESC, reviews_count DESC, likes_count DESC
+            LIMIT 10
+        `;
+        const [highestRated] = await pool.query(highestRatedSql);
+
+        return {
+            mostSaved,
+            highestRated
+        };
+    }
 }
 
 module.exports = new RecipeRepository();

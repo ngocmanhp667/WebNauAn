@@ -12,6 +12,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
     fetchNotifications,
     fetchUnreadCount,
@@ -51,6 +52,7 @@ const typeConfig = {
 
 const NotificationBell = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { notifications, unreadCount, status } = useSelector((state) => state.notification);
     const { user } = useSelector((state) => state.auth);
     const [isOpen, setIsOpen] = useState(false);
@@ -88,9 +90,19 @@ const NotificationBell = () => {
         dispatch(markAllRead());
     };
 
-    const handleMarkRead = (notifId, isRead) => {
-        if (!isRead) {
-            dispatch(markNotificationRead(notifId));
+    const handleNotificationClick = (notif) => {
+        if (!notif.is_read) {
+            dispatch(markNotificationRead(notif.id));
+        }
+        setIsOpen(false);
+        if (notif.type === 'comment' || notif.type === 'review' || notif.type === 'new_recipe') {
+            if (notif.recipe_id) {
+                navigate(`/recipe/${notif.recipe_id}`);
+            }
+        } else if (notif.type === 'follow') {
+            if (notif.sender_id) {
+                navigate(`/chef/${notif.sender_id}`);
+            }
         }
     };
 
@@ -214,7 +226,7 @@ const NotificationBell = () => {
                                 return (
                                     <div
                                         key={notif.id}
-                                        onClick={() => handleMarkRead(notif.id, notif.is_read)}
+                                        onClick={() => handleNotificationClick(notif)}
                                         className="flex items-start gap-3 px-5 py-3.5 cursor-pointer transition-colors"
                                         style={{
                                             background: notif.is_read
