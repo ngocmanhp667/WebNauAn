@@ -38,6 +38,7 @@ export const loginAccount = createAsyncThunk(
         // Lưu vào localStorage
         localStorage.setItem('token', response.data.token)
         localStorage.setItem('user', JSON.stringify(response.data.user))
+        localStorage.removeItem('fridgeItems')
       }
       return response.data
     } catch (error) {
@@ -140,6 +141,7 @@ const authSlice = createSlice({
       state.result = null
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      localStorage.removeItem('fridgeItems')
     },
     setGoogleAuth(state, action) {
       state.status = 'succeeded';
@@ -148,6 +150,7 @@ const authSlice = createSlice({
       state.result = action.payload;
       localStorage.setItem('token', action.payload.token);
       localStorage.setItem('user', JSON.stringify(action.payload.user));
+      localStorage.removeItem('fridgeItems');
     },
   },
   extraReducers: (builder) => {
