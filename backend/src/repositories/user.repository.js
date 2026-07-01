@@ -103,7 +103,7 @@ class UserRepository {
      * @param {string} passwordHash - Mật khẩu đã được hash
      * @returns {Object} Kết quả UPDATE
      */
-    async updatePassword(email, passwordHash) {
+    async updatePasswordByEmail(email, passwordHash) {
         const [result] = await pool.execute(
             'UPDATE users SET password_hash = ?, otp_code = NULL, otp_expires_at = NULL WHERE email = ?',
             [passwordHash, email]
@@ -167,7 +167,7 @@ class UserRepository {
         return rows;
     }
 
-    async updatePassword(id, passwordHash) {
+    async updatePasswordById(id, passwordHash) {
         const [result] = await pool.execute(
             'UPDATE users SET password_hash = ? WHERE id = ?',
             [passwordHash, id]

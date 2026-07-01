@@ -244,7 +244,7 @@ class UserService {
         const passwordHash = await bcrypt.hash(newPassword, salt);
 
         // Bước 5: Cập nhật mật khẩu trong DB
-        await userRepository.updatePassword(email, passwordHash);
+        await userRepository.updatePasswordByEmail(email, passwordHash);
 
         return { message: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.' };
     }
@@ -463,7 +463,7 @@ class UserService {
         const passwordHash = await bcrypt.hash(newPassword, salt);
 
         // Cập nhật database
-        await userRepository.updatePassword(userId, passwordHash);
+        await userRepository.updatePasswordById(userId, passwordHash);
     }
 
     /**
