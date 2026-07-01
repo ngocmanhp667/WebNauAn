@@ -45,6 +45,12 @@ const {
 router.post("/login", loginLimiter, validateLogin, AuthController.login);
 
 /**
+ * POST /api/auth/google
+ * Đăng nhập bằng Google (OAuth2 ID Token)
+ */
+router.post("/auth/google", AuthController.googleLogin);
+
+/**
  * POST /api/register
  * Middlewares: Rate Limit -> Input Validation -> Controller
  *

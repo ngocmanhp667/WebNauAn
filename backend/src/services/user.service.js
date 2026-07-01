@@ -8,6 +8,7 @@
  */
 
 const bcrypt = require('bcryptjs');
+const axios = require('axios');
 const pool = require('../config/database');
 const userRepository = require('../repositories/user.repository');
 const JWTService = require('./jwt.service');
@@ -463,6 +464,87 @@ class UserService {
 
         // Cập nhật database
         await userRepository.updatePassword(userId, passwordHash);
+    }
+
+    /**
+     * Xác thực và đăng nhập bằng Google OAuth
+     * 
+     * @param {string} idToken
+     * @returns {Object} { token, user }
+     */
+    async loginWithGoogle(idToken) {
+        if (!idToken) {
+            const error = new Error('Google ID Token là bắt buộc');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        try {
+            // Xác thực token với API Google
+            const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+            const payload = googleRes.data;
+
+            if (!payload || !payload.email) {
+                const error = new Error('Token Google không hợp lệ');
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const email = payload.email.trim().toLowerCase();
+            const fullName = payload.name || 'Người dùng Google';
+            const avatarUrl = payload.picture || null;
+
+            // Tìm user theo email
+            let user = await userRepository.findByEmail(email);
+
+            if (!user) {
+                // Tạo tài khoản mới tự động
+                // Tạo username ngẫu nhiên từ email prefix + 4 số cuối timestamp
+                const emailPrefix = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+                const randomSuffix = Date.now().toString().slice(-4);
+                const username = `${emailPrefix}${randomSuffix}`;
+
+                // Tạo mật khẩu ngẫu nhiên bảo mật (không dùng)
+                const salt = await bcrypt.genSalt(10);
+                const randomPassword = Math.random().toString(36).substring(2, 15);
+                const password_hash = await bcrypt.hash(randomPassword, salt);
+
+                // Lưu vào DB với is_verified = 1
+                const result = await userRepository.create({
+                    username,
+                    password_hash,
+                    email,
+                    full_name: fullName,
+                    is_verified: 1 // Tự động xác thực tài khoản Google
+                });
+
+                // Cập nhật ảnh đại diện nếu có
+                if (avatarUrl) {
+                    await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl, result.insertId]);
+                }
+
+                // Lấy thông tin user vừa tạo
+                user = await userRepository.findById(result.insertId);
+            } else if (user.is_verified === 0) {
+                // Nếu tài khoản đã được đăng ký nháp nhưng chưa xác thực OTP, 
+                // tự động kích hoạt luôn vì đăng nhập qua Google là an toàn
+                await pool.query('UPDATE users SET is_verified = 1 WHERE id = ?', [user.id]);
+                user.is_verified = 1;
+            }
+
+            // Tạo JWT token qua JWTService
+            const token = JWTService.generateToken(user);
+
+            return {
+                token,
+                user: toUserDTO(user)
+            };
+        } catch (error) {
+            console.error('❌ Lỗi đăng nhập Google:', error.message);
+            const err = new Error(error.response?.data?.error_description || 'Xác thực Google thất bại');
+            err.statusCode = 401;
+            throw err;
+        }
     }
 }
 

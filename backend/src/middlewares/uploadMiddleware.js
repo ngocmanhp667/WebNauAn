@@ -21,8 +21,7 @@ const storage = new CloudinaryStorage({
         return {
             folder: folderName,
             allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-            // Tự tạo tên file không bị trùng
-            public_id: file.fieldname + '-' + Date.now(),
+            public_id: `${file.fieldname}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         };
     }
 });

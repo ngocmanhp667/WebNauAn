@@ -141,6 +141,14 @@ const authSlice = createSlice({
       localStorage.removeItem('token')
       localStorage.removeItem('user')
     },
+    setGoogleAuth(state, action) {
+      state.status = 'succeeded';
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+      state.result = action.payload;
+      localStorage.setItem('token', action.payload.token);
+      localStorage.setItem('user', JSON.stringify(action.payload.user));
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -201,5 +209,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { clearAuthError, resetAuthState, logoutAccount } = authSlice.actions
+export const { clearAuthError, resetAuthState, logoutAccount, setGoogleAuth } = authSlice.actions
 export default authSlice.reducer
