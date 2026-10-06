@@ -29,4 +29,10 @@ const aiLimiter = rateLimit({
  */
 router.post('/ai/fridge-suggest', verifyToken, aiLimiter, aiController.suggestRecipesFromFridge);
 
+/**
+ * POST /api/ai/distribute-dishes
+ * Dùng AI tính toán phân bổ số món theo độ khó
+ */
+router.post('/ai/distribute-dishes', verifyToken, aiLimiter, aiController.suggestDishDistribution);
+
 module.exports = router;

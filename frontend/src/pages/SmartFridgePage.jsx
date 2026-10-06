@@ -12,19 +12,24 @@ const QUICK_INGREDIENTS = [
 const SmartFridgePage = () => {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [inputValue, setInputValue] = useState("");
+  const [inputQuantity, setInputQuantity] = useState("");
   const [peopleCount, setPeopleCount] = useState(2);
-  const [complexity, setComplexity] = useState("bình thường");
+  const [dishDistribution, setDishDistribution] = useState({ easy: 1, medium: 1, hard: 1 });
   const [cookingSpeed, setCookingSpeed] = useState("bình thường");
-  const [dishCount, setDishCount] = useState(3);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
+  const [globalShoppingList, setGlobalShoppingList] = useState([]);
   const [activeRecipe, setActiveRecipe] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const savedItems = localStorage.getItem("fridgeItems");
     if (savedItems) {
-      try { setFridgeItems(JSON.parse(savedItems)); } catch (e) { /* ignore */ }
+      try { 
+        const parsed = JSON.parse(savedItems);
+        const normalized = parsed.map(item => typeof item === 'string' ? { name: item, quantity: '' } : item);
+        setFridgeItems(normalized); 
+      } catch (e) { /* ignore */ }
     }
   }, []);
 
@@ -32,22 +37,40 @@ const SmartFridgePage = () => {
 
   const handleAddItem = (e) => {
     if (e) e.preventDefault();
-    const item = inputValue.trim();
-    if (item && !fridgeItems.includes(item)) {
-      const updated = [...fridgeItems, item];
+    const name = inputValue.trim();
+    const quantity = inputQuantity.trim();
+    
+    if (!name) {
+      setError("Vui lòng nhập tên nguyên liệu!");
+      return;
+    }
+    
+    if (!quantity) {
+      setError("Vui lòng nhập số lượng nguyên liệu!");
+      return;
+    }
+    
+    const exists = fridgeItems.some(item => item.name === name);
+    if (!exists) {
+      const updated = [...fridgeItems, { name, quantity }];
       setFridgeItems(updated);
       saveToLocalStorage(updated);
       setInputValue("");
+      setInputQuantity("");
       setError("");
+    } else {
+      setError("Nguyên liệu này đã có trong tủ lạnh!");
     }
   };
 
-  const handleQuickAdd = (item) => {
-    if (!fridgeItems.includes(item)) {
-      const updated = [...fridgeItems, item];
-      setFridgeItems(updated);
-      saveToLocalStorage(updated);
+  const handleQuickAdd = (itemName) => {
+    const exists = fridgeItems.some(item => item.name === itemName);
+    if (!exists) {
+      setInputValue(itemName);
+      document.getElementById("quantity-input")?.focus();
       setError("");
+    } else {
+      setError("Nguyên liệu này đã có trong tủ lạnh!");
     }
   };
 
@@ -63,20 +86,69 @@ const SmartFridgePage = () => {
     setSuggestions([]);
   };
 
+  const handleAutoDistribute = async (timeLimitMinutes, currentPeople = peopleCount) => {
+    setCookingSpeed(`${timeLimitMinutes} phút`);
+    
+    try {
+      setLoading(true);
+      const res = await api.post("/api/ai/distribute-dishes", {
+        peopleCount: currentPeople,
+        cookingTime: timeLimitMinutes
+      });
+      if (res.data.success && res.data.data) {
+        const { easy, medium, hard } = res.data.data;
+        setDishDistribution({ easy: easy || 0, medium: medium || 0, hard: hard || 0 });
+      }
+    } catch (error) {
+      console.error("Lỗi khi dùng AI chia món:", error);
+      // Fallback logic
+      let target = Math.min(6, currentPeople > 3 ? currentPeople : currentPeople + 1);
+      let easy = 0, medium = 0, hard = 0, t = timeLimitMinutes;
+      if (t >= 60 && currentPeople >= 3) { hard = 1; t -= 60; }
+      while (t >= 30 && (easy + medium + hard) < target) { medium++; t -= 30; }
+      while (t >= 15 && (easy + medium + hard) < target) { easy++; t -= 15; }
+      while (t >= 15 && easy > 0) { easy--; medium++; t -= 15; }
+      if (easy === 0 && medium === 0 && hard === 0) easy = 1;
+      setDishDistribution({ easy, medium, hard });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGetSuggestions = async () => {
     if (fridgeItems.length === 0) {
       setError("Vui lòng thêm ít nhất một nguyên liệu vào tủ lạnh!");
       return;
     }
+    const totalDishes = dishDistribution.easy + dishDistribution.medium + dishDistribution.hard;
+    if (totalDishes === 0) {
+      setError("Vui lòng chọn ít nhất 1 món ăn ở phần Tùy chọn bữa ăn!");
+      return;
+    }
+    if (totalDishes > 7) {
+      setError("Vui lòng chọn tối đa 7 món ăn để AI phân tích tốt nhất!");
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
       setSuggestions([]);
+      const complexityStr = `Yêu cầu phân bổ đúng độ khó: ${dishDistribution.easy} món dễ, ${dishDistribution.medium} món trung bình, ${dishDistribution.hard} món khó.`;
+      
       const response = await api.post("/api/ai/fridge-suggest", {
-        ingredients: fridgeItems, peopleCount, complexity, cookingSpeed, dishCount,
+        ingredients: fridgeItems, peopleCount, complexity: complexityStr, cookingSpeed, dishCount: totalDishes,
       });
       if (response.data.success) {
-        setSuggestions(response.data.data || []);
+        if (Array.isArray(response.data.data)) {
+            // Old format fallback
+            setSuggestions(response.data.data);
+            setGlobalShoppingList([]);
+        } else {
+            // New format
+            setSuggestions(response.data.data.recipes || []);
+            setGlobalShoppingList(response.data.data.shoppingList || []);
+        }
         setTimeout(() => {
           const el = document.getElementById("ai-results");
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -98,6 +170,11 @@ const SmartFridgePage = () => {
         ? "bg-primary text-white border-primary shadow-sm"
         : "bg-surface-container-low text-secondary border-outline-variant/20 hover:border-primary/40 hover:bg-primary/5"
     }`;
+
+  // Fallback in case old array format is returned without globalShoppingList
+  const allMissingIngredients = globalShoppingList.length > 0 
+    ? globalShoppingList 
+    : Array.from(new Set(suggestions.flatMap(recipe => recipe.additionalIngredientsNeeded || [])));
 
   return (
     <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
@@ -130,9 +207,17 @@ const SmartFridgePage = () => {
           <form onSubmit={handleAddItem} style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             <input
               type="text"
-              placeholder="Nhập tên nguyên liệu (VD: trứng, thịt heo, cải ngọt...)"
+              placeholder="Tên nguyên liệu (VD: bắp cải)"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              style={{ flex: 2, padding: "10px 16px", borderRadius: 12, border: "1px solid rgba(225,191,183,0.3)", background: "#f5f3f3", fontSize: 14, outline: "none", color: "#1b1c1c" }}
+            />
+            <input
+              id="quantity-input"
+              type="text"
+              placeholder="Số lượng (VD: 200g)"
+              value={inputQuantity}
+              onChange={(e) => setInputQuantity(e.target.value)}
               style={{ flex: 1, padding: "10px 16px", borderRadius: 12, border: "1px solid rgba(225,191,183,0.3)", background: "#f5f3f3", fontSize: 14, outline: "none", color: "#1b1c1c" }}
             />
             <button type="submit" style={{ background: "#ab2e10", color: "#fff", borderRadius: 12, padding: "0 18px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -145,7 +230,7 @@ const SmartFridgePage = () => {
             <p style={{ fontSize: 12, fontWeight: 600, color: "#665e49", marginBottom: 6 }}>Thêm nhanh nguyên liệu:</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {QUICK_INGREDIENTS.map((item) => {
-                const added = fridgeItems.includes(item);
+                const added = fridgeItems.some(fi => fi.name === item);
                 return (
                   <button
                     key={item} type="button"
@@ -180,7 +265,7 @@ const SmartFridgePage = () => {
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: 14, background: "#f5f3f3", borderRadius: 12, border: "1px solid rgba(225,191,183,0.1)", minHeight: 50, maxHeight: 140, overflowY: "auto" }}>
               {fridgeItems.map((item, index) => (
                 <span key={index} style={{ display: "inline-flex", alignItems: "center", background: "#ffdad2", color: "#3d0700", fontSize: 13, fontWeight: 600, padding: "5px 12px", borderRadius: 8, border: "1px solid #ffb4a3" }}>
-                  {item}
+                  {item.name} {item.quantity && `(${item.quantity})`}
                   <button type="button" onClick={() => handleRemoveItem(index)} style={{ marginLeft: 8, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#8b1b00" }}>close</span>
                   </button>
@@ -217,47 +302,70 @@ const SmartFridgePage = () => {
               </div>
             </div>
 
-            {/* Số món */}
+            {/* Thời gian nấu */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1b1c1c", marginBottom: 8 }}>Số lượng món ăn gợi ý:</label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <button key={num} type="button" onClick={() => setDishCount(num)} className={pillBtn(dishCount === num)}>
-                    {num}
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1b1c1c", marginBottom: 8 }}>Thời gian nấu (tự động chia món):</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {[30, 45, 60, 90].map((val) => (
+                  <button 
+                    key={val} 
+                    type="button" 
+                    onClick={() => handleAutoDistribute(val, peopleCount)} 
+                    className={pillBtn(cookingSpeed === `${val} phút`)}
+                    style={{ padding: "8px 0", fontSize: 12, flex: "1 1 20%", textAlign: "center" }}
+                  >
+                    {val}p
                   </button>
                 ))}
+                <input 
+                  type="number" 
+                  placeholder="Nhập phút"
+                  value={cookingSpeed.replace(/\D/g, '') || ''}
+                  onChange={(e) => setCookingSpeed(e.target.value ? `${e.target.value} phút` : "")}
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    if (val > 0) handleAutoDistribute(val, peopleCount);
+                  }}
+                  style={{ flex: "1 1 30%", padding: "8px", borderRadius: 12, border: "1px solid rgba(225,191,183,0.5)", background: "#f5f3f3", fontSize: 12, outline: "none", color: "#1b1c1c", textAlign: "center", minWidth: 60 }}
+                />
               </div>
             </div>
 
-            {/* Độ phức tạp */}
-            <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1b1c1c", marginBottom: 8 }}>Độ phức tạp:</label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-                {[
-                  { value: "đơn giản", label: "Đơn giản" },
-                  { value: "bình thường", label: "Bình thường" },
-                  { value: "phức tạp", label: "Phức tạp" },
-                ].map((item) => (
-                  <button key={item.value} type="button" onClick={() => setComplexity(item.value)} className={pillBtn(complexity === item.value)}>
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Phân bổ độ khó */}
+            <div style={{ gridColumn: "span 2" }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1b1c1c", marginBottom: 8 }}>
+                Số lượng món theo độ khó (Tổng: {dishDistribution.easy + dishDistribution.medium + dishDistribution.hard} món):
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                {/* Dễ */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f5f3f3", borderRadius: 12, padding: "6px 12px", border: "1px solid rgba(225,191,183,0.3)" }}>
+                  <span style={{ fontSize: 13, color: "#166534", fontWeight: 600 }}>Món dễ</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button type="button" onClick={() => setDishDistribution(p => ({ ...p, easy: Math.max(0, p.easy - 1) }))} style={{ width: 24, height: 24, borderRadius: "50%", background: "#fff", border: "1px solid #ddd", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>-</button>
+                    <span style={{ fontSize: 14, fontWeight: 700, minWidth: 16, textAlign: "center" }}>{dishDistribution.easy}</span>
+                    <button type="button" onClick={() => setDishDistribution(p => ({ ...p, easy: p.easy + 1 }))} style={{ width: 24, height: 24, borderRadius: "50%", background: "#ab2e10", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                  </div>
+                </div>
 
-            {/* Tốc độ nấu */}
-            <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1b1c1c", marginBottom: 8 }}>Tốc độ nấu:</label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
-                {[
-                  { value: "nhanh", label: "Nhanh" },
-                  { value: "bình thường", label: "Bình thường" },
-                  { value: "chậm", label: "Chậm" },
-                ].map((item) => (
-                  <button key={item.value} type="button" onClick={() => setCookingSpeed(item.value)} className={pillBtn(cookingSpeed === item.value)}>
-                    {item.label}
-                  </button>
-                ))}
+                {/* Trung bình */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f5f3f3", borderRadius: 12, padding: "6px 12px", border: "1px solid rgba(225,191,183,0.3)" }}>
+                  <span style={{ fontSize: 13, color: "#854d0e", fontWeight: 600 }}>Trung bình</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button type="button" onClick={() => setDishDistribution(p => ({ ...p, medium: Math.max(0, p.medium - 1) }))} style={{ width: 24, height: 24, borderRadius: "50%", background: "#fff", border: "1px solid #ddd", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>-</button>
+                    <span style={{ fontSize: 14, fontWeight: 700, minWidth: 16, textAlign: "center" }}>{dishDistribution.medium}</span>
+                    <button type="button" onClick={() => setDishDistribution(p => ({ ...p, medium: p.medium + 1 }))} style={{ width: 24, height: 24, borderRadius: "50%", background: "#ab2e10", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                  </div>
+                </div>
+
+                {/* Khó */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f5f3f3", borderRadius: 12, padding: "6px 12px", border: "1px solid rgba(225,191,183,0.3)" }}>
+                  <span style={{ fontSize: 13, color: "#991b1b", fontWeight: 600 }}>Món khó</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button type="button" onClick={() => setDishDistribution(p => ({ ...p, hard: Math.max(0, p.hard - 1) }))} style={{ width: 24, height: 24, borderRadius: "50%", background: "#fff", border: "1px solid #ddd", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>-</button>
+                    <span style={{ fontSize: 14, fontWeight: 700, minWidth: 16, textAlign: "center" }}>{dishDistribution.hard}</span>
+                    <button type="button" onClick={() => setDishDistribution(p => ({ ...p, hard: p.hard + 1 }))} style={{ width: 24, height: 24, borderRadius: "50%", background: "#ab2e10", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -290,7 +398,7 @@ const SmartFridgePage = () => {
             ) : (
               <>
                 <span className="material-symbols-outlined" style={{ fontSize: 20 }}>auto_awesome</span>
-                Gợi ý {dishCount} món ngon cùng AI
+                Gợi ý {dishDistribution.easy + dishDistribution.medium + dishDistribution.hard} món ngon cùng AI
               </>
             )}
           </button>
@@ -301,7 +409,7 @@ const SmartFridgePage = () => {
           {loading ? (
             <div style={{ background: "#fff", borderRadius: 16, border: "1px solid rgba(225,191,183,0.15)", padding: 32, boxShadow: "0 4px 20px rgba(72,72,72,0.06)" }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
-                {Array.from({ length: dishCount }).map((_, i) => (
+                {Array.from({ length: dishDistribution.easy + dishDistribution.medium + dishDistribution.hard || 3 }).map((_, i) => (
                   <div key={i} className="animate-pulse" style={{ border: "1px solid rgba(225,191,183,0.1)", borderRadius: 14, padding: 20, background: "rgba(245,243,243,0.5)" }}>
                     <div style={{ height: 18, background: "rgba(228,226,226,0.5)", borderRadius: 6, width: "70%", marginBottom: 12 }}></div>
                     <div style={{ height: 14, background: "rgba(228,226,226,0.35)", borderRadius: 6, width: "100%", marginBottom: 8 }}></div>
@@ -313,7 +421,7 @@ const SmartFridgePage = () => {
               </div>
               <div style={{ textAlign: "center", marginTop: 24 }}>
                 <span className="material-symbols-outlined animate-spin text-primary" style={{ fontSize: 30 }}>restaurant</span>
-                <p className="text-primary font-bold" style={{ fontSize: 14, marginTop: 8 }}>AI MâmNgon đang phân tích tủ lạnh của bạn...</p>
+                <p className="text-primary font-bold" style={{ fontSize: 14, marginTop: 8 }}>AI MâmNgon đang suy nghĩ và tính toán...</p>
               </div>
             </div>
           ) : suggestions.length > 0 ? (
@@ -328,6 +436,19 @@ const SmartFridgePage = () => {
                   <span className="material-symbols-outlined" style={{ fontSize: 14 }}>refresh</span> Xóa
                 </button>
               </div>
+
+              {/* Tổng hợp nguyên liệu cần mua thêm */}
+              {allMissingIngredients.length > 0 && (
+                <div style={{ background: "#fffbeb", border: "1px solid #fde68a", padding: "16px 20px", borderRadius: 12, marginBottom: 20, boxShadow: "0 2px 8px rgba(72,72,72,0.04)" }}>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "#92400e", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>shopping_cart_checkout</span> 
+                    Danh sách nguyên liệu cần mua thêm cho bữa ăn này:
+                  </p>
+                  <ul style={{ fontSize: 13, color: "#59413b", listStyle: "disc", paddingLeft: 22, lineHeight: "24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "4px 16px" }}>
+                    {allMissingIngredients.map((ing, idx) => <li key={idx}>{ing}</li>)}
+                  </ul>
+                </div>
+              )}
 
               {/* Grid món ăn */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
@@ -473,18 +594,6 @@ const SmartFridgePage = () => {
                   <ul style={{ fontSize: 13, color: "#59413b", listStyle: "disc", paddingLeft: 18, lineHeight: "22px" }}>
                     {activeRecipe.fridgeIngredientsUsed?.map((ing, idx) => <li key={idx}>{ing}</li>)}
                   </ul>
-                </div>
-                <div style={{ background: "#fffbeb", border: "1px solid #fde68a", padding: 14, borderRadius: 12 }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: "#92400e", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>add_shopping_cart</span> Cần mua thêm:
-                  </p>
-                  {activeRecipe.additionalIngredientsNeeded?.length > 0 ? (
-                    <ul style={{ fontSize: 13, color: "#59413b", listStyle: "disc", paddingLeft: 18, lineHeight: "22px" }}>
-                      {activeRecipe.additionalIngredientsNeeded.map((ing, idx) => <li key={idx}>{ing}</li>)}
-                    </ul>
-                  ) : (
-                    <p style={{ fontSize: 12, color: "rgba(102,94,73,0.5)", fontStyle: "italic" }}>Chỉ cần gia vị cơ bản có sẵn!</p>
-                  )}
                 </div>
               </div>
 

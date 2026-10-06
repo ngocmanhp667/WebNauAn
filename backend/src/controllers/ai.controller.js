@@ -45,6 +45,25 @@ class AIController {
             next(error);
         }
     }
+
+    async suggestDishDistribution(req, res, next) {
+        try {
+            const { peopleCount, cookingTime } = req.body;
+            
+            if (!cookingTime) {
+                return res.status(400).json({ success: false, message: 'Thiếu thời gian nấu' });
+            }
+
+            const distribution = await aiService.suggestDishDistribution(peopleCount, cookingTime);
+
+            return res.status(200).json({
+                success: true,
+                data: distribution
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new AIController();

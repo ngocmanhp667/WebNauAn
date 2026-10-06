@@ -12,11 +12,13 @@ class AIService {
             throw error;
         }
 
-        const ingredientsText = Array.isArray(ingredients) ? ingredients.join(', ') : ingredients;
+        const ingredientsText = Array.isArray(ingredients) 
+            ? ingredients.map(i => typeof i === 'string' ? i : `${i.name}${i.quantity ? ` (${i.quantity})` : ''}`).join(', ') 
+            : ingredients;
         
         // Tạo prompt chi tiết cho Gemini
         const prompt = `Bạn là một đầu bếp chuyên nghiệp và chuyên gia dinh dưỡng của hệ thống MâmNgon.
-Người dùng đang có các loại thực phẩm sau đây trong tủ lạnh: [ ${ingredientsText} ].
+Người dùng đang có các loại thực phẩm sau đây trong tủ lạnh kèm theo số lượng: [ ${ingredientsText} ].
 
 Hãy gợi ý ĐÚNG ${dishCount || 3} món ăn ngon miệng có thể nấu bằng cách sử dụng tối đa các thực phẩm này (người dùng đã có sẵn các gia vị cơ bản như: muối, đường, hạt nêm, nước mắm, tiêu, dầu ăn, hành, tỏi). Không được gợi ý nhiều hơn hoặc ít hơn ${dishCount || 3} món.
 
@@ -25,19 +27,27 @@ Yêu cầu bữa ăn phải đáp ứng các tiêu chí sau:
 - Độ phức tạp mong muốn: ${complexity} (nếu đơn giản thì gợi ý món chế biến nhanh gọn, nếu phức tạp thì gợi ý món cầu kỳ, chuẩn vị).
 - Tốc độ chế biến: ${cookingSpeed} (nếu nhanh thì ưu tiên món dưới 25 phút, nếu chậm thì có thể gợi ý món hầm, kho cầu kỳ).
 
-BẮT BUỘC TRẢ VỀ DƯỚI DẠNG MỘT MẢNG JSON HỢP LỆ (ARRAY OF OBJECTS). Mỗi món ăn là một đối tượng JSON có đúng cấu trúc sau:
+BẮT BUỘC TRẢ VỀ DƯỚI DẠNG MỘT ĐỐI TƯỢNG JSON HỢP LỆ CÓ CẤU TRÚC SAU:
 {
-    "name": "Tên món ăn (Ví dụ: Trứng cuộn cà chua)",
-    "description": "Mô tả ngắn gọn và hấp dẫn về món ăn",
-    "fridgeIngredientsUsed": ["nguyên liệu dùng từ tủ lạnh, ghi rõ loại thực phẩm ví dụ: Trứng, Cà chua"],
-    "additionalIngredientsNeeded": ["gia vị hoặc nguyên liệu cần chuẩn bị thêm ngoài gia vị cơ bản, nếu không cần ghi mảng rỗng"],
-    "prepTime": 10,
-    "cookTime": 15,
-    "difficulty": "dễ",
-    "steps": [
-        "Bước 1: ...",
-        "Bước 2: ...",
-        "Bước 3: ..."
+    "shoppingList": [
+        "Tổng hợp TOÀN BỘ các nguyên liệu cần mua thêm cho TẤT CẢ các món ăn, KHÔNG ĐỂ BỊ TRÙNG LẶP.",
+        "BẠN PHẢI TÍNH TOÁN tổng số lượng nguyên liệu cần dùng cho CẢ BỮA ĂN so với lượng đang có sẵn trong tủ lạnh.",
+        "Ví dụ: Nếu trong tủ có 1kg chân heo, mà món 1 dùng 500g, món 2 dùng 1kg (tổng dùng 1.5kg), thì shoppingList chỉ cần ghi: 'Mua thêm 500g chân heo'."
+    ],
+    "recipes": [
+        {
+            "name": "Tên món ăn (Ví dụ: Trứng cuộn cà chua)",
+            "description": "Mô tả ngắn gọn và hấp dẫn về món ăn",
+            "fridgeIngredientsUsed": ["nguyên liệu dùng từ tủ lạnh, ghi rõ loại thực phẩm ví dụ: Trứng, Cà chua"],
+            "prepTime": 10,
+            "cookTime": 15,
+            "difficulty": "dễ",
+            "steps": [
+                "Bước 1: ...",
+                "Bước 2: ...",
+                "Bước 3: ..."
+            ]
+        }
     ]
 }
 
@@ -101,18 +111,81 @@ Hãy chỉ trả về dữ liệu JSON thô. Không bọc trong cặp dấu nhá
                 console.warn(`⚠️ Lỗi ở lần thử ${attempt}:`, error.message);
                 
                 if (attempt < maxAttempts) {
-                    // Nếu gặp lỗi quá tải hoặc hết hạn, đổi sang model dự phòng gemini-2.5-flash ổn định hơn
-                    if (activeModel !== 'gemini-2.5-flash') {
-                        console.log('🔄 Đang tự động đổi sang model dự phòng: gemini-2.5-flash...');
-                        activeModel = 'gemini-2.5-flash';
+                    // Nếu gặp lỗi quá tải (503) hoặc lỗi khác, đổi model dự phòng
+                    if (activeModel === 'gemini-3.8-flash') {
+                        console.log('🔄 Đang tự động đổi sang model dự phòng nhẹ hơn: gemini-3.5-flash-lite...');
+                        activeModel = 'gemini-3.5-flash-lite';
+                    } else {
+                        console.log('🔄 Đang tự động đổi sang model dự phòng: gemini-3.8-flash...');
+                        activeModel = 'gemini-3.8-flash';
                     }
-                    // Chờ 2 giây trước khi thử lại
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    // Chờ 3 giây trước khi thử lại
+                    await new Promise(resolve => setTimeout(resolve, 3000));
                 } else {
                     console.error('❌ Đã thử lại tối đa nhưng vẫn thất bại.');
                     const err = new Error(error.message || 'Lỗi khi kết nối với dịch vụ gợi ý AI');
                     err.statusCode = 500;
                     throw err;
+                }
+            }
+        }
+    }
+
+    async suggestDishDistribution(peopleCount, cookingTime) {
+        let activeModel = this.model;
+        let attempt = 0;
+        const maxAttempts = 3;
+
+        while (attempt < maxAttempts) {
+            attempt++;
+            try {
+                console.log(`🤖 Đang kết nối Gemini API (Lần thử ${attempt}/${maxAttempts}) sử dụng model: ${activeModel}...`);
+                const genModel = this.genAI.getGenerativeModel({
+                    model: activeModel,
+                    generationConfig: {
+                        temperature: 0.7,
+                    }
+                });
+
+                const prompt = `Bạn là một chuyên gia lập kế hoạch bữa ăn. Tôi cần chuẩn bị bữa ăn cho ${peopleCount} người trong tổng thời gian là ${cookingTime} phút. 
+Hãy suy luận và phân bổ số lượng các món ăn theo độ khó một cách hợp lý nhất:
+- Món dễ (chuẩn bị ~15p)
+- Món trung bình (chuẩn bị ~30p)
+- Món khó (chuẩn bị ~60p)
+
+Quy tắc:
+- Tổng thời gian nấu các món (có thể nấu song song vài món) phải phù hợp với giới hạn ${cookingTime} phút. 
+- Tổng số lượng món ăn tối đa là 5 món.
+- Bạn phải trả về ĐÚNG VÀ DUY NHẤT một chuỗi JSON hợp lệ, không có thêm bất kỳ ký tự nào khác bên ngoài.
+
+Mẫu JSON cần trả về:
+{
+  "easy": 1,
+  "medium": 1,
+  "hard": 0
+}`;
+
+                const result = await genModel.generateContent(prompt);
+                const response = result.response;
+                let text = response.text().trim();
+
+                // Lọc bỏ markdown markdown if any
+                text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                
+                return JSON.parse(text);
+
+            } catch (error) {
+                console.warn(`⚠️ Lỗi ở lần thử ${attempt}:`, error.message);
+                if (attempt < maxAttempts) {
+                    if (activeModel === 'gemini-3.8-flash') {
+                        activeModel = 'gemini-3.5-flash-lite';
+                    } else {
+                        activeModel = 'gemini-3.8-flash';
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                } else {
+                    console.error('❌ Đã thử lại tối đa nhưng vẫn thất bại.');
+                    throw new Error('Không thể gợi ý phân bổ lúc này, vui lòng thử lại.');
                 }
             }
         }
